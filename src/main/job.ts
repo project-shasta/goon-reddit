@@ -1,0 +1,489 @@
+import fs from 'node:fs'
+import fsp from 'node:fs/promises'
+import path from 'node:path'
+import type {
+  ActiveDownload,
+  JobOptions,
+  JobState,
+  MediaItem,
+  SubredditInfo
+} from '@shared/types'
+import { safeFilename } from '@shared/filename'
+import type { AuthManager } from './auth'
+import type { SettingsStore } from './settings'
+import type { ToolManager } from './tooling'
+import { allowMediaRoot } from './mediaProtocol'
+import { extractMedia } from './reddit/extract'
+import { errorMessage, isRedditError } from './reddit/errors'
+import { validateSubreddit } from './reddit/validate'
+import { downloadToFile, runPool, uniqueDestination } from './download/queue'
+import { downloadWithFfmpeg } from './download/ffmpeg'
+import { downloadWithYtDlp } from './download/ytdlp'
+
+export type LogLevel = 'info' | 'warn' | 'error' | 'success'
+
+export interface JobDeps {
+  auth: AuthManager
+  settings: SettingsStore
+  tools: ToolManager
+  emitState: (state: JobState) => void
+  emitMedia: (items: MediaItem[]) => void
+  emitMediaUpdate: (item: MediaItem) => void
+  log: (level: LogLevel, message: string) => void
+}
+
+function initialState(): JobState {
+  return {
+    phase: 'idle',
+    mode: 'download',
+    subreddit: null,
+    scannedPosts: 0,
+    discovered: 0,
+    completed: 0,
+    skipped: 0,
+    failed: 0,
+    active: [],
+    message: null,
+    startedAt: null,
+    finishedAt: null
+  }
+}
+
+export class JobRunner {
+  private state: JobState = initialState()
+  private controller: AbortController | null = null
+  private running = false
+
+  constructor(private readonly deps: JobDeps) {}
+
+  getState(): JobState {
+    return { ...this.state, active: [...this.state.active] }
+  }
+
+  isRunning(): boolean {
+    return this.running
+  }
+
+  private emit(): void {
+    this.deps.emitState(this.getState())
+  }
+
+  private setPhase(phase: JobState['phase'], message: string | null = null): void {
+    this.state.phase = phase
+    this.state.message = message
+    this.emit()
+  }
+
+  cancel(): void {
+    if (!this.running) return
+    this.state.message = 'Cancelling…'
+    this.emit()
+    this.controller?.abort()
+  }
+
+  async start(options: JobOptions): Promise<void> {
+    if (this.running) throw new Error('A job is already running.')
+
+    const includeAny =
+      options.includeImages ||
+      options.includeGalleries ||
+      options.includeVideos ||
+      options.includeExternalVideos
+    if (!includeAny) throw new Error('Enable at least one media type.')
+
+    const destination = path.resolve(options.destination)
+    const controller = new AbortController()
+    this.controller = controller
+    this.running = true
+    this.state = {
+      ...initialState(),
+      mode: options.mode,
+      startedAt: Date.now()
+    }
+    this.setPhase('validating')
+    allowMediaRoot(destination)
+
+    try {
+      const auth = await this.deps.auth.refresh(false)
+      if (!auth.loggedIn) {
+        throw new Error(
+          auth.message ?? 'Log in on Reddit before starting. Reddit now requires a logged-in session.'
+        )
+      }
+
+      const subreddit = await validateSubreddit(
+        this.deps.auth.client,
+        options.subreddit,
+        controller.signal
+      )
+      this.state.subreddit = subreddit
+      this.deps.log(
+        'info',
+        `r/${subreddit.name} — ${subreddit.subscribers?.toLocaleString() ?? '?'} members${
+          subreddit.over18 ? ' — NSFW' : ''
+        }`
+      )
+      if (subreddit.quarantined) {
+        this.deps.log('warn', 'This subreddit is quarantined; it may require opt-in on Reddit.')
+      }
+
+      if (options.mode === 'download') {
+        await fsp.mkdir(path.join(destination, safeFilename(subreddit.name)), { recursive: true })
+      }
+
+      const media = await this.scan(subreddit, options, destination, controller.signal)
+
+      if (options.mode === 'scan') {
+        this.state.finishedAt = Date.now()
+        this.setPhase(
+          'done',
+          media.length > 0
+            ? `Found ${media.length} media item${media.length === 1 ? '' : 's'} in ${this.state.scannedPosts} posts.`
+            : 'No downloadable media found in the scanned posts.'
+        )
+        return
+      }
+
+      if (media.length === 0) {
+        this.state.finishedAt = Date.now()
+        this.setPhase('done', 'No downloadable media found in the scanned posts.')
+        return
+      }
+
+      await this.downloadAll(media, subreddit, options, destination, controller.signal)
+
+      this.state.finishedAt = Date.now()
+      const summary = `Downloaded ${this.state.completed} file${
+        this.state.completed === 1 ? '' : 's'
+      }${this.state.skipped ? `, skipped ${this.state.skipped}` : ''}${
+        this.state.failed ? `, ${this.state.failed} failed` : ''
+      }.`
+
+      if (controller.signal.aborted) {
+        this.setPhase('cancelled', `Cancelled. ${summary}`)
+      } else {
+        this.setPhase('done', summary)
+      }
+      this.deps.log(controller.signal.aborted ? 'warn' : 'success', summary)
+    } catch (err) {
+      this.state.finishedAt = Date.now()
+      if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError')) {
+        this.setPhase('cancelled', 'Cancelled.')
+      } else {
+        const message = errorMessage(err)
+        this.setPhase('error', message)
+        this.deps.log('error', message)
+        if (isRedditError(err) && err.code === 'AUTH_REQUIRED') {
+          this.deps.log('warn', 'Open the Reddit login window to refresh your session.')
+        }
+      }
+    } finally {
+      this.running = false
+      this.controller = null
+      if (this.state.phase !== 'done' && this.state.phase !== 'error') this.emit()
+    }
+  }
+
+  private extractOptions(options: JobOptions) {
+    return {
+      includeImages: options.includeImages,
+      includeGalleries: options.includeGalleries,
+      includeVideos: options.includeVideos,
+      includeExternalVideos: options.includeExternalVideos,
+      skipNsfw: options.skipNsfw
+    }
+  }
+
+  private async scan(
+    subreddit: SubredditInfo,
+    options: JobOptions,
+    destination: string,
+    signal: AbortSignal
+  ): Promise<MediaItem[]> {
+    this.setPhase('scanning')
+    const media: MediaItem[] = []
+    const seen = new Set<string>()
+    const seenFiles = new Set<string>()
+    const maxPosts = options.maxPosts > 0 ? options.maxPosts : Number.POSITIVE_INFINITY
+    const folder = path.join(destination, safeFilename(subreddit.name))
+    let scanned = 0
+
+    for await (const page of this.deps.auth.client.pages(subreddit.name, { signal })) {
+      if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
+      const batch: MediaItem[] = []
+
+      for (const post of page.posts) {
+        if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
+        if (scanned >= maxPosts) break
+        scanned++
+
+        const extracted = extractMedia(post, this.extractOptions(options))
+        for (const item of extracted) {
+          if (seen.has(item.id)) continue
+          seen.add(item.id)
+
+          item.filename = safeFilename(item.filename)
+          const initialPath = path.join(folder, item.filename)
+
+          if (seenFiles.has(initialPath) && options.skipExisting) continue
+          seenFiles.add(initialPath)
+
+          if (options.skipExisting && fs.existsSync(initialPath)) {
+            item.localPath = initialPath
+          }
+
+          media.push(item)
+          batch.push(item)
+        }
+      }
+
+      this.state.scannedPosts = scanned
+      this.state.discovered = media.length
+      this.emit()
+      if (batch.length > 0) this.deps.emitMedia(batch)
+      if (scanned >= maxPosts) break
+    }
+
+    this.state.scannedPosts = scanned
+    this.state.discovered = media.length
+    this.emit()
+    return media
+  }
+
+  private async downloadAll(
+    media: MediaItem[],
+    subreddit: SubredditInfo,
+    options: JobOptions,
+    destination: string,
+    signal: AbortSignal
+  ): Promise<void> {
+    this.setPhase('downloading')
+    const folder = path.join(destination, safeFilename(subreddit.name))
+    const reserved = new Set<string>()
+
+    await runPool(media, options.concurrency, async (item) => {
+      if (signal.aborted) return
+      await this.downloadItem(item, folder, options.skipExisting, reserved, signal)
+    })
+  }
+
+  private activeEntry(item: MediaItem, filename: string): ActiveDownload {
+    return {
+      id: item.id,
+      filename,
+      status: 'queued',
+      receivedBytes: 0,
+      totalBytes: null,
+      ratio: null,
+      speedBps: null
+    }
+  }
+
+  private pushActive(entry: ActiveDownload): void {
+    this.state.active = [entry, ...this.state.active.filter((a) => a.id !== entry.id)].slice(0, 60)
+  }
+
+  private async downloadItem(
+    item: MediaItem,
+    folder: string,
+    skipExisting: boolean,
+    reserved: Set<string>,
+    signal: AbortSignal
+  ): Promise<void> {
+    const initialPath = path.join(folder, item.filename)
+
+    if (skipExisting && fs.existsSync(initialPath)) {
+      item.localPath = initialPath
+      this.state.skipped++
+      this.deps.emitMediaUpdate({ ...item })
+      this.emit()
+      return
+    }
+
+    let destination: string
+    try {
+      destination = await uniqueDestination(initialPath, reserved)
+    } catch (err) {
+      this.state.failed++
+      this.deps.log('error', `${item.filename}: ${errorMessage(err)}`)
+      this.emit()
+      return
+    }
+
+    const entry = this.activeEntry(item, path.basename(destination))
+    this.pushActive(entry)
+    this.emit()
+
+    let lastEmit = 0
+    let lastBytes = 0
+    let lastTime = Date.now()
+
+    const tick = (received: number, total: number | null, ratio: number | null, force = false): void => {
+      entry.receivedBytes = received
+      entry.totalBytes = total
+      entry.ratio = ratio
+      const now = Date.now()
+      const elapsed = (now - lastTime) / 1000
+      if (elapsed > 0.25 && received >= lastBytes) {
+        entry.speedBps = (received - lastBytes) / elapsed
+        lastBytes = received
+        lastTime = now
+      }
+      if (force || now - lastEmit > 200) {
+        lastEmit = now
+        this.emit()
+      }
+    }
+
+    try {
+      if (item.kind === 'video') {
+        entry.status = 'processing'
+        this.emit()
+        await this.downloadRedditVideo(item, destination, signal, (ratio) => {
+          tick(ratio === null ? 0 : Math.round(ratio * 1000), ratio === null ? null : 1000, ratio)
+        })
+      } else if (item.kind === 'external-video') {
+        entry.status = 'processing'
+        this.emit()
+        const resolved = await this.downloadExternalVideo(item, destination, signal, (received, total) =>
+          tick(received, total, total ? received / total : null)
+        )
+        item.localPath = resolved.path
+        item.filename = path.basename(resolved.path)
+        item.ext = path.extname(resolved.path).replace(/^\./, '') || item.ext
+        entry.filename = item.filename
+      } else {
+        entry.status = 'downloading'
+        this.emit()
+        const result = await this.downloadImage(item, destination, signal, (received, total) =>
+          tick(received, total, total ? received / total : null)
+        )
+        item.localPath = destination
+        entry.receivedBytes = result.bytes
+      }
+
+      if (item.kind !== 'external-video') item.localPath = destination
+      entry.status = 'done'
+      entry.ratio = 1
+      this.state.completed++
+      this.deps.emitMediaUpdate({ ...item })
+      this.deps.log('success', `Saved ${path.basename(item.localPath ?? destination)}`)
+      tick(entry.receivedBytes, entry.totalBytes, 1, true)
+    } catch (err) {
+      if (signal.aborted || (err instanceof Error && err.name === 'AbortError')) {
+        entry.status = 'cancelled'
+        this.emit()
+      } else {
+        entry.status = 'failed'
+        entry.error = errorMessage(err)
+        this.state.failed++
+        this.deps.log('error', `${item.filename}: ${errorMessage(err)}`)
+        this.emit()
+      }
+    } finally {
+      // Keep the finished file; remove anything left behind by a failed or
+      // cancelled transfer.
+      if (entry.status !== 'done') {
+        await fsp.unlink(`${destination}.part`).catch(() => undefined)
+        await fsp.unlink(`${destination}.part.mp4`).catch(() => undefined)
+        await fsp.unlink(destination).catch(() => undefined)
+      }
+    }
+  }
+
+  private async downloadImage(
+    item: MediaItem,
+    destination: string,
+    signal: AbortSignal,
+    onProgress: (received: number, total: number | null) => void
+  ): Promise<{ bytes: number }> {
+    const fetchFn = this.deps.auth.session.fetch.bind(this.deps.auth.session)
+    try {
+      return await downloadToFile(fetchFn, item.sourceUrl, destination, { signal, onProgress })
+    } catch (err) {
+      if (signal.aborted) throw err
+      if (item.previewUrl && item.previewUrl !== item.sourceUrl) {
+        this.deps.log('warn', `Retrying ${item.filename} with preview URL`)
+        return await downloadToFile(fetchFn, item.previewUrl, destination, { signal, onProgress })
+      }
+      throw err
+    }
+  }
+
+  private async downloadRedditVideo(
+    item: MediaItem,
+    destination: string,
+    signal: AbortSignal,
+    onProgress: (ratio: number | null) => void
+  ): Promise<void> {
+    const ffmpeg = this.deps.tools.ffmpegPath()
+    const alternates = item.videoAlternates ?? {}
+    const attempts: Array<{ kind: 'ffmpeg' | 'http'; url: string; label: string }> = []
+
+    if (alternates.dash) attempts.push({ kind: 'ffmpeg', url: alternates.dash, label: 'DASH' })
+    if (alternates.hls) attempts.push({ kind: 'ffmpeg', url: alternates.hls, label: 'HLS' })
+    if (alternates.fallback) {
+      attempts.push({ kind: 'http', url: alternates.fallback, label: 'fallback' })
+    }
+    if (attempts.length === 0) {
+      attempts.push({
+        kind: item.videoStrategy === 'fallback' ? 'http' : 'ffmpeg',
+        url: item.sourceUrl,
+        label: item.videoStrategy ?? 'video'
+      })
+    }
+
+    let lastError: unknown = null
+    for (const attempt of attempts) {
+      if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
+      try {
+        if (attempt.kind === 'ffmpeg') {
+          if (!ffmpeg) {
+            lastError = new Error('ffmpeg is missing from the tools folder.')
+            continue
+          }
+          this.deps.log('info', `Merging ${attempt.label} stream for ${item.filename}`)
+          await downloadWithFfmpeg(ffmpeg, attempt.url, destination, {
+            duration: item.duration,
+            signal,
+            onProgress
+          })
+        } else {
+          this.deps.log('warn', `Falling back to video-only ${attempt.label} download for ${item.filename}`)
+          const fetchFn = this.deps.auth.session.fetch.bind(this.deps.auth.session)
+          await downloadToFile(fetchFn, attempt.url, destination, {
+            signal,
+            onProgress: (received, total) => onProgress(total ? received / total : null)
+          })
+        }
+        return
+      } catch (err) {
+        if (signal.aborted) throw err
+        lastError = err
+        this.deps.log('warn', `${attempt.label} failed for ${item.filename}: ${errorMessage(err)}`)
+      }
+    }
+
+    throw lastError instanceof Error ? lastError : new Error('All video download strategies failed.')
+  }
+
+  private async downloadExternalVideo(
+    item: MediaItem,
+    destination: string,
+    signal: AbortSignal,
+    onProgress: (received: number, total: number | null) => void
+  ): Promise<{ path: string; bytes: number }> {
+    const ytdlp = this.deps.tools.ytdlpPath()
+    if (!ytdlp) {
+      throw new Error(
+        'yt-dlp is missing from the tools folder. Use Settings → Tools → Update yt-dlp, then retry.'
+      )
+    }
+    const outBase = destination.replace(/\.[^.]+$/, '')
+    return downloadWithYtDlp(ytdlp, item.sourceUrl, outBase, {
+      ffmpegPath: this.deps.tools.ffmpegPath(),
+      signal,
+      onProgress
+    })
+  }
+}
