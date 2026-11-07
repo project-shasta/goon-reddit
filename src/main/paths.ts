@@ -79,7 +79,42 @@ function migrateLegacyProfile(previousDir: string, dataDir: string): void {
       })
     }
 
-    copy('settings.json')
+    // Only copy settings.json if it has custom values (not just the old default
+    // of 1000).  A fresh user who never changed maxPosts should get the new
+    // default of 100.
+    const settingsSrc = path.join(previousDir, 'settings.json')
+    if (fs.existsSync(settingsSrc)) {
+      try {
+        const raw = JSON.parse(fs.readFileSync(settingsSrc, 'utf8')) as Record<string, unknown>
+        // If maxPosts is 1000 (old default) and nothing else is set, skip it.
+        if ((raw.maxPosts as number | undefined) === 1000) {
+          // Check if there are any other custom values beyond the old defaults.
+          const oldDefaults = {
+            concurrency: 4,
+            includeImages: true,
+            includeGalleries: true,
+            includeVideos: true,
+            includeExternalVideos: true,
+            skipNsfw: false,
+            skipExisting: true,
+            slideshowIntervalMs: 3000,
+            blurNsfw: false
+          }
+          const hasCustomValues = Object.entries(oldDefaults).some(
+            ([key, val]) => (raw as Record<string, unknown>)[key] !== val
+          )
+          if (!hasCustomValues) {
+            // All values match old defaults — skip migration, let new defaults apply.
+          } else {
+            copy('settings.json')
+          }
+        } else {
+          copy('settings.json')
+        }
+      } catch {
+        // Malformed settings.json — skip it.
+      }
+    }
     copy('Local State')
 
     const partition = path.join('Partitions', 'reddit')

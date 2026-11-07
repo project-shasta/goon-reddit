@@ -27,13 +27,14 @@ const INTERVALS = [1500, 2500, 4000, 6000, 10000]
 export function Slideshow({
   images,
   intervalMs,
+  autoPlay,
   blurNsfw,
   busy,
   emptyHint,
   onIntervalChange
 }: SlideshowProps): React.JSX.Element {
   const [index, setIndex] = useState(0)
-  const [playing, setPlaying] = useState(true)
+  const [playing, setPlaying] = useState(autoPlay)
   const [revealed, setRevealed] = useState(false)
   const [useFallback, setUseFallback] = useState(false)
   const [skipped, setSkipped] = useState<Set<string>>(new Set())
