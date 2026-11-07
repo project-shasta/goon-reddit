@@ -222,6 +222,37 @@ export default function App(): React.JSX.Element {
     []
   )
 
+  const handleQueueMore = useCallback(
+    async (batch: number) => {
+      if (!settings || !validated) return
+      const newMax = Math.max(settings.maxPosts, job.scannedPosts) + batch
+      setSettings({ ...settings, maxPosts: newMax })
+      await window.api.updateSettings({ maxPosts: newMax }).catch(() => undefined)
+      setMedia([])
+      setView('slideshow')
+      setJob({ ...INITIAL_JOB, mode: 'scan', phase: 'validating', startedAt: Date.now() })
+      try {
+        await window.api.startJob({
+          subreddit: validated.name,
+          destination: settings.destination,
+          mode: 'scan',
+          maxPosts: newMax,
+          concurrency: settings.concurrency,
+          includeImages: settings.includeImages,
+          includeGalleries: settings.includeGalleries,
+          includeVideos: settings.includeVideos,
+          includeExternalVideos: settings.includeExternalVideos,
+          skipNsfw: settings.skipNsfw,
+          skipExisting: settings.skipExisting
+        })
+      } catch (err) {
+        setJob(INITIAL_JOB)
+        addLog({ level: 'error', message: errorText(err), time: Date.now() })
+      }
+    },
+    [settings, validated, job.scannedPosts, addLog]
+  )
+
   const imageCount = useMemo(
     () =>
       media.filter(
@@ -346,6 +377,7 @@ export default function App(): React.JSX.Element {
             subreddit={validated ?? job.subreddit}
             onIntervalChange={handleIntervalChange}
             onGoDownload={() => setView('download')}
+            onQueueMore={handleQueueMore}
           />
         )}
 

@@ -2,7 +2,47 @@ import { useMemo } from 'react'
 import type { AppSettings, JobState, MediaItem, SubredditInfo } from '@shared/types'
 import { isViewableImage } from '../lib/media'
 import { Slideshow } from './Slideshow'
-import { IconGrid, IconImage } from './icons'
+import { IconDownload, IconGrid, IconImage } from './icons'
+
+const QUEUE_BATCHES = [25, 50, 100, 200]
+
+function QueueMoreButton({
+  onQueueMore,
+  maxPosts
+}: {
+  onQueueMore: (count: number) => void
+  maxPosts: number
+}): React.JSX.Element {
+  return (
+    <div className="relative group/qm">
+      <button
+        className="btn btn-secondary px-2 py-1 text-xs"
+        onClick={() => {
+          const next = QUEUE_BATCHES.reduce<(typeof QUEUE_BATCHES)[number]>((best, b) => (b > maxPosts ? b : best), QUEUE_BATCHES[0])
+          if (Number.isFinite(next)) onQueueMore(next)
+        }}
+        title="Scan more posts and add images to this slideshow"
+      >
+        <IconDownload size={12} />
+        Queue more
+      </button>
+      <div className="pointer-events-none absolute bottom-full right-0 mb-1 hidden rounded-xl border border-white/10 bg-zinc-900 p-1 group-hover/qm:flex">
+        {QUEUE_BATCHES.map((batch) => (
+          <button
+            key={batch}
+            className={`btn px-2 py-1 text-[11px] ${
+              batch <= maxPosts ? 'btn-disabled' : 'btn-secondary'
+            }`}
+            onClick={() => onQueueMore(batch)}
+            title={`Scan ${batch} more posts`}
+          >
+            +{batch}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 interface BrowserViewProps {
   media: MediaItem[]
@@ -11,6 +51,7 @@ interface BrowserViewProps {
   subreddit: SubredditInfo | null
   onIntervalChange: (intervalMs: number) => void
   onGoDownload: () => void
+  onQueueMore: (count: number) => void
 }
 
 export function BrowserView({
@@ -19,7 +60,8 @@ export function BrowserView({
   settings,
   subreddit,
   onIntervalChange,
-  onGoDownload
+  onGoDownload,
+  onQueueMore
 }: BrowserViewProps): React.JSX.Element {
   const images = useMemo(() => media.filter(isViewableImage), [media])
   const busy = job.phase === 'scanning' || job.phase === 'validating'
@@ -42,6 +84,9 @@ export function BrowserView({
           <IconGrid size={13} />
           {images.length === 0 ? 'Scan a subreddit' : 'Downloader'}
         </button>
+        {subreddit && !busy && job.scannedPosts > 0 && (
+          <QueueMoreButton onQueueMore={onQueueMore} maxPosts={settings.maxPosts} />
+        )}
       </div>
 
       <Slideshow
