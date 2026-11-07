@@ -1,0 +1,22 @@
+export const IPC = {
+  authStatus: 'auth:status',
+  authOpenLogin: 'auth:open-login',
+  authLogout: 'auth:logout',
+  authState: 'auth:state',
+  subredditValidate: 'subreddit:validate',
+  jobStart: 'job:start',
+  jobCancel: 'job:cancel',
+  jobState: 'job:state',
+  jobMedia: 'job:media',
+  jobMediaUpdate: 'job:media-update',
+  jobLog: 'job:log',
+  settingsGet: 'settings:get',
+  settingsUpdate: 'settings:update',
+  settingsChooseDestination: 'settings:choose-destination',
+  toolsStatus: 'tools:status',
+  toolsUpdateYtdlp: 'tools:update-ytdlp',
+  toolsSetup: 'tools:setup',
+  shellOpenExternal: 'shell:open-external',
+  shellRevealFile: 'shell:reveal-file',
+  shellOpenFolder: 'shell:open-folder'
+} as const
