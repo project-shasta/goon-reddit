@@ -74,12 +74,12 @@ space to pause, and `F` for fullscreen. Speed and NSFW blur are in **Settings**.
 Everything the app writes lives in a self-contained `data` folder next to the app:
 `data/settings.json`, the Chromium profile, and the persisted `reddit` session. In development that is
 the project root, in a normal install it is the folder that contains the executable, and portable
-builds use `PORTABLE_EXECUTABLE_DIR`. Nothing is written to `%APPDATA%` once the app has started.
+builds use `PORTABLE_EXECUTABLE_DIR`. Nothing is written to `%APPDATA%`.
 
 On first launch after upgrading, the app copies an existing profile from the old
 `%APPDATA%\Reddit Downloader` location (settings, `Local State`, and the Reddit partition) into the
-new `data` folder, so you stay logged in. If the app folder is read-only, the app falls back to
-`%APPDATA%` instead of failing to start.
+new `data` folder, so you stay logged in. If the app folder is read-only, the app will refuse to
+start — it must be placed in a writable location.
 
 ## How it works
 

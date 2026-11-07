@@ -35,12 +35,11 @@ export function getDataDir(): string {
     return cachedDataDir
   }
 
-  // The app folder can be read-only if it was installed system-wide. Keep the
-  // app usable in that case instead of failing to start.
-  cachedDataDir = path.join(app.getPath('userData'), 'data')
-  fs.mkdirSync(cachedDataDir, { recursive: true })
-  console.warn('[data] app folder is not writable; falling back to', cachedDataDir)
-  return cachedDataDir
+  // A truly portable app must write into its own directory. If we can't, fail
+  // early rather than silently scattering data across the user's machine.
+  throw new Error(
+    `The app folder is not writable (${appData}). Move the app to a location where you have write access.`
+  )
 }
 
 /** Profile folders that are pure caches and only slow the migration down. */
@@ -95,11 +94,15 @@ function migrateLegacyProfile(previousDir: string, dataDir: string): void {
 /**
  * Must run before app.whenReady() and before any session is created, so
  * Chromium writes its whole profile (cookies, storage, caches) into data/.
+ * Also override paths that default to %APPDATA% so nothing leaks out.
  */
 export function configureUserData(): void {
   const previousDir = app.getPath('userData')
   const dataDir = getDataDir()
   app.setPath('userData', dataDir)
+  app.setPath('logs', path.join(dataDir, 'logs'))
+  app.setPath('crashDumps', path.join(dataDir, 'crashDumps'))
+  app.setPath('sessionData', path.join(dataDir, 'sessionData'))
   migrateLegacyProfile(previousDir, dataDir)
 }
 

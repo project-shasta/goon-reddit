@@ -15,8 +15,8 @@ registerMediaScheme()
 
 app.userAgentFallback = CHROME_UA
 app.setName('Reddit Downloader')
-// Keep settings, sessions and tool data next to the app instead of APPDATA.
-// This must happen before whenReady() and before any session is created.
+// Everything the app writes lives next to the app itself. This must happen
+// before whenReady() and before any session is created.
 configureUserData()
 
 let mainWindow: BrowserWindow | null = null
