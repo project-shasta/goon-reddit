@@ -10,7 +10,6 @@ taskkill /F /IM electron.exe 2>nul
 timeout /t 2 /nobreak >nul
 
 echo [2/4] Cleaning old build artifacts...
-if exist "dist\win-unpacked" rmdir /s /q "dist\win-unpacked"
 if exist "dist\*.exe" del /q "dist\*.exe" 2>nul
 if exist "dist\*.blockmap" del /q "dist\*.blockmap" 2>nul
 

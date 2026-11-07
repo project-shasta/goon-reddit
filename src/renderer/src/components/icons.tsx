@@ -85,6 +85,22 @@ export function IconChevronRight(props: IconProps): React.JSX.Element {
   )
 }
 
+export function IconChevronUp(props: IconProps): React.JSX.Element {
+  return (
+    <svg {...base(props)}>
+      <path d="m18 15-6-6-6 6" />
+    </svg>
+  )
+}
+
+export function IconChevronDown(props: IconProps): React.JSX.Element {
+  return (
+    <svg {...base(props)}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  )
+}
+
 export function IconRefresh(props: IconProps): React.JSX.Element {
   return (
     <svg {...base(props)}>

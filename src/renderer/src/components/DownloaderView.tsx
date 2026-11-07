@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type {
   AppSettings,
   AuthStatus,
@@ -9,7 +10,7 @@ import { AuthPanel } from './AuthPanel'
 import { SubredditBar } from './SubredditBar'
 import { JobProgress } from './JobProgress'
 import { LogPanel } from './LogPanel'
-import { IconSettings } from './icons'
+import { IconSettings, IconChevronDown, IconChevronUp } from './icons'
 
 interface DownloaderViewProps {
   auth: AuthStatus
@@ -57,6 +58,8 @@ export function DownloaderView({
     settings.includeExternalVideos && 'External videos'
   ].filter(Boolean)
 
+  const [showLogs, setShowLogs] = useState(false)
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <AuthPanel auth={auth} onChanged={onAuthChanged} />
@@ -93,7 +96,28 @@ export function DownloaderView({
       </div>
 
       <JobProgress job={job} destination={settings.destination} />
-      <LogPanel logs={logs} onClear={onClearLogs} />
+
+      <div className="flex items-center justify-between border-b border-white/5 px-4 py-2">
+        <h2 className="text-xs font-semibold tracking-wide text-zinc-400 uppercase">Activity</h2>
+        <button
+          className="btn btn-ghost px-2 py-1 text-xs"
+          onClick={onClearLogs}
+          disabled={!logs.length}
+        >
+          Clear
+        </button>
+      </div>
+      {showLogs && <LogPanel logs={logs} onClear={onClearLogs} />}
+
+      <button
+        className={`flex w-full items-center gap-1 border-t border-white/5 px-4 py-1.5 text-xs text-zinc-500 transition hover:bg-white/5 hover:text-zinc-300 ${
+          showLogs ? 'rounded-b-xl' : 'rounded-b-xl'
+        }`}
+        onClick={() => setShowLogs((v) => !v)}
+      >
+        {showLogs ? <IconChevronUp size={12} /> : <IconChevronDown size={12} />}
+        {showLogs ? 'Hide activity' : 'Show activity'}
+      </button>
     </div>
   )
 }
