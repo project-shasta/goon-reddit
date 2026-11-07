@@ -27,3 +27,21 @@ export function mediaFallbackSrc(item: MediaItem): string | null {
   if (item.sourceUrl && item.sourceUrl !== item.previewUrl) return item.sourceUrl
   return null
 }
+
+/**
+ * Reddit serves "image deleted" placeholder images from these hosts.
+ * When a primary image 404s and the only fallback is one of these,
+ * the result will be placeholder text, not the actual image.
+ */
+export function isRedditPreviewHost(url: string): boolean {
+  try {
+    const h = new URL(url).hostname
+    return (
+      h === 'preview.redd.it' ||
+      h === 'external-preview.redd.it' ||
+      h === 'external-content.redd.it'
+    )
+  } catch {
+    return false
+  }
+}

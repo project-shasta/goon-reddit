@@ -9,15 +9,14 @@ taskkill /F /IM "Reddit Downloader.exe" 2>nul
 taskkill /F /IM electron.exe 2>nul
 timeout /t 2 /nobreak >nul
 
-echo [2/5] Preserving login and settings from previous build...
-if exist "dist\win-unpacked\data" (
-    if not exist ".build-preserve" mkdir .build-preserve
-    xcopy /E /I /Y "dist\win-unpacked\data" ".build-preserve\data\" 2>nul
+echo [2/5] Preserving login session from previous build...
+if exist "dist\win-unpacked\data\Partitions\reddit" (
+    if not exist ".build-preserve\data\Partitions\reddit" mkdir ".build-preserve\data\Partitions\reddit" 2>nul
+    xcopy /E /I /Y "dist\win-unpacked\data\Partitions\reddit" ".build-preserve\data\Partitions\reddit\" 2>nul
 )
-echo [3/5] Merging current dev settings into preserved folder...
-if exist "data\settings.json" (
+if exist "dist\win-unpacked\data\Local State" (
     if not exist ".build-preserve\data" mkdir ".build-preserve\data"
-    copy /Y "data\settings.json" ".build-preserve\data\settings.json" 2>nul
+    copy /Y "dist\win-unpacked\data\Local State" ".build-preserve\data\Local State" 2>nul
 )
 
 echo [4/5] Cleaning old build artifacts...
@@ -29,7 +28,7 @@ call npm run build:win
 
 if %errorlevel% equ 0 (
     echo.
-    echo Restoring login and settings...
+    echo Restoring login session...
     if exist ".build-preserve\data" (
         if not exist "dist\win-unpacked\data" mkdir "dist\win-unpacked\data"
         xcopy /E /I /Y ".build-preserve\data" "dist\win-unpacked\data\" 2>nul

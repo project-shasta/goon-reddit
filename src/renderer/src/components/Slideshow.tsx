@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { MediaItem } from '@shared/types'
-import { mediaFallbackSrc, mediaSrc } from '../lib/media'
+import { isRedditPreviewHost, mediaFallbackSrc, mediaSrc } from '../lib/media'
 import { timeAgo } from '../lib/format'
 import {
   IconChevronLeft,
@@ -170,12 +170,20 @@ export function Slideshow({
               blurred ? 'scale-105 blur-2xl' : ''
             }`}
             onError={() => {
+              const fb = mediaFallbackSrc(current)
               if (useFallback) {
                 // Both primary and fallback failed — skip this broken image.
                 setSkipped((prev) => new Set(prev).add(current!.id))
                 go(1)
-              } else if (!useFallback && mediaFallbackSrc(current)) {
-                setUseFallback(true)
+              } else if (!useFallback && fb) {
+                // If the fallback is a Reddit preview-host URL, it's almost
+                // certainly the "image deleted" placeholder — skip instead.
+                if (isRedditPreviewHost(fb)) {
+                  setSkipped((prev) => new Set(prev).add(current!.id))
+                  go(1)
+                } else {
+                  setUseFallback(true)
+                }
               }
             }}
           />

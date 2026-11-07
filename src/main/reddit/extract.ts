@@ -70,7 +70,11 @@ function isDirectVideoUrl(url: string): boolean {
  */
 function isDeletedImagePlaceholder(url: string): boolean {
   const h = hostOf(url)
-  if (h === 'external-preview.redd.it' || h === 'external-content.redd.it') {
+  if (
+    h === 'preview.redd.it' ||
+    h === 'external-preview.redd.it' ||
+    h === 'external-content.redd.it'
+  ) {
     const ext = extensionFromUrl(url)
     return ext !== null && ['jpg', 'png', 'gif', 'webp', 'avif'].includes(ext)
   }
