@@ -68,17 +68,20 @@ function isDirectVideoUrl(url: string): boolean {
  * external-preview / external-content hosts and have the same URL pattern as
  * real images, but contain text instead of the original content.
  */
-function isDeletedImagePlaceholder(url: string): boolean {
+/**
+ * Detect Reddit's "image deleted" placeholder images and low-res previews.
+ * These are served from preview hosts. For the slideshow we want full-res
+ * images, so any image whose sourceUrl is from a preview host should be
+ * skipped — the user will get a better version from i.redd.it or the
+ * external host directly.
+ */
+function isRedditPreviewHost(url: string): boolean {
   const h = hostOf(url)
-  if (
+  return (
     h === 'preview.redd.it' ||
     h === 'external-preview.redd.it' ||
     h === 'external-content.redd.it'
-  ) {
-    const ext = extensionFromUrl(url)
-    return ext !== null && ['jpg', 'png', 'gif', 'webp', 'avif'].includes(ext)
-  }
-  return false
+  )
 }
 
 function isVideoHost(url: string): boolean {
@@ -281,8 +284,9 @@ function extractFromPost(post: RedditPost, options: ExtractOptions, depth = 0): 
   if (sourceUrl && !post.is_self) {
     const hint = post.post_hint
 
-    if (isDeletedImagePlaceholder(sourceUrl)) {
-      // Skip "image deleted" placeholders — they're just text images.
+    if (isRedditPreviewHost(sourceUrl)) {
+      // The source is a Reddit preview/thumbnail URL — skip it.
+      // We want full-res images (i.redd.it or the original external host).
       return []
     }
 
