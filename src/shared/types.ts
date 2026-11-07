@@ -110,6 +110,7 @@ export interface AppSettings {
   skipNsfw: boolean
   skipExisting: boolean
   slideshowIntervalMs: number
+  slideshowAutoPlay: boolean
   blurNsfw: boolean
   toolsDir: string | null
 }

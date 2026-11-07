@@ -22,6 +22,7 @@ type BooleanKey =
   | 'includeExternalVideos'
   | 'skipNsfw'
   | 'skipExisting'
+  | 'slideshowAutoPlay'
   | 'blurNsfw'
 
 const MEDIA_TOGGLES: Array<{ key: BooleanKey; label: string; hint: string }> = [
@@ -34,6 +35,7 @@ const MEDIA_TOGGLES: Array<{ key: BooleanKey; label: string; hint: string }> = [
 const BEHAVIOR_TOGGLES: Array<{ key: BooleanKey; label: string; hint: string }> = [
   { key: 'skipNsfw', label: 'Skip NSFW posts', hint: 'Ignore posts marked over 18' },
   { key: 'skipExisting', label: 'Skip files already downloaded', hint: 'Resume where you left off' },
+  { key: 'slideshowAutoPlay', label: 'Auto-play slideshow', hint: 'Start playing when images load' },
   { key: 'blurNsfw', label: 'Blur NSFW in slideshow', hint: 'Click to reveal each image' }
 ]
 

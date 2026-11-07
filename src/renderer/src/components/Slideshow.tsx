@@ -15,6 +15,7 @@ import {
 interface SlideshowProps {
   images: MediaItem[]
   intervalMs: number
+  autoPlay: boolean
   blurNsfw: boolean
   busy: boolean
   emptyHint: string
