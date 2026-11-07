@@ -317,7 +317,7 @@ export default function App(): React.JSX.Element {
         </div>
       </header>
 
-      <main className="flex min-h-0 flex-1 flex-col p-4">
+      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4">
         {view === 'download' && (
           <DownloaderView
             auth={auth}
