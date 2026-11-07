@@ -89,14 +89,17 @@ function isVideoHost(url: string): boolean {
 }
 
 /**
- * Strip query / fragment from i.redd.it URLs.  Reddit appends
+ * Strip query / fragment from i.redd.it URLs only.  Reddit appends
  * ?width=…&format=…&s=… which forces a small thumbnail — removing them
  * returns the full-resolution image.
+ *
+ * Do NOT strip from preview.redd.it — there the ?width= param controls
+ * the size (larger value = larger image), so removing it shrinks it.
  */
 function stripRedditImageParams(url: string): string {
   try {
     const parsed = new URL(url)
-    if (parsed.hostname.endsWith('i.redd.it') || parsed.hostname.endsWith('reddit.com')) {
+    if (parsed.hostname === 'i.redd.it') {
       return parsed.origin + parsed.pathname
     }
   } catch {
