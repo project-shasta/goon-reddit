@@ -14,7 +14,7 @@ function QueueMoreButton({
   maxPosts: number
 }): React.JSX.Element {
   return (
-    <div className="relative group/qm">
+    <div className="relative group/qm pb-8">
       <button
         className="btn btn-secondary px-2 py-1 text-xs"
         onClick={() => {
