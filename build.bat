@@ -14,17 +14,22 @@ if exist "dist\win-unpacked\data" (
     if not exist ".build-preserve" mkdir .build-preserve
     xcopy /E /I /Y "dist\win-unpacked\data" ".build-preserve\data\" 2>nul
 )
+echo [3/5] Merging current dev settings into preserved folder...
+if exist "data\settings.json" (
+    if not exist ".build-preserve\data" mkdir ".build-preserve\data"
+    copy /Y "data\settings.json" ".build-preserve\data\settings.json" 2>nul
+)
 
-echo [3/5] Cleaning old build artifacts...
+echo [4/5] Cleaning old build artifacts...
 if exist "dist\*.exe" del /q "dist\*.exe" 2>nul
 if exist "dist\*.blockmap" del /q "dist\*.blockmap" 2>nul
 
-echo [4/5] Building...
+echo [5/5] Building...
 call npm run build:win
 
 if %errorlevel% equ 0 (
     echo.
-    echo [5/5] Restoring login and settings...
+    echo Restoring login and settings...
     if exist ".build-preserve\data" (
         if not exist "dist\win-unpacked\data" mkdir "dist\win-unpacked\data"
         xcopy /E /I /Y ".build-preserve\data" "dist\win-unpacked\data\" 2>nul
