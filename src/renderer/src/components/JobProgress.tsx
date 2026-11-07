@@ -1,0 +1,251 @@
+import type { ActiveDownload, JobState } from '@shared/types'
+import {
+  downloadPercent,
+  formatBytes,
+  formatCount,
+  formatSpeed
+} from '../lib/format'
+import {
+  IconAlert,
+  IconCheck,
+  IconDownload,
+  IconFolder,
+  IconSpinner,
+  IconVideo
+} from './icons'
+
+interface JobProgressProps {
+  job: JobState
+  destination: string
+}
+
+const PHASE_LABEL: Record<JobState['phase'], string> = {
+  idle: 'Ready',
+  validating: 'Checking subreddit',
+  scanning: 'Scanning new posts',
+  downloading: 'Downloading',
+  done: 'Finished',
+  cancelled: 'Cancelled',
+  error: 'Error'
+}
+
+function statusTone(status: ActiveDownload['status']): string {
+  switch (status) {
+    case 'done':
+      return 'text-emerald-400'
+    case 'failed':
+      return 'text-red-400'
+    case 'cancelled':
+      return 'text-zinc-500'
+    case 'processing':
+      return 'text-amber-300'
+    default:
+      return 'text-zinc-300'
+  }
+}
+
+function ActiveRow({ entry }: { entry: ActiveDownload }): React.JSX.Element {
+  const percent = downloadPercent(entry)
+  const isVideo = entry.filename.toLowerCase().endsWith('.mp4')
+
+  return (
+    <li className="space-y-1.5 py-2">
+      <div className="flex items-center gap-2 text-xs">
+        <span className={`shrink-0 ${statusTone(entry.status)}`}>
+          {entry.status === 'done' ? (
+            <IconCheck size={13} />
+          ) : entry.status === 'failed' ? (
+            <IconAlert size={13} />
+          ) : entry.status === 'processing' ? (
+            <IconVideo size={13} />
+          ) : (
+            <IconDownload size={13} />
+          )}
+        </span>
+        <span className="min-w-0 flex-1 truncate text-zinc-300" title={entry.filename}>
+          {entry.filename}
+        </span>
+        <span className={`shrink-0 tabular-nums ${statusTone(entry.status)}`}>
+          {entry.status === 'done'
+            ? 'done'
+            : entry.status === 'failed'
+              ? 'failed'
+              : entry.status === 'cancelled'
+                ? 'cancelled'
+                : entry.status === 'processing'
+                  ? percent !== null
+                    ? `merging ${Math.round(percent)}%`
+                    : 'merging…'
+                  : percent !== null
+                    ? `${Math.round(percent)}%`
+                    : entry.totalBytes
+                      ? formatBytes(entry.receivedBytes)
+                      : '…'}
+        </span>
+        {entry.status === 'downloading' && entry.speedBps ? (
+          <span className="w-20 shrink-0 text-right tabular-nums text-zinc-500">
+            {formatSpeed(entry.speedBps)}
+          </span>
+        ) : entry.status === 'downloading' && !entry.ratio && entry.totalBytes ? (
+          <span className="w-20 shrink-0 text-right tabular-nums text-zinc-500">
+            {formatBytes(entry.receivedBytes)} / {formatBytes(entry.totalBytes)}
+          </span>
+        ) : (
+          <span className="w-20 shrink-0" />
+        )}
+      </div>
+      <div className="h-1 overflow-hidden rounded-full bg-white/5">
+        <div
+          className={`h-full rounded-full transition-all duration-200 ${
+            entry.status === 'failed'
+              ? 'bg-red-500'
+              : entry.status === 'done'
+                ? 'bg-emerald-500'
+                : isVideo
+                  ? 'bg-amber-400'
+                  : 'bg-orange-500'
+          }`}
+          style={{ width: `${percent ?? (entry.status === 'done' ? 100 : 8)}%` }}
+        />
+      </div>
+      {entry.error && (
+        <p className="truncate text-[11px] text-red-400" title={entry.error}>
+          {entry.error}
+        </p>
+      )}
+    </li>
+  )
+}
+
+export function JobProgress({ job, destination }: JobProgressProps): React.JSX.Element {
+  const busy = job.phase === 'validating' || job.phase === 'scanning' || job.phase === 'downloading'
+  const finished = job.discovered > 0 ? job.completed + job.skipped + job.failed : 0
+  const overall =
+    job.mode === 'download' && job.discovered > 0
+      ? Math.min(100, (finished / job.discovered) * 100)
+      : null
+
+  if (job.phase === 'idle') {
+    return (
+      <section className="card px-4 py-4 text-sm text-zinc-500">
+        Enter a subreddit and press <span className="text-zinc-300">Download new</span> to grab its
+        latest images, galleries and videos. Use{' '}
+        <span className="text-zinc-300">Scan only</span> to preview it in the slideshow.
+      </section>
+    )
+  }
+
+  return (
+    <section className="card space-y-3 p-4">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span
+          className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold ${
+            job.phase === 'error'
+              ? 'bg-red-500/15 text-red-300'
+              : job.phase === 'done'
+                ? 'bg-emerald-500/15 text-emerald-300'
+                : job.phase === 'cancelled'
+                  ? 'bg-white/10 text-zinc-300'
+                  : 'bg-orange-500/15 text-orange-300'
+          }`}
+        >
+          {busy && <IconSpinner size={12} />}
+          {PHASE_LABEL[job.phase]}
+        </span>
+        {job.subreddit && (
+          <span className="text-sm font-semibold text-zinc-200">r/{job.subreddit.name}</span>
+        )}
+        <button
+          className="btn btn-ghost ml-auto px-2 py-1 text-xs"
+          onClick={() => void window.api.openFolder(destination).catch(() => undefined)}
+          title={destination}
+        >
+          <IconFolder size={13} />
+          Open folder
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <Stat label="Posts scanned" value={formatCount(job.scannedPosts)} />
+        <Stat label="Media found" value={formatCount(job.discovered)} />
+        <Stat
+          label={job.mode === 'scan' ? 'Loaded' : 'Downloaded'}
+          value={formatCount(job.mode === 'scan' ? job.discovered : job.completed)}
+          tone="text-emerald-400"
+        />
+        <Stat
+          label={job.failed > 0 ? 'Skipped / failed' : 'Skipped'}
+          value={formatCount(job.failed > 0 ? job.skipped + job.failed : job.skipped)}
+          tone={job.failed > 0 ? 'text-red-400' : 'text-zinc-300'}
+        />
+      </div>
+
+      {overall !== null && (
+        <div className="space-y-1">
+          <div className="h-2 overflow-hidden rounded-full bg-white/5">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-400 transition-all duration-300"
+              style={{ width: `${overall}%` }}
+            />
+          </div>
+          <div className="flex justify-between text-[11px] text-zinc-500">
+            <span>
+              {finished} of {job.discovered} finished
+            </span>
+            <span>{Math.round(overall)}%</span>
+          </div>
+        </div>
+      )}
+
+      {job.message && (
+        <p
+          className={`flex items-start gap-2 rounded-xl px-3 py-2 text-xs ${
+            job.phase === 'error'
+              ? 'border border-red-500/25 bg-red-500/5 text-red-300'
+              : job.phase === 'done'
+                ? 'border border-emerald-500/20 bg-emerald-500/5 text-emerald-300'
+                : 'bg-white/5 text-zinc-300'
+          }`}
+        >
+          {job.phase === 'error' ? (
+            <IconAlert size={13} className="mt-0.5 shrink-0" />
+          ) : job.phase === 'done' ? (
+            <IconCheck size={13} className="mt-0.5 shrink-0" />
+          ) : null}
+          {job.message}
+        </p>
+      )}
+
+      {job.active.length > 0 && (
+        <div>
+          <div className="mb-1 flex items-center justify-between text-[11px] font-semibold tracking-wide text-zinc-500 uppercase">
+            <span>Transfers</span>
+            <span>{job.active.filter((entry) => entry.status !== 'done').length} active</span>
+          </div>
+          <ul className="max-h-64 divide-y divide-white/5 overflow-y-auto pr-1">
+            {job.active.map((entry) => (
+              <ActiveRow key={entry.id} entry={entry} />
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function Stat({
+  label,
+  value,
+  tone = 'text-zinc-100'
+}: {
+  label: string
+  value: string
+  tone?: string
+}): React.JSX.Element {
+  return (
+    <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+      <div className="text-[10px] font-semibold tracking-wide text-zinc-500 uppercase">{label}</div>
+      <div className={`text-lg font-semibold tabular-nums ${tone}`}>{value}</div>
+    </div>
+  )
+}
