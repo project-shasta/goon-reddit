@@ -1,0 +1,11 @@
+node_modules/
+out/
+dist/
+data/
+*.log
+*.tsbuildinfo
+.DS_Store
+tools/*.exe
+tools/yt-dlp
+tools/versions.json
+!tools/.gitkeep

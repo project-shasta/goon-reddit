@@ -1,0 +1,34 @@
+appId: com.shasta.redditdownloader
+productName: Reddit Downloader
+copyright: Copyright © 2026 Shasta
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - out/**
+  - package.json
+
+extraFiles:
+  - from: tools
+    to: tools
+    filter:
+      - '**/*'
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: zip
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Reddit Downloader
