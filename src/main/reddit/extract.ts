@@ -70,12 +70,33 @@ function isVideoHost(url: string): boolean {
   return isDirectVideoUrl(url)
 }
 
+/**
+ * Strip query / fragment from i.redd.it URLs.  Reddit appends
+ * ?width=…&format=…&s=… which forces a small thumbnail — removing them
+ * returns the full-resolution image.
+ */
+function stripRedditImageParams(url: string): string {
+  try {
+    const parsed = new URL(url)
+    if (parsed.hostname.endsWith('i.redd.it') || parsed.hostname.endsWith('reddit.com')) {
+      return parsed.origin + parsed.pathname
+    }
+  } catch {
+    // ignore
+  }
+  return url
+}
+
 function previewFromPost(post: RedditPost): MediaItem['previewUrl'] {
   const images = post.preview?.images
   if (Array.isArray(images) && images[0]) {
     const resolutions = images[0].resolutions
-    const first = Array.isArray(resolutions) && resolutions.length > 0 ? resolutions[0] : images[0].source
-    const url = decodeUrl(first?.url)
+    // Use the highest-resolution variant (last in the array) or the source.
+    const best =
+      Array.isArray(resolutions) && resolutions.length > 0
+        ? resolutions[resolutions.length - 1]
+        : images[0].source
+    const url = decodeUrl(best?.url)
     if (url) return url
   }
   if (typeof post.thumbnail === 'string' && /^https?:\/\//.test(post.thumbnail)) {
@@ -242,13 +263,14 @@ function extractFromPost(post: RedditPost, options: ExtractOptions, depth = 0): 
     if (hint === 'image' || (hostOf(sourceUrl) === 'i.redd.it' && isDirectImageUrl(sourceUrl))) {
       if (options.includeImages) {
         const ext = extensionFromUrl(sourceUrl) ?? 'jpg'
+        const fullRes = stripRedditImageParams(sourceUrl)
         return [
           {
             ...base,
             id: `${base.postId}:image`,
             mediaId: null,
             kind: 'image',
-            sourceUrl,
+            sourceUrl: fullRes,
             ext,
             filename: buildFilename({
               postId: base.postId,
