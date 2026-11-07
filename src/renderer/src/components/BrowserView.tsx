@@ -27,7 +27,7 @@ function QueueMoreButton({
         <IconChevronDown size={11} className="ml-0.5" />
       </button>
       {open && (
-        <div className="absolute top-full right-0 mt-1 rounded-xl border border-white/10 bg-zinc-900 p-1">
+        <div className="absolute top-full right-0 z-50 mt-1 rounded-xl border border-white/10 bg-zinc-900 p-1">
           {QUEUE_BATCHES.map((batch) => (
             <button
               key={batch}
