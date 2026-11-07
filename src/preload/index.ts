@@ -23,7 +23,6 @@ const api: RendererApi = {
   openLogin: () => ipcRenderer.invoke(IPC.authOpenLogin),
   logout: () => ipcRenderer.invoke(IPC.authLogout),
   validateSubreddit: (name: string) => ipcRenderer.invoke(IPC.subredditValidate, name),
-  suggestSubreddits: (query: string) => ipcRenderer.invoke(IPC.subredditSuggest, query),
   startJob: (options: Partial<JobOptions>) => ipcRenderer.invoke(IPC.jobStart, options),
   cancelJob: () => ipcRenderer.invoke(IPC.jobCancel),
   getSettings: () => ipcRenderer.invoke(IPC.settingsGet),

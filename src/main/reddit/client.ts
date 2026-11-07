@@ -400,27 +400,6 @@ export class RedditClient {
     }
   }
 
-  /**
-   * Suggest matching subreddits for a partial query. Reddit's autocomplete
-   * endpoint is lightweight and safe to call frequently, but we throttle
-   * client-side to stay well under any rate limit.
-   */
-  async suggestSubreddits(query: string): Promise<Array<{ name: string; title?: string }>> {
-    const trimmed = query.trim()
-    if (trimmed.length < 1) return []
-
-    try {
-      const json = await this.getJson<any>(
-        `/api/subreddit_autocomplete_v2_v2?q=${encodeURIComponent(trimmed)}&type=sr`
-      )
-      const names = json?.[0]
-      if (!Array.isArray(names)) return []
-      return names.map((name: string) => ({ name }))
-    } catch {
-      return []
-    }
-  }
-
   destroy(): void {
     if (this.hiddenWindow && !this.hiddenWindow.isDestroyed()) {
       this.hiddenWindow.destroy()

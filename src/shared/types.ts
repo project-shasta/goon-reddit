@@ -157,7 +157,6 @@ export interface RendererApi {
   openLogin(): Promise<boolean>
   logout(): Promise<boolean>
   validateSubreddit(name: string): Promise<SubredditInfo>
-  suggestSubreddits(query: string): Promise<Array<{ name: string; title?: string }>>
   startJob(options: Partial<JobOptions>): Promise<boolean>
   cancelJob(): Promise<boolean>
   getSettings(): Promise<AppSettings>

@@ -80,10 +80,6 @@ export function registerIpcHandlers(ctx: IpcContext): void {
     return validateSubreddit(ctx.auth.client, String(name ?? ''))
   })
 
-  ipcMain.handle(IPC.subredditSuggest, async (_event, query: string) => {
-    return ctx.auth.client.suggestSubreddits(String(query ?? ''))
-  })
-
   ipcMain.handle(IPC.jobStart, async (_event, raw: Partial<JobOptions>) => {
     if (ctx.job.isRunning()) throw new Error('A job is already running.')
     const options = buildJobOptions(raw ?? {}, ctx.settings.get())
