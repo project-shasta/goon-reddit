@@ -9,7 +9,7 @@ const SETTINGS_FILE = () => path.join(getDataDir(), 'settings.json')
 function defaults(): AppSettings {
   return {
     destination: path.join(app.getPath('downloads'), 'Reddit Downloads'),
-    maxPosts: 1000,
+    maxPosts: 100,
     concurrency: 4,
     includeImages: true,
     includeGalleries: true,
@@ -56,7 +56,7 @@ export class SettingsStore {
         typeof next.destination === 'string' && next.destination.trim()
           ? path.resolve(next.destination)
           : base.destination,
-      maxPosts: clampInt(next.maxPosts, 0, 100000, base.maxPosts),
+      maxPosts: clampInt(next.maxPosts, 0, 10000, base.maxPosts),
       concurrency: clampInt(next.concurrency, 1, 8, base.concurrency),
       includeImages: asBool(next.includeImages, base.includeImages),
       includeGalleries: asBool(next.includeGalleries, base.includeGalleries),

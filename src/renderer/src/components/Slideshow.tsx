@@ -35,6 +35,7 @@ export function Slideshow({
   const [playing, setPlaying] = useState(true)
   const [revealed, setRevealed] = useState(false)
   const [useFallback, setUseFallback] = useState(false)
+  const [skipped, setSkipped] = useState<Set<string>>(new Set())
 
   const count = images.length
   const current = count > 0 ? images[Math.min(index, count - 1)] : null
@@ -47,6 +48,11 @@ export function Slideshow({
     setRevealed(false)
     setUseFallback(false)
   }, [current?.id])
+
+  // Reset skipped set when the images list changes (new scan).
+  useEffect(() => {
+    setSkipped(new Set())
+  }, [images.length])
 
   const go = useCallback(
     (delta: number) => {
@@ -94,16 +100,27 @@ export function Slideshow({
     return () => clearTimeout(timer)
   }, [playing, count, intervalMs, go, index])
 
-  const nextPreload = useMemo(() => {
-    if (count <= 1) return null
-    return mediaSrc(images[(index + 1) % count])
-  }, [count, images, index])
+  const PRELOAD_AHEAD = 3
+
+  const urlsToPreload = useMemo(() => {
+    if (count <= 1) return []
+    const urls: string[] = []
+    for (let i = 1; i <= PRELOAD_AHEAD; i++) {
+      const candidate = (index + i) % count
+      if (!skipped.has(images[candidate].id)) {
+        const url = mediaSrc(images[candidate])
+        if (url && urls.indexOf(url) === -1) urls.push(url)
+      }
+    }
+    return urls
+  }, [count, images, index, skipped])
 
   useEffect(() => {
-    if (!nextPreload) return
-    const preload = new Image()
-    preload.src = nextPreload
-  }, [nextPreload])
+    for (const url of urlsToPreload) {
+      const preload = new Image()
+      preload.src = url
+    }
+  }, [urlsToPreload])
 
   const fullSrc = current ? (useFallback ? mediaFallbackSrc(current) : mediaSrc(current)) : null
   const blurred = Boolean(current?.over18 && blurNsfw && !revealed)
@@ -151,7 +168,13 @@ export function Slideshow({
               blurred ? 'scale-105 blur-2xl' : ''
             }`}
             onError={() => {
-              if (!useFallback && mediaFallbackSrc(current)) setUseFallback(true)
+              if (useFallback) {
+                // Both primary and fallback failed — skip this broken image.
+                setSkipped((prev) => new Set(prev).add(current!.id))
+                go(1)
+              } else if (!useFallback && mediaFallbackSrc(current)) {
+                setUseFallback(true)
+              }
             }}
           />
         ) : null}
@@ -279,36 +302,38 @@ export function Slideshow({
       </div>
 
       <div className="flex gap-1.5 overflow-x-auto border-t border-white/10 bg-zinc-950/90 px-3 py-2">
-        {thumbs.map(({ item, itemIndex }) => (
-          <button
-            key={item.id}
-            className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border transition ${
-              itemIndex === index
-                ? 'border-orange-400 opacity-100'
-                : 'border-white/10 opacity-50 hover:opacity-90'
-            }`}
-            onClick={() => goTo(itemIndex)}
-            title={item.postTitle || item.filename}
-          >
-            <img
-              src={item.previewUrl ?? mediaSrc(item)}
-              alt=""
-              className="h-full w-full object-cover"
-              loading="lazy"
-              onError={(event) => {
-                const fallback = mediaFallbackSrc(item)
-                if (fallback && event.currentTarget.src !== fallback) {
-                  event.currentTarget.src = fallback
-                }
-              }}
-            />
-            {item.over18 && (
-              <span className="absolute right-0.5 bottom-0.5 rounded bg-red-500 px-1 text-[8px] font-bold text-white">
-                18+
-              </span>
-            )}
-          </button>
-        ))}
+        {thumbs
+          .filter(({ item }) => !skipped.has(item.id))
+          .map(({ item, itemIndex }) => (
+            <button
+              key={item.id}
+              className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border transition ${
+                itemIndex === index
+                  ? 'border-orange-400 opacity-100'
+                  : 'border-white/10 opacity-50 hover:opacity-90'
+              }`}
+              onClick={() => goTo(itemIndex)}
+              title={item.postTitle || item.filename}
+            >
+              <img
+                src={item.previewUrl ?? mediaSrc(item)}
+                alt=""
+                className="h-full w-full object-cover"
+                loading="lazy"
+                onError={(event) => {
+                  const fallback = mediaFallbackSrc(item)
+                  if (fallback && event.currentTarget.src !== fallback) {
+                    event.currentTarget.src = fallback
+                  }
+                }}
+              />
+              {item.over18 && (
+                <span className="absolute right-0.5 bottom-0.5 rounded bg-red-500 px-1 text-[8px] font-bold text-white">
+                  18+
+                </span>
+              )}
+            </button>
+          ))}
       </div>
     </div>
   )

@@ -15,6 +15,7 @@ import type { ToolManager } from './tooling'
 import { allowMediaRoot } from './mediaProtocol'
 import { extractMedia } from './reddit/extract'
 import { errorMessage, isRedditError } from './reddit/errors'
+import { sleep } from './reddit/client'
 import { validateSubreddit } from './reddit/validate'
 import { downloadToFile, runPool, uniqueDestination } from './download/queue'
 import { downloadWithFfmpeg } from './download/ffmpeg'
@@ -358,6 +359,12 @@ export class JobRunner {
         const result = await this.downloadImage(item, destination, signal, (received, total) =>
           tick(received, total, total ? received / total : null)
         )
+        if ('skipped' in result) {
+          this.state.skipped++
+          this.deps.log('warn', `Skipped ${item.filename}`)
+          this.emit()
+          return
+        }
         item.localPath = destination
         entry.receivedBytes = result.bytes
       }
@@ -396,18 +403,41 @@ export class JobRunner {
     destination: string,
     signal: AbortSignal,
     onProgress: (received: number, total: number | null) => void
-  ): Promise<{ bytes: number }> {
+  ): Promise<{ bytes: number } | { skipped: true }> {
     const fetchFn = this.deps.auth.session.fetch.bind(this.deps.auth.session)
-    try {
-      return await downloadToFile(fetchFn, item.sourceUrl, destination, { signal, onProgress })
-    } catch (err) {
-      if (signal.aborted) throw err
-      if (item.previewUrl && item.previewUrl !== item.sourceUrl) {
-        this.deps.log('warn', `Retrying ${item.filename} with preview URL`)
-        return await downloadToFile(fetchFn, item.previewUrl, destination, { signal, onProgress })
+    const maxRetries = 3
+
+    // Try the primary URL up to maxRetries times.
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await downloadToFile(fetchFn, item.sourceUrl, destination, { signal, onProgress })
+      } catch (err) {
+        if (signal.aborted) throw err
+        if (attempt < maxRetries - 1) {
+          this.deps.log('warn', `Retrying ${item.filename} (attempt ${attempt + 2}/${maxRetries})`)
+          await sleep(800 + Math.random() * 400, signal)
+        }
       }
-      throw err
     }
+
+    // Fallback to the preview/thumbnail URL, also retrying up to maxRetries times.
+    if (item.previewUrl && item.previewUrl !== item.sourceUrl) {
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          this.deps.log('warn', `Retrying ${item.filename} with preview URL (attempt ${attempt + 1}/${maxRetries})`)
+          return await downloadToFile(fetchFn, item.previewUrl, destination, { signal, onProgress })
+        } catch (err) {
+          if (signal.aborted) throw err
+          if (attempt < maxRetries - 1) {
+            await sleep(800 + Math.random() * 400, signal)
+          }
+        }
+      }
+    }
+
+    // All retries exhausted — skip this item instead of failing the whole job.
+    this.deps.log('warn', `Skipping ${item.filename}: could not fetch after ${maxRetries} attempts`)
+    return { skipped: true }
   }
 
   private async downloadRedditVideo(

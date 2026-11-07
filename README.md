@@ -66,7 +66,7 @@ space to pause, and `F` for fullscreen. Speed and NSFW blur are in **Settings**.
 
 ### Settings
 
-- Destination folder, number of newest posts to scan, parallel downloads
+- Destination folder, number of newest posts to scan (default 100), parallel downloads
 - Which media types to fetch (images, galleries, Reddit videos, external videos)
 - Skip NSFW, skip already-downloaded files, blur NSFW in slideshow
 - Slideshow interval and tool status/updates
