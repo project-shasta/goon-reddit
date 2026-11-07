@@ -63,6 +63,20 @@ function isDirectVideoUrl(url: string): boolean {
   return ext !== null && ['mp4', 'webm', 'mov', 'mkv', 'm4v'].includes(ext)
 }
 
+/**
+ * Detect Reddit's "image deleted" placeholder images.  These are served from
+ * external-preview / external-content hosts and have the same URL pattern as
+ * real images, but contain text instead of the original content.
+ */
+function isDeletedImagePlaceholder(url: string): boolean {
+  const h = hostOf(url)
+  if (h === 'external-preview.redd.it' || h === 'external-content.redd.it') {
+    const ext = extensionFromUrl(url)
+    return ext !== null && ['jpg', 'png', 'gif', 'webp', 'avif'].includes(ext)
+  }
+  return false
+}
+
 function isVideoHost(url: string): boolean {
   const host = hostOf(url).replace(/^www\./, '')
   if (VIDEO_HOSTS.has(host)) return true
@@ -259,6 +273,11 @@ function extractFromPost(post: RedditPost, options: ExtractOptions, depth = 0): 
 
   if (sourceUrl && !post.is_self) {
     const hint = post.post_hint
+
+    if (isDeletedImagePlaceholder(sourceUrl)) {
+      // Skip "image deleted" placeholders — they're just text images.
+      return []
+    }
 
     if (hint === 'image' || (hostOf(sourceUrl) === 'i.redd.it' && isDirectImageUrl(sourceUrl))) {
       if (options.includeImages) {
