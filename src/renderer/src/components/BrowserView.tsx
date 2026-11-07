@@ -1,8 +1,8 @@
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import type { AppSettings, JobState, MediaItem, SubredditInfo } from '@shared/types'
 import { isViewableImage } from '../lib/media'
 import { Slideshow } from './Slideshow'
-import { IconDownload, IconGrid, IconImage } from './icons'
+import { IconChevronDown, IconDownload, IconGrid, IconImage } from './icons'
 
 const QUEUE_BATCHES = [25, 50, 100, 200]
 
@@ -13,33 +13,39 @@ function QueueMoreButton({
   onQueueMore: (count: number) => void
   maxPosts: number
 }): React.JSX.Element {
+  const [open, setOpen] = useState(false)
+
   return (
-    <div className="relative group/qm pb-8">
+    <div className="relative">
       <button
         className="btn btn-secondary px-2 py-1 text-xs"
-        onClick={() => {
-          const next = QUEUE_BATCHES.reduce<(typeof QUEUE_BATCHES)[number]>((best, b) => (b > maxPosts ? b : best), QUEUE_BATCHES[0])
-          if (Number.isFinite(next)) onQueueMore(next)
-        }}
+        onClick={() => setOpen((v) => !v)}
         title="Scan more posts and add images to this slideshow"
       >
         <IconDownload size={12} />
         Queue more
+        <IconChevronDown size={11} className="ml-0.5" />
       </button>
-      <div className="pointer-events-auto absolute top-full right-0 z-50 mt-1 hidden rounded-xl border border-white/10 bg-zinc-900 p-1 group-hover/qm:flex">
-        {QUEUE_BATCHES.map((batch) => (
-          <button
-            key={batch}
-            className={`btn px-2 py-1 text-[11px] ${
-              batch <= maxPosts ? 'btn-disabled' : 'btn-secondary'
-            }`}
-            onClick={() => onQueueMore(batch)}
-            title={`Scan ${batch} more posts`}
-          >
-            +{batch}
-          </button>
-        ))}
-      </div>
+      {open && (
+        <div className="absolute top-full right-0 mt-1 rounded-xl border border-white/10 bg-zinc-900 p-1">
+          {QUEUE_BATCHES.map((batch) => (
+            <button
+              key={batch}
+              className={`btn block w-full text-left px-2 py-1 text-[11px] ${
+                batch <= maxPosts ? 'btn-disabled' : 'btn-secondary'
+              }`}
+              onClick={() => {
+                onQueueMore(batch)
+                setOpen(false)
+              }}
+              disabled={batch <= maxPosts}
+              title={`Scan ${batch} more posts`}
+            >
+              +{batch}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
