@@ -26,7 +26,7 @@ function QueueMoreButton({
         <IconDownload size={12} />
         Queue more
       </button>
-      <div className="pointer-events-none absolute top-full right-0 z-50 mt-1 hidden rounded-xl border border-white/10 bg-zinc-900 p-1 group-hover/qm:flex">
+      <div className="pointer-events-auto absolute top-full right-0 z-50 mt-1 hidden rounded-xl border border-white/10 bg-zinc-900 p-1 group-hover/qm:flex">
         {QUEUE_BATCHES.map((batch) => (
           <button
             key={batch}
