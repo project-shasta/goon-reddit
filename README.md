@@ -61,11 +61,31 @@ npm start        # preview the production build
 
 ## Using the app
 
+### Layout
+
+The app has two tabs in the header: **Downloader** and **Settings**.
+
+**Downloader tab** (top to bottom):
+
+1. **Auth panel** — login/logout/recheck buttons. Shows your Reddit username when connected.
+2. **Subreddit bar** — enter a subreddit name (e.g. `pics`), press **Check**, then **Download new**.
+3. **Progress** — shows posts scanned, media found, downloaded/skipped counts, and a transfer list.
+4. **Activity log** — toggleable, closed by default. Shows timestamped entries (info, warn, error, success).
+
+**Settings tab**:
+
+- Destination folder, number of newest posts to scan (default 100), parallel downloads (1–8)
+- Media types: images, galleries, Reddit videos, external videos (toggle each)
+- Behavior: skip NSFW, skip already-downloaded files
+- Tools: ffmpeg and yt-dlp status, update yt-dlp
+
+### Workflow
+
 1. Press **Log in on Reddit** and finish the normal Reddit login (including 2FA if enabled). The
    window closes itself once the session is verified.
 2. Type a subreddit name (for example `pics` or `r/pics`) and press **Check**.
 3. Press **Download new** — scans newest posts, then downloads matching media.
-4. Watch progress in **Activity** and the transfer list. Use **Cancel** to stop mid-run.
+4. Watch progress in the transfer list and the transfer list. Use **Cancel** to stop mid-run.
 
 Files are saved flat per subreddit:
 
@@ -76,22 +96,15 @@ Files are saved flat per subreddit:
 Galleries get `_01`, `_02`, … suffixes. Existing files are skipped by default, and name collisions
 get ` (1)`, ` (2)`, … suffixes.
 
-### Settings
+### Retry and thumbnail handling
 
-- Destination folder, number of newest posts to scan (default 100), parallel downloads
-- Which media types to fetch (images, galleries, Reddit videos, external videos)
-- Skip NSFW, skip already-downloaded files
-- Tool status and updates
+Downloads retry up to 3 times per URL (source URL + preview URL fallback). A small orange badge
+shows the retry count (e.g. `×3`). Failed entries show an alert icon with a hover tooltip containing
+the error reason.
 
-Everything the app writes lives in a self-contained `data` folder next to the app:
-`data/settings.json`, the Chromium profile, and the persisted `reddit` session. In development that is
-the project root, in a normal install it is the folder that contains the executable, and portable
-builds use `PORTABLE_EXECUTABLE_DIR`. Nothing is written to `%APPDATA%`.
-
-On first launch after upgrading, the app copies an existing profile from the old
-`%APPDATA%\Reddit Downloader` location (settings, `Local State`, and the Reddit partition) into the
-new `data` folder, so you stay logged in. If the app folder is read-only, the app will refuse to
-start — it must be placed in a writable location.
+If a downloaded image is still a thumbnail (detected by file size: JPEG < 12 KB, PNG/WebP < 8 KB),
+it is skipped and the app fetches the next unscanned posts from the subreddit, adding their media
+to the queue. This replaces low-res images with higher-quality ones from later in the scan range.
 
 ## How it works
 
