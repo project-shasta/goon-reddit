@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session, shell } from 'electron'
+import { app, BrowserWindow, dialog, session, shell } from 'electron'
 import path from 'node:path'
 import { IPC } from '@shared/ipc'
 import type { AuthStatus, JobState, LogEntry, MediaItem } from '@shared/types'
@@ -14,15 +14,22 @@ import { HistoryStore } from './history'
 
 registerMediaScheme()
 
+let startupError: Error | null = null
+
 app.userAgentFallback = CHROME_UA
 app.setName('GoOn ReDdIt')
 // Everything the app writes lives next to the app itself. This must happen
 // before whenReady() and before any session is created.
-configureUserData()
+try {
+  configureUserData()
+} catch (err) {
+  startupError = err instanceof Error ? err : new Error(String(err))
+}
 
 let mainWindow: BrowserWindow | null = null
 let auth: AuthManager | null = null
 let job: JobRunner | null = null
+let history: HistoryStore | null = null
 
 function send(channel: string, payload: unknown): void {
   if (mainWindow && !mainWindow.isDestroyed()) {
@@ -58,6 +65,9 @@ function createMainWindow(): BrowserWindow {
   })
 
   win.on('ready-to-show', () => win.show())
+  win.on('closed', () => {
+    if (mainWindow === win) mainWindow = null
+  })
 
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:/i.test(url)) void shell.openExternal(url).catch(() => undefined)
@@ -79,9 +89,15 @@ function createMainWindow(): BrowserWindow {
   return win
 }
 
-const gotLock = app.requestSingleInstanceLock()
+const gotLock = startupError ? false : app.requestSingleInstanceLock()
 
-if (!gotLock) {
+if (startupError) {
+  const message = startupError.message
+  app.whenReady().then(() => {
+    dialog.showErrorBox('Could not start the app', message)
+    app.quit()
+  })
+} else if (!gotLock) {
   app.quit()
 } else {
   app.on('second-instance', () => {
@@ -102,16 +118,14 @@ if (!gotLock) {
     )
 
     mainWindow = createMainWindow()
-    mainWindow.on('closed', () => {
-      mainWindow = null
-    })
 
     auth = new AuthManager(emitAuth)
-    const history = new HistoryStore()
+    const historyStore = new HistoryStore()
+    history = historyStore
     job = new JobRunner({
       auth,
       settings,
-      history,
+      history: historyStore,
       tools: new ToolManager(settings),
       emitState: (state: JobState) => send(IPC.jobState, state),
       emitMedia: (items: MediaItem[]) => send(IPC.jobMedia, items),
@@ -123,7 +137,7 @@ if (!gotLock) {
       auth,
       job,
       settings,
-      history,
+      history: historyStore,
       tools: new ToolManager(settings),
       getMainWindow: () => mainWindow,
       log: emitLog
@@ -144,6 +158,7 @@ if (!gotLock) {
 
   app.on('before-quit', () => {
     job?.cancel()
+    history?.flush()
     auth?.destroy()
   })
 }

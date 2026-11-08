@@ -226,7 +226,10 @@ export class JobRunner {
     const folder = path.join(destination, safeFilename(subreddit.name))
     let scanned = 0
 
-    for await (const page of this.deps.auth.client.pages(subreddit.name, { signal })) {
+    for await (const page of this.deps.auth.client.pages(subreddit.name, {
+      signal,
+      sortOrder: options.sortOrder
+    })) {
       if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
       const batch: MediaItem[] = []
 
@@ -237,6 +240,9 @@ export class JobRunner {
 
         const extracted = extractMedia(post, this.extractOptions(options))
         for (const item of extracted) {
+          // Crossposts keep the original post's ID in `item.postId`; check that
+          // too so a crosspost is recorded against the ID later sent to history.
+          if (this.deps.history.has(subreddit.name, item.postId)) continue
           if (seen.has(item.id)) continue
           seen.add(item.id)
 

@@ -278,12 +278,14 @@ export function SettingsView({
           ok={tools?.ffmpeg.ok ?? false}
           version={tools?.ffmpeg.version ?? null}
           path={tools?.ffmpeg.path ?? null}
+          notFound={t.notFound as string}
         />
         <ToolRow
           name={(t.ytDlp as string)}
           ok={tools?.ytdlp.ok ?? false}
           version={tools?.ytdlp.version ?? null}
           path={tools?.ytdlp.path ?? null}
+          notFound={t.notFound as string}
           action={
             <button
               className="btn btn-secondary px-2 py-1 text-xs"
@@ -354,12 +356,14 @@ function ToolRow({
   ok,
   version,
   path,
+  notFound,
   action
 }: {
   name: string
   ok: boolean
   version: string | null
   path: string | null
+  notFound: string
   action?: React.ReactNode
 }): React.JSX.Element {
   return (
@@ -377,7 +381,7 @@ function ToolRow({
           {version && <span className="ml-2 font-normal text-zinc-500">{version}</span>}
         </div>
         <div className="truncate font-mono text-[10px] text-zinc-600" title={path ?? ''}>
-          {path ?? 'not found'}
+          {path ?? notFound}
         </div>
       </div>
       {action}

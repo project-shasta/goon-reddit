@@ -7,6 +7,8 @@ const KNOWN_FILE = () => path.join(getDataDir(), '.known')
 /** Simple history store: one line per subreddit, post IDs space-separated. */
 export class HistoryStore {
   private history: Map<string, Set<string>>
+  private dirty = false
+  private saveTimer: NodeJS.Timeout | null = null
 
   constructor() {
     this.history = this.load()
@@ -48,6 +50,30 @@ export class HistoryStore {
     }
   }
 
+  /**
+   * Rewriting the whole file after every completed post is slow on large
+   * histories. Mark the data dirty and coalesce writes instead.
+   */
+  private scheduleSave(): void {
+    this.dirty = true
+    if (this.saveTimer) return
+    this.saveTimer = setTimeout(() => {
+      this.saveTimer = null
+      this.flush()
+    }, 500)
+  }
+
+  /** Persist pending changes now. Called when a job finishes and on quit. */
+  flush(): void {
+    if (this.saveTimer) {
+      clearTimeout(this.saveTimer)
+      this.saveTimer = null
+    }
+    if (!this.dirty) return
+    this.dirty = false
+    this.save()
+  }
+
   /** Check if a post ID has been downloaded for this subreddit. */
   has(subreddit: string, postId: string): boolean {
     const ids = this.history.get(subreddit.toLowerCase())
@@ -61,7 +87,7 @@ export class HistoryStore {
       this.history.set(key, new Set<string>())
     }
     this.history.get(key)!.add(postId)
-    this.save()
+    this.scheduleSave()
   }
 
   /** Get all known post IDs for a subreddit. */
@@ -72,7 +98,7 @@ export class HistoryStore {
   /** Clear history for a subreddit. */
   clear(subreddit: string): void {
     this.history.delete(subreddit.toLowerCase())
-    this.save()
+    this.scheduleSave()
   }
 
   /** Get all post IDs across all subreddits. */
@@ -83,6 +109,6 @@ export class HistoryStore {
   /** Clear all known post IDs. */
   clearAll(): void {
     this.history.clear()
-    this.save()
+    this.scheduleSave()
   }
 }

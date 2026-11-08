@@ -13,4 +13,10 @@ export type LanguageId =
   | 'eo'
   | 'enSimple'
 
-export type Translation = Record<string, string | ((n: number) => string) | ((u: string) => string)>
+export type TranslationValue =
+  | string
+  | ((n: number) => string)
+  | ((u: string) => string)
+  | ((done: number, total: number) => string)
+
+export type Translation = Record<string, TranslationValue>

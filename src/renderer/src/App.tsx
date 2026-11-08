@@ -73,6 +73,13 @@ export default function App(): React.JSX.Element {
     })
   }, [])
 
+  const refreshHistoryCount = useCallback(() => {
+    void window.api
+      .historyTotal()
+      .then(setHistoryCount)
+      .catch(() => undefined)
+  }, [])
+
   useEffect(() => {
     let cancelled = false
 
@@ -114,6 +121,9 @@ export default function App(): React.JSX.Element {
     const offAuth = window.api.onAuthState((status) => setAuth(status))
     const offJob = window.api.onJobState((state) => {
       setJob(state)
+      if (state.phase === 'done' || state.phase === 'cancelled' || state.phase === 'error') {
+        refreshHistoryCount()
+      }
       if (state.subreddit?.name) {
         setValidated((current) =>
           current && current.name.toLowerCase() === state.subreddit!.name.toLowerCase()
@@ -131,7 +141,7 @@ export default function App(): React.JSX.Element {
       offJob()
       offLog()
     }
-  }, [addLog])
+  }, [addLog, refreshHistoryCount])
 
   useEffect(() => {
     const trimmed = subredditInput.trim()
@@ -214,7 +224,47 @@ export default function App(): React.JSX.Element {
     async (patch: Partial<AppSettings>) => {
       const next = await window.api.updateSettings(patch)
       setSettings(next)
+      setSortOrder(next.sortOrder)
+      window.api.setTheme(next.theme)
+      window.api.setLanguage(next.language)
+      setLanguage(next.language)
       addLog({ level: 'info', message: (t.settingsSaved as string), time: Date.now() })
+    },
+    [addLog, t]
+  )
+
+  const handleThemeChange = useCallback(
+    (theme: AppSettings['theme']) => {
+      setShowThemePicker(false)
+      window.api.setTheme(theme)
+      void window.api
+        .updateSettings({ theme })
+        .then((next) => {
+          setSettings(next)
+          window.api.setTheme(next.theme)
+        })
+        .catch((err) => {
+          addLog({ level: 'error', message: errorText(err), time: Date.now() })
+        })
+    },
+    [addLog]
+  )
+
+  const handleLanguageChange = useCallback(
+    (nextLanguage: LanguageId) => {
+      setShowLangPicker(false)
+      setLanguage(nextLanguage)
+      window.api.setLanguage(nextLanguage)
+      void window.api
+        .updateSettings({ language: nextLanguage })
+        .then((next) => {
+          setSettings(next)
+          setLanguage(next.language)
+          window.api.setLanguage(next.language)
+        })
+        .catch((err) => {
+          addLog({ level: 'error', message: errorText(err), time: Date.now() })
+        })
     },
     [addLog]
   )
@@ -228,13 +278,13 @@ export default function App(): React.JSX.Element {
       <div className="flex h-full flex-col items-center justify-center gap-3 text-sm text-zinc-400">
         {startupError ? (
           <>
-            <span className="text-red-400">Could not start the app</span>
+            <span className="text-red-400">{t.startupError as string}</span>
             <p className="max-w-md text-center text-xs text-zinc-500">{startupError}</p>
           </>
         ) : (
           <>
             <IconSpinner size={22} className="text-orange-400" />
-            Loading settings…
+            {t.loadingSettings as string}
           </>
         )}
       </div>
@@ -248,21 +298,20 @@ export default function App(): React.JSX.Element {
           <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5 text-center shadow-2xl">
             <span className="text-2xl">🗑️</span>
             <h3 className="mt-3 text-sm font-semibold text-zinc-100">
-              Wipe the slate clean?
+              {t.wipeTheSlateClean as string}
             </h3>
             <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-              This will forget <strong>{historyCount.toLocaleString()}</strong> known posts across
-              all subreddits. Next scan will re-download everything.
+              {(t.forgetKnown as (n: number) => string)(historyCount)}
             </p>
             <p className="mt-2 text-xs text-zinc-500">
-              (There is no undo. Your files will still be on disk, though.)
+              {t.noUndoFilesStillOnDisk as string}
             </p>
             <div className="mt-4 flex gap-2">
               <button
                 className="btn btn-secondary flex-1"
                 onClick={() => setShowClearKnownConfirm(false)}
               >
-                Never mind
+                {t.neverMind as string}
               </button>
               <button
                 className="btn btn-primary flex-1"
@@ -272,7 +321,7 @@ export default function App(): React.JSX.Element {
                   setShowClearKnownConfirm(false)
                 }}
               >
-                Yeah, forget it all
+                {t.yeahForgetItAll as string}
               </button>
             </div>
           </div>
@@ -309,24 +358,20 @@ export default function App(): React.JSX.Element {
             {showThemePicker && (
               <div className="absolute top-full z-50 mt-1 w-48 rounded-xl border border-white/10 bg-zinc-900 py-1 shadow-lg">
                 {([
-                  { id: 'dark', label: 'Dark (default)' },
-                  { id: 'midnight', label: 'Midnight' },
-                  { id: 'circuit', label: 'Circuit Breaker' },
-                  { id: 'corporate', label: 'Corporate' },
-                  { id: 'vaporwave', label: 'Vaporwave' }
+                  { id: 'dark', label: t.darkDefault as string },
+                  { id: 'midnight', label: t.midnight as string },
+                  { id: 'circuit', label: t.circuitBreaker as string },
+                  { id: 'corporate', label: t.corporate as string },
+                  { id: 'vaporwave', label: t.vaporwave as string }
                 ] as const).map((th) => (
                   <button
                     key={th.id}
                     className={`flex w-full px-3 py-2 text-sm transition-colors ${
-                      settings?.theme === th.id
+                      settings.theme === th.id
                         ? 'bg-orange-500/15 text-orange-300'
                         : 'text-zinc-300 hover:bg-white/5 hover:text-zinc-100'
                     }`}
-                    onClick={() => {
-                      window.api.setTheme(th.id)
-                      void window.api.updateSettings({ theme: th.id }).catch(() => undefined)
-                      setShowThemePicker(false)
-                    }}
+                    onClick={() => handleThemeChange(th.id)}
                   >
                     {th.label}
                   </button>
@@ -339,7 +384,7 @@ export default function App(): React.JSX.Element {
             <button
               className="tab"
               onClick={() => setShowLangPicker((v) => !v)}
-              title="Change language"
+              title={t.changeLanguage as string}
             >
               🌐 {languageLabel(language)}
             </button>
@@ -353,12 +398,7 @@ export default function App(): React.JSX.Element {
                         ? 'bg-orange-500/15 text-orange-300'
                         : 'text-zinc-300 hover:bg-white/5 hover:text-zinc-100'
                     }`}
-                    onClick={() => {
-                      window.api.setLanguage(lang)
-                      void window.api.updateSettings({ language: lang }).catch(() => undefined)
-                      setLanguage(lang)
-                      setShowLangPicker(false)
-                    }}
+                    onClick={() => handleLanguageChange(lang)}
                   >
                     {languageLabel(lang)}
                   </button>
@@ -377,7 +417,7 @@ export default function App(): React.JSX.Element {
           )}
           {historyCount > 0 && (
             <>
-              <span className="rounded bg-white/5 px-2 py-1 text-[10px] tabular-nums text-zinc-500" title="Known posts">
+              <span className="rounded bg-white/5 px-2 py-1 text-[10px] tabular-nums text-zinc-500" title={t.knownPosts as string}>
                 {historyCount.toLocaleString()}
               </span>
               <button

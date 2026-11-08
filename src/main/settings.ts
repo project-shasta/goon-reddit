@@ -57,7 +57,7 @@ export class SettingsStore {
         typeof next.destination === 'string' && next.destination.trim()
           ? path.resolve(next.destination)
           : base.destination,
-      maxPosts: clampInt(next.maxPosts, 0, 10000, base.maxPosts),
+      maxPosts: clampInt(next.maxPosts, 0, 100000, base.maxPosts),
       concurrency: clampInt(next.concurrency, 1, 8, base.concurrency),
       includeImages: asBool(next.includeImages, base.includeImages),
       includeGalleries: asBool(next.includeGalleries, base.includeGalleries),

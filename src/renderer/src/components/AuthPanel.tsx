@@ -56,7 +56,7 @@ export function AuthPanel({ auth, onChanged, lang = 'en' }: AuthPanelProps): Rea
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 text-sm font-semibold text-zinc-100">
             <IconCheck size={14} className="text-emerald-400" />
-            {(t.connectedAs as (u: string) => string)(auth.username ?? 'your account')}
+            {(t.connectedAs as (u: string) => string)(auth.username ?? (t.yourAccount as string))}
           </div>
           <p className="truncate text-xs text-zinc-500">
             {t.cookiesStayInApp as string}

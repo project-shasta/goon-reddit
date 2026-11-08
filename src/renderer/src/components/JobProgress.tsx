@@ -214,7 +214,10 @@ export function JobProgress({
           </div>
           <div className="flex justify-between text-[11px] text-zinc-500">
             <span>
-              {finished} of {job.discovered} finished
+              {(t.finishedOfTotal as (done: number, total: number) => string)(
+                finished,
+                job.discovered
+              )}
             </span>
             <span>{Math.round(overall)}%</span>
           </div>
