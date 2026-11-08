@@ -116,7 +116,7 @@ export interface AuthStatus {
 }
 
 export type SortOrder = 'new' | 'hot' | 'top' | 'rising'
-export type Theme = 'dark' | 'midnight' | 'circuit' | 'corporate' | 'vaporwave'
+export type Theme = 'dark' | 'midnight' | 'circuit' | 'corporate' | 'vaporwave' | 'matrix'
 export type LanguageId =
   | 'en'
   | 'de'
@@ -131,6 +131,7 @@ export type LanguageId =
   | 'cyberpunk'
   | 'eo'
   | 'enSimple'
+  | 'matrix'
 
 export interface AppSettings {
   destination: string

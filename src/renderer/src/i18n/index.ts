@@ -15,7 +15,8 @@ const languageNames: Record<LanguageId, string> = {
   pirate: '🏴‍☠️ Pirate',
   cyberpunk: '⚡ Cyberpunk',
   eo: '🌐 Esperanto',
-  enSimple: '📖 Easy English'
+  enSimple: '📖 Easy English',
+  matrix: '💚 Matrix'
 }
 
 export function useI18n(language: LanguageId): Translation {

@@ -382,7 +382,8 @@ export default function App(): React.JSX.Element {
                   { id: 'midnight', label: t.midnight as string },
                   { id: 'circuit', label: t.circuitBreaker as string },
                   { id: 'corporate', label: t.corporate as string },
-                  { id: 'vaporwave', label: t.vaporwave as string }
+                  { id: 'vaporwave', label: t.vaporwave as string },
+                  { id: 'matrix', label: t.matrix as string }
                 ] as const).map((th) => (
                   <button
                     key={th.id}

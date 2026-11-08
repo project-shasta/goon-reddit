@@ -12,6 +12,7 @@ import { pirate } from './pirate'
 import { cyberpunk } from './cyberpunk'
 import { eo } from './e0'
 import { enSimple } from './enSimple'
+import { matrix } from './matrix'
 
 export const translations: Record<LanguageId, Translation> = {
   en,
@@ -26,7 +27,8 @@ export const translations: Record<LanguageId, Translation> = {
   pirate,
   cyberpunk,
   eo,
-  enSimple
+  enSimple,
+  matrix
 }
 
 /**

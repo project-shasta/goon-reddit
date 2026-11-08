@@ -68,13 +68,13 @@ export class SettingsStore {
       sortOrder: (['new', 'hot', 'top', 'rising'] as const).includes(next.sortOrder)
         ? next.sortOrder
         : base.sortOrder,
-      theme: (['dark', 'midnight', 'circuit', 'corporate', 'vaporwave'] as const).includes(
+      theme: (['dark', 'midnight', 'circuit', 'corporate', 'vaporwave', 'matrix'] as const).includes(
         next.theme
       )
         ? (next.theme as Theme)
         : base.theme,
       language: (
-        ['en', 'de', 'uk', 'zh-TW', 'zh', 'ja', 'fr', 'it', 'es', 'pirate', 'cyberpunk', 'eo', 'enSimple'] as const
+        ['en', 'de', 'uk', 'zh-TW', 'zh', 'ja', 'fr', 'it', 'es', 'pirate', 'cyberpunk', 'eo', 'enSimple', 'matrix'] as const
       ).includes(next.language)
         ? (next.language as LanguageId)
         : base.language,

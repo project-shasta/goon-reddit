@@ -12,6 +12,7 @@ export type LanguageId =
   | 'cyberpunk'
   | 'eo'
   | 'enSimple'
+  | 'matrix'
 
 export type TranslationValue =
   | string

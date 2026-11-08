@@ -87,6 +87,23 @@
   color-scheme: dark;
 }
 
+[data-theme='matrix'] {
+  --bg: #0a0a0a;
+  --bg-card: rgb(0 255 65 / 0.04);
+  --bg-card-hover: rgb(0 255 65 / 0.08);
+  --bg-input: rgb(0 0 0 / 0.7);
+  --accent: #00ff41;
+  --accent-hover: #33ff71;
+  --accent-ring: rgb(0 255 65 / 0.2);
+  --text: #c8f7c5;
+  --text-muted: #2ecc71;
+  --text-link: #a8e6a3;
+  --border: rgb(0 255 65 / 0.12);
+  --scrollbar: rgb(0 255 65 / 0.12);
+  --scrollbar-hover: rgb(0 255 65 / 0.25);
+  color-scheme: dark;
+}
+
 html,
 body,
 #root {
@@ -113,6 +130,9 @@ body {
   background: var(--bg);
 }
 [data-theme='vaporwave'] {
+  background: var(--bg);
+}
+[data-theme='matrix'] {
   background: var(--bg);
 }
 
