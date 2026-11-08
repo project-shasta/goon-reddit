@@ -167,12 +167,13 @@ export class ToolManager {
     }
 
     // Build the actual download URL with the real tag
+    // Platform prefixes: win64, winarm64, linux64, linuxarm64, macosx64, macosxarm64
     const ext = isWin ? 'zip' : 'tar.xz'
     const platformPrefix = isWin
-      ? `win${arch}`
+      ? arch === 'arm64' ? 'winarm64' : 'win64'
       : process.platform === 'darwin'
-        ? `macos${arch}`
-        : `linux${arch}`
+        ? arch === 'arm64' ? 'macosxarm64' : 'macosx64'
+        : arch === 'arm64' ? 'linuxarm64' : 'linux64'
     const archiveUrl = `https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/download/${tag}/ffmpeg-master-latest-${platformPrefix}-gpl.${ext}`
 
     const res = await fetch(archiveUrl, {
