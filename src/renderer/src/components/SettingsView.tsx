@@ -381,18 +381,6 @@ export function SettingsView({
           }
         />
         {!tools && <p className="text-[11px] text-zinc-500">{t.checkingTools as string}</p>}
-        {tools && !tools.ffmpeg.ok && (
-          <p className="flex items-start gap-2 text-[11px] text-amber-300">
-            <IconAlert size={13} className="mt-0.5 shrink-0" />
-            {t.noAudioHint as string}
-          </p>
-        )}
-        {tools && !tools.ytdlp.ok && (
-          <p className="flex items-start gap-2 text-[11px] text-amber-300">
-            <IconAlert size={13} className="mt-0.5 shrink-0" />
-            {t.externalVideoFailsHint as string}
-          </p>
-        )}
       </section>
 
       {showNsfwConfirm && (
