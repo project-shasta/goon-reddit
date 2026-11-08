@@ -167,6 +167,7 @@ export interface RendererApi {
   openExternal(url: string): Promise<boolean>
   revealFile(path: string): Promise<boolean>
   openFolder(path: string): Promise<boolean>
+  historyTotal(): Promise<number>
   onAuthState(callback: (status: AuthStatus) => void): () => void
   onJobState(callback: (state: JobState) => void): () => void
   onJobMedia(callback: (items: MediaItem[]) => void): () => void

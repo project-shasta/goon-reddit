@@ -33,6 +33,7 @@ const api: RendererApi = {
   openExternal: (url: string) => ipcRenderer.invoke(IPC.shellOpenExternal, url),
   revealFile: (file: string) => ipcRenderer.invoke(IPC.shellRevealFile, file),
   openFolder: (directory: string) => ipcRenderer.invoke(IPC.shellOpenFolder, directory),
+  historyTotal: () => ipcRenderer.invoke(IPC.historyTotal),
   onAuthState: (callback: (status: AuthStatus) => void) =>
     subscribe<AuthStatus>(IPC.authState, callback),
   onJobState: (callback: (state: JobState) => void) =>

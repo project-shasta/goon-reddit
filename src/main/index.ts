@@ -10,6 +10,7 @@ import { CHROME_UA } from './reddit/client'
 import { configureUserData } from './paths'
 import { SettingsStore } from './settings'
 import { ToolManager } from './tooling'
+import { HistoryStore } from './history'
 
 registerMediaScheme()
 
@@ -106,9 +107,11 @@ if (!gotLock) {
     })
 
     auth = new AuthManager(emitAuth)
+    const history = new HistoryStore()
     job = new JobRunner({
       auth,
       settings,
+      history,
       tools: new ToolManager(settings),
       emitState: (state: JobState) => send(IPC.jobState, state),
       emitMedia: (items: MediaItem[]) => send(IPC.jobMedia, items),
@@ -120,6 +123,7 @@ if (!gotLock) {
       auth,
       job,
       settings,
+      history,
       tools: new ToolManager(settings),
       getMainWindow: () => mainWindow,
       log: emitLog

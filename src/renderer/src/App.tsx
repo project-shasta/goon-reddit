@@ -50,6 +50,7 @@ export default function App(): React.JSX.Element {
   const [validating, setValidating] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
   const [startupError, setStartupError] = useState<string | null>(null)
+  const [historyCount, setHistoryCount] = useState(0)
 
   const addLog = useCallback((entry: LogEntry) => {
     setLogs((current) => {
@@ -62,9 +63,10 @@ export default function App(): React.JSX.Element {
     let cancelled = false
 
     void (async () => {
-      const [settingsResult, authResult] = await Promise.allSettled([
+      const [settingsResult, authResult, historyResult] = await Promise.allSettled([
         window.api.getSettings(),
-        window.api.getAuthStatus()
+        window.api.getAuthStatus(),
+        window.api.historyTotal()
       ])
       if (cancelled) return
 
@@ -83,6 +85,10 @@ export default function App(): React.JSX.Element {
           checking: false,
           message: errorText(authResult.reason)
         })
+      }
+
+      if (historyResult.status === 'fulfilled') {
+        setHistoryCount(historyResult.value)
       }
     })()
 
@@ -243,6 +249,11 @@ export default function App(): React.JSX.Element {
             <span className="flex items-center gap-1.5 text-xs text-orange-300">
               <IconSpinner size={13} />
               {job.phase === 'downloading' ? 'Downloading' : 'Working'}
+            </span>
+          )}
+          {historyCount > 0 && (
+            <span className="rounded bg-white/5 px-2 py-1 text-[10px] tabular-nums text-zinc-500" title="Known posts">
+              {historyCount.toLocaleString()}
             </span>
           )}
           <span

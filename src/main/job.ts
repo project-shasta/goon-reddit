@@ -20,12 +20,14 @@ import { validateSubreddit } from './reddit/validate'
 import { downloadToFile, runPool, uniqueDestination } from './download/queue'
 import { downloadWithFfmpeg } from './download/ffmpeg'
 import { downloadWithYtDlp } from './download/ytdlp'
+import { HistoryStore } from './history'
 
 export type LogLevel = 'info' | 'warn' | 'error' | 'success'
 
 export interface JobDeps {
   auth: AuthManager
   settings: SettingsStore
+  history: HistoryStore
   tools: ToolManager
   emitState: (state: JobState) => void
   emitMedia: (items: MediaItem[]) => void
@@ -238,6 +240,11 @@ export class JobRunner {
           if (seen.has(item.id)) continue
           seen.add(item.id)
 
+          // Skip posts that have already been downloaded (per history).
+          if (this.deps.history.has(subreddit.name, post.id)) {
+            continue
+          }
+
           item.filename = safeFilename(item.filename)
           const initialPath = path.join(folder, item.filename)
 
@@ -345,7 +352,7 @@ export class JobRunner {
 
     await runPool(media, options.concurrency, async (item) => {
       if (signal.aborted) return
-      await this.downloadItem(item, folder, options.skipExisting, reserved, signal)
+      await this.downloadItem(item, folder, options.skipExisting, reserved, signal, subreddit.name)
     })
   }
 
@@ -371,7 +378,8 @@ export class JobRunner {
     folder: string,
     skipExisting: boolean,
     reserved: Set<string>,
-    signal: AbortSignal
+    signal: AbortSignal,
+    subredditName: string
   ): Promise<void> {
     const initialPath = path.join(folder, item.filename)
 
@@ -471,6 +479,8 @@ export class JobRunner {
       entry.status = 'done'
       entry.ratio = 1
       this.state.completed++
+      // Record in history.
+      this.deps.history.add(subredditName, item.postId)
       this.deps.emitMediaUpdate({ ...item })
       this.deps.log('success', `Saved ${path.basename(item.localPath ?? destination)}`)
       tick(entry.receivedBytes, entry.totalBytes, 1, true)

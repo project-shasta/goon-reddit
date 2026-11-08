@@ -5,6 +5,7 @@ import type { AppSettings, JobOptions, LogEntry } from '@shared/types'
 import type { AuthManager } from './auth'
 import type { JobRunner } from './job'
 import type { SettingsStore } from './settings'
+import type { HistoryStore } from './history'
 import type { ToolManager } from './tooling'
 import { allowMediaRoot } from './mediaProtocol'
 import { validateSubreddit } from './reddit/validate'
@@ -14,6 +15,7 @@ export interface IpcContext {
   auth: AuthManager
   job: JobRunner
   settings: SettingsStore
+  history: HistoryStore
   tools: ToolManager
   getMainWindow: () => BrowserWindow | null
   log: (level: LogEntry['level'], message: string) => void
@@ -120,6 +122,14 @@ export function registerIpcHandlers(ctx: IpcContext): void {
 
     if (result.canceled || result.filePaths.length === 0) return null
     return result.filePaths[0]
+  })
+
+  ipcMain.handle(IPC.historyTotal, async () => {
+    let total = 0
+    for (const postIds of ctx.history.getAllPostIds()) {
+      total += postIds.size
+    }
+    return total
   })
 
   ipcMain.handle(IPC.toolsStatus, async () => ctx.tools.status())
