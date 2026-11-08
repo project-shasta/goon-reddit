@@ -102,6 +102,7 @@ export interface AuthStatus {
 }
 
 export type SortOrder = 'new' | 'hot' | 'top' | 'rising'
+export type Theme = 'dark' | 'midnight' | 'circuit' | 'corporate' | 'vaporwave'
 
 export interface AppSettings {
   destination: string
@@ -114,6 +115,7 @@ export interface AppSettings {
   skipNsfw: boolean
   skipExisting: boolean
   sortOrder: SortOrder
+  theme: Theme
   toolsDir: string | null
 }
 
@@ -173,6 +175,7 @@ export interface RendererApi {
   openFolder(path: string): Promise<boolean>
   historyTotal(): Promise<number>
   historyClear(): Promise<void>
+  setTheme(theme: string): void
   onAuthState(callback: (status: AuthStatus) => void): () => void
   onJobState(callback: (state: JobState) => void): () => void
   onJobMedia(callback: (items: MediaItem[]) => void): () => void

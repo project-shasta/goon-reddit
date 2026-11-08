@@ -1,4 +1,7 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
+
+declare const document: { documentElement: { removeAttribute(k: string): void; setAttribute(k: string, v: string): void } }
+
 import { IPC } from '../shared/ipc'
 import type {
   AppSettings,
@@ -44,7 +47,11 @@ const api: RendererApi = {
   onJobMediaUpdate: (callback: (item: MediaItem) => void) =>
     subscribe<MediaItem>(IPC.jobMediaUpdate, callback),
   onJobLog: (callback: (entry: LogEntry) => void) =>
-    subscribe<LogEntry>(IPC.jobLog, callback)
+    subscribe<LogEntry>(IPC.jobLog, callback),
+  setTheme: (theme: string) => {
+    document.documentElement.removeAttribute('data-theme')
+    if (theme !== 'dark') document.documentElement.setAttribute('data-theme', theme)
+  }
 }
 
 contextBridge.exposeInMainWorld('api', api)

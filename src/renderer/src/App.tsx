@@ -58,6 +58,7 @@ export default function App(): React.JSX.Element {
   const [startupError, setStartupError] = useState<string | null>(null)
   const [historyCount, setHistoryCount] = useState(0)
   const [showClearKnownConfirm, setShowClearKnownConfirm] = useState(false)
+  const [showThemePicker, setShowThemePicker] = useState(false)
   const [sortOrder, setSortOrder] = useState<SortOrder>('new')
 
   const addLog = useCallback((entry: LogEntry) => {
@@ -82,6 +83,7 @@ export default function App(): React.JSX.Element {
         const loadedSettings = settingsResult.value
         setSettings(loadedSettings)
         setSortOrder(loadedSettings.sortOrder)
+        window.api.setTheme(loadedSettings.theme)
       } else {
         setStartupError(errorText(settingsResult.reason))
       }
@@ -283,6 +285,43 @@ export default function App(): React.JSX.Element {
             Settings
           </button>
         </nav>
+
+        <div className="relative">
+          <button
+            className="tab"
+            onClick={() => setShowThemePicker((v) => !v)}
+            title="Change theme"
+          >
+            🎨 Theme
+          </button>
+          {showThemePicker && (
+            <div className="absolute top-full z-50 mt-1 w-48 rounded-xl border border-white/10 bg-zinc-900 py-1 shadow-lg">
+              {([
+                { id: 'dark', label: 'Dark (default)' },
+                { id: 'midnight', label: 'Midnight' },
+                { id: 'circuit', label: 'Circuit Breaker' },
+                { id: 'corporate', label: 'Corporate' },
+                { id: 'vaporwave', label: 'Vaporwave' }
+              ] as const).map((t) => (
+                <button
+                  key={t.id}
+                  className={`flex w-full px-3 py-2 text-sm transition-colors ${
+                    settings?.theme === t.id
+                      ? 'bg-orange-500/15 text-orange-300'
+                      : 'text-zinc-300 hover:bg-white/5 hover:text-zinc-100'
+                  }`}
+                  onClick={() => {
+                    window.api.setTheme(t.id)
+                    void window.api.updateSettings({ theme: t.id }).catch(() => undefined)
+                    setShowThemePicker(false)
+                  }}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="ml-auto flex items-center gap-2">
           {busy && (

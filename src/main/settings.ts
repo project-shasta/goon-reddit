@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
-import type { AppSettings } from '@shared/types'
+import type { AppSettings, Theme } from '@shared/types'
 import { getDataDir } from './paths'
 
 const SETTINGS_FILE = () => path.join(getDataDir(), 'settings.json')
@@ -18,6 +18,7 @@ function defaults(): AppSettings {
     skipNsfw: false,
     skipExisting: true,
     sortOrder: 'new' as const,
+    theme: 'dark' as const,
     toolsDir: null
   }
 }
@@ -66,6 +67,11 @@ export class SettingsStore {
       sortOrder: (['new', 'hot', 'top', 'rising'] as const).includes(next.sortOrder)
         ? next.sortOrder
         : base.sortOrder,
+      theme: (['dark', 'midnight', 'circuit', 'corporate', 'vaporwave'] as const).includes(
+        next.theme
+      )
+        ? (next.theme as Theme)
+        : base.theme,
       toolsDir:
         typeof next.toolsDir === 'string' && next.toolsDir.trim()
           ? path.resolve(next.toolsDir)

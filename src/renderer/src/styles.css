@@ -1,6 +1,89 @@
 @import 'tailwindcss';
 
-:root {
+/* ── Theme variables ── */
+:root,
+[data-theme='dark'] {
+  --bg: #09090b;
+  --bg-card: rgb(255 255 255 / 0.025);
+  --bg-card-hover: rgb(255 255 255 / 0.05);
+  --bg-input: rgb(0 0 0 / 0.3);
+  --accent: #f97316;
+  --accent-hover: #fb923c;
+  --accent-ring: rgb(249 115 22 / 0.2);
+  --text: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --text-link: #d4d4d8;
+  --border: rgb(255 255 255 / 0.1);
+  --scrollbar: rgb(255 255 255 / 0.1);
+  --scrollbar-hover: rgb(255 255 255 / 0.2);
+  color-scheme: dark;
+}
+
+[data-theme='midnight'] {
+  --bg: #0f0a2e;
+  --bg-card: rgb(255 255 255 / 0.03);
+  --bg-card-hover: rgb(255 255 255 / 0.05);
+  --bg-input: rgb(15 10 46 / 0.5);
+  --accent: #22d3ee;
+  --accent-hover: #67e8f9;
+  --accent-ring: rgb(34 211 238 / 0.2);
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-link: #cbd5e1;
+  --border: rgb(255 255 255 / 0.1);
+  --scrollbar: rgb(255 255 255 / 0.1);
+  --scrollbar-hover: rgb(255 255 255 / 0.2);
+  color-scheme: dark;
+}
+
+[data-theme='circuit'] {
+  --bg: #000000;
+  --bg-card: rgb(250 204 21 / 0.05);
+  --bg-card-hover: rgb(250 204 21 / 0.08);
+  --bg-input: rgb(0 0 0 / 0.8);
+  --accent: #facc15;
+  --accent-hover: #fde047;
+  --accent-ring: rgb(250 204 21 / 0.2);
+  --text: #fef3c7;
+  --text-muted: #ca8a04;
+  --text-link: #fde68a;
+  --border: rgb(250 204 21 / 0.15);
+  --scrollbar: rgb(250 204 21 / 0.15);
+  --scrollbar-hover: rgb(250 204 21 / 0.3);
+  color-scheme: dark;
+}
+
+[data-theme='corporate'] {
+  --bg: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-input: #ffffff;
+  --accent: #2563eb;
+  --accent-hover: #3b82f6;
+  --accent-ring: rgb(37 99 235 / 0.2);
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --text-link: #334155;
+  --border: rgb(0 0 0 / 0.1);
+  --scrollbar: rgb(0 0 0 / 0.15);
+  --scrollbar-hover: rgb(0 0 0 / 0.3);
+  color-scheme: light;
+}
+
+[data-theme='vaporwave'] {
+  --bg: linear-gradient(135deg, #861982 0%, #25225b 100%);
+  --bg-card: rgb(244 114 182 / 0.06);
+  --bg-card-hover: rgb(244 114 182 / 0.1);
+  --bg-input: rgb(37 34 91 / 0.6);
+  --accent: #f472b6;
+  --accent-hover: #f9a8d4;
+  --accent-ring: rgb(244 114 182 / 0.2);
+  --text: #fce7f3;
+  --text-muted: #f472b6;
+  --text-link: #fbcfe8;
+  --border: rgb(244 114 182 / 0.15);
+  --scrollbar: rgb(244 114 182 / 0.15);
+  --scrollbar-hover: rgb(244 114 182 / 0.3);
   color-scheme: dark;
 }
 
@@ -11,11 +94,29 @@ body,
 }
 
 body {
-  @apply bg-zinc-950 text-zinc-100 antialiased;
   font-family:
     'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
+/* ── Theme application ── */
+:root,
+[data-theme='dark'] {
+  background: var(--bg);
+}
+[data-theme='midnight'] {
+  background: var(--bg);
+}
+[data-theme='circuit'] {
+  background: var(--bg);
+}
+[data-theme='corporate'] {
+  background: var(--bg);
+}
+[data-theme='vaporwave'] {
+  background: var(--bg);
+}
+
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -26,64 +127,163 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-white/10;
+  border-radius: 9999px;
+  background: var(--scrollbar);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-white/20;
+  background: var(--scrollbar-hover);
 }
 
+/* ── Component classes (theme-aware) ── */
 @layer components {
   .card {
-    @apply rounded-2xl border border-white/10 bg-white/[0.025] shadow-xl shadow-black/20;
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   }
 
   .btn {
-    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40;
+    display: inline-flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
   }
 
   .btn-primary {
-    @apply bg-orange-500 text-zinc-950 hover:bg-orange-400 active:bg-orange-600;
+    background: var(--accent);
+    color: #09090b;
+  }
+  .btn-primary:not(:disabled):hover {
+    background: var(--accent-hover);
+  }
+  .btn-primary:not(:disabled):active {
+    background: var(--accent);
+    filter: brightness(0.9);
   }
 
   .btn-secondary {
-    @apply border border-white/10 bg-white/5 text-zinc-200 hover:border-white/20 hover:bg-white/10;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+  }
+  .btn-secondary:not(:disabled):hover {
+    border-color: var(--text-muted);
+    background: var(--bg-card-hover);
   }
 
   .btn-danger {
-    @apply border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20;
+    border: 1px solid rgb(239 68 68 / 0.3);
+    background: rgb(239 68 68 / 0.1);
+    color: #f87171;
+  }
+  .btn-danger:not(:disabled):hover {
+    background: rgb(239 68 68 / 0.2);
   }
 
   .btn-ghost {
-    @apply text-zinc-400 hover:bg-white/5 hover:text-zinc-100;
+    color: var(--text-muted);
+  }
+  .btn-ghost:not(:disabled):hover {
+    background: var(--bg-card-hover);
+    color: var(--text);
   }
 
   .input {
-    @apply w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/20;
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    background: var(--bg-input);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text);
+    outline: none;
+    transition: all 0.15s;
+  }
+  .input::placeholder {
+    color: var(--text-muted);
+  }
+  .input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-ring);
   }
 
   .label {
-    @apply mb-1.5 block text-xs font-semibold tracking-wide text-zinc-400 uppercase;
+    margin-bottom: 0.375rem;
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
 
   .checkbox-row {
-    @apply flex cursor-pointer items-center gap-2.5 rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-zinc-300 transition hover:border-white/20 hover:bg-white/5;
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    gap: 0.625rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+  .checkbox-row:hover {
+    border-color: var(--text-muted);
+    background: var(--bg-card-hover);
   }
 
   .checkbox {
-    @apply h-4 w-4 shrink-0 accent-orange-500;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
   }
 
   .tab {
-    @apply cursor-pointer rounded-lg px-3.5 py-1.5 text-sm font-medium text-zinc-400 transition hover:bg-white/5 hover:text-zinc-100;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    padding: 0.375rem 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .tab:hover {
+    background: var(--bg-card-hover);
+    color: var(--text);
   }
 
   .tab-active {
-    @apply bg-white/10 text-white shadow-sm;
+    background: var(--bg-card-hover);
+    color: var(--text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   .badge {
-    @apply inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 0.375rem;
+    padding: 0.125rem 0.375rem;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 }
 
