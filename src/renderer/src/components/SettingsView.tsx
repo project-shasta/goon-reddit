@@ -42,6 +42,7 @@ export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX
   const [error, setError] = useState<string | null>(null)
   const [tools, setTools] = useState<ToolsStatus | null>(null)
   const [updatingTools, setUpdatingTools] = useState(false)
+  const [showNsfwConfirm, setShowNsfwConfirm] = useState(false)
 
   useEffect(() => {
     setDraft(settings)
@@ -100,6 +101,23 @@ export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX
   }
 
   const dirty = JSON.stringify(draft) !== JSON.stringify(settings)
+
+  const handleNsfwToggle = (checked: boolean): void => {
+    if (checked) {
+      setShowNsfwConfirm(true)
+    } else {
+      patch('skipNsfw', false)
+    }
+  }
+
+  const confirmNsfwSkip = (): void => {
+    patch('skipNsfw', true)
+    setShowNsfwConfirm(false)
+  }
+
+  const cancelNsfwSkip = (): void => {
+    setShowNsfwConfirm(false)
+  }
 
   return (
     <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
@@ -197,7 +215,11 @@ export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX
                 type="checkbox"
                 className="checkbox mt-0.5"
                 checked={draft[toggle.key]}
-                onChange={(event) => patch(toggle.key, event.target.checked)}
+                onChange={(event) =>
+                  toggle.key === 'skipNsfw'
+                    ? handleNsfwToggle(event.target.checked)
+                    : patch(toggle.key, event.target.checked)
+                }
               />
               <span>
                 <span className="block font-medium">{toggle.label}</span>
@@ -261,6 +283,32 @@ export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX
           </p>
         )}
       </section>
+
+      {showNsfwConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5 text-center shadow-2xl">
+            <span className="text-2xl">🚧</span>
+            <h3 className="mt-3 text-sm font-semibold text-zinc-100">
+              Hold up. Are you sure?
+            </h3>
+            <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+              You're about to enable <strong>skip NSFW posts</strong>. That's like telling art to
+              go behind a velvet rope. The internet was built on curiosity, my friend.
+            </p>
+            <p className="mt-2 text-xs text-zinc-500">
+              (But hey, it's your app. Your rules.)
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button className="btn btn-secondary flex-1" onClick={cancelNsfwSkip}>
+                I'll take the risk
+              </button>
+              <button className="btn btn-primary flex-1" onClick={confirmNsfwSkip}>
+                Yes, buzzkill mode
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="sticky bottom-0 flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur">
         <button className="btn btn-primary" onClick={() => void save()} disabled={saving || !dirty}>
