@@ -18,9 +18,11 @@ extraFiles:
 
 win:
   icon: build/icon.ico
+  executableName: goon-reddit
   target:
     - target: zip
       arch:
         - x64
+  artifactName: "goon-reddit.${ext}"
 
 electronDist: node_modules/electron/dist
