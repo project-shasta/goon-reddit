@@ -748,7 +748,9 @@ export class JobRunner {
     })
   }
 
-  /** Pause between yt-dlp invocations to avoid 429 rate-limit responses. */
-  private static readonly YtDlpInterCallDelayMs = 3000
+  /** Pause between yt-dlp invocations to avoid 429 rate-limit responses.
+   * 1500 ms balances parallel throughput with rate-limit safety.
+   * The exponential backoff retries (commit 4ab87c6c) handle actual 429s. */
+  private static readonly YtDlpInterCallDelayMs = 1500
   private lastYtDlpStart_ = 0
 }
