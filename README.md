@@ -39,18 +39,13 @@ npm run build:win       # typecheck + build + zip archive
 
 ### Icon generation (PNG → ICO)
 
-The app icon is generated from a source PNG using Python/Pillow (installed via mise):
+Edit `resources/icon.png` to change the icon, then generate the ICO:
 
 ```powershell
-mise exec -- python -c "
-from PIL import Image
-img = Image.open('resources/icon.png')
-img = img.resize((256, 256), Image.LANCZOS).convert('RGBA')
-img.save('build/icon.ico', format='ICO', sizes=[(256, 256)])
-"
+npm run icon:gen
 ```
 
-Edit `resources/icon.png` to change the icon, then re-run the command.
+Requires Python + Pillow via mise (`mise use python` then `pip install Pillow`).
 
 ## Run
 

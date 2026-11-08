@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "tools:setup": "node scripts/setup-tools.mjs",
+    "icon:gen": "node scripts/gen-icon.mjs",
     "build:win": "npm run tools:setup && npm run typecheck && electron-vite build && electron-builder --win"
   },
   "dependencies": {
