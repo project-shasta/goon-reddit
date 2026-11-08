@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   AppSettings,
   AuthStatus,
@@ -113,14 +113,18 @@ export default function App(): React.JSX.Element {
 
     const offAuth = window.api.onAuthState((status) => setAuth(status))
     const offJob = window.api.onJobState((state) => {
-      setJob(state)
-      if (state.subreddit?.name) {
-        setValidated((current) =>
-          current && current.name.toLowerCase() === state.subreddit!.name.toLowerCase()
-            ? current
-            : state.subreddit
-        )
-        setValidationError(null)
+      try {
+        setJob(state)
+        if (state.subreddit?.name) {
+          setValidated((current) =>
+            current && current.name.toLowerCase() === state.subreddit!.name.toLowerCase()
+              ? current
+              : state.subreddit
+          )
+          setValidationError(null)
+        }
+      } catch {
+        // Main process is still working; silently ignore renderer-side render errors
       }
     })
     const offLog = window.api.onJobLog((entry) => addLog(entry))
@@ -141,9 +145,12 @@ export default function App(): React.JSX.Element {
   const busy =
     job.phase === 'validating' || job.phase === 'scanning' || job.phase === 'downloading'
 
+  const validatingRef = useRef(false)
+
   const handleValidate = useCallback(async () => {
     const name = subredditInput.trim()
-    if (!name) return
+    if (!name || validatingRef.current) return
+    validatingRef.current = true
     setValidating(true)
     setValidationError(null)
     try {
@@ -155,6 +162,7 @@ export default function App(): React.JSX.Element {
       setValidationError(errorText(err))
     } finally {
       setValidating(false)
+      validatingRef.current = false
     }
   }, [subredditInput])
 
