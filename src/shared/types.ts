@@ -101,6 +101,8 @@ export interface AuthStatus {
   message: string | null
 }
 
+export type SortOrder = 'new' | 'hot' | 'top' | 'rising'
+
 export interface AppSettings {
   destination: string
   maxPosts: number
@@ -111,7 +113,7 @@ export interface AppSettings {
   includeExternalVideos: boolean
   skipNsfw: boolean
   skipExisting: boolean
-  sortOrder: 'new' | 'hot' | 'top' | 'rising'
+  sortOrder: SortOrder
   toolsDir: string | null
 }
 
@@ -140,7 +142,7 @@ export interface JobOptions {
   includeExternalVideos: boolean
   skipNsfw: boolean
   skipExisting: boolean
-  sortOrder: 'new' | 'hot' | 'top' | 'rising'
+  sortOrder: SortOrder
 }
 
 export interface LogEntry {

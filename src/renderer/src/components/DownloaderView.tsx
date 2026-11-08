@@ -1,5 +1,12 @@
 import { useState } from 'react'
-import type { AppSettings, AuthStatus, JobState, LogEntry, SubredditInfo } from '@shared/types'
+import type {
+  AppSettings,
+  AuthStatus,
+  JobState,
+  LogEntry,
+  SortOrder,
+  SubredditInfo
+} from '@shared/types'
 import { SubredditBar } from './SubredditBar'
 import { JobProgress } from './JobProgress'
 import { AuthPanel } from './AuthPanel'
@@ -13,8 +20,8 @@ export interface DownloaderViewProps {
   validated: SubredditInfo | null
   validating: boolean
   validationError: string | null
-  sortOrder: 'new' | 'hot' | 'top' | 'rising'
-  onSortOrderChange: (order: 'new' | 'hot' | 'top' | 'rising') => void
+  sortOrder: SortOrder
+  onSortOrderChange: (order: SortOrder) => void
   onInputChange: (value: string) => void
   onValidate: () => void
   onStart: (mode: 'download') => void

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { JobState, SubredditInfo } from '@shared/types'
+import type { JobState, SortOrder, SubredditInfo } from '@shared/types'
 import { formatCount } from '../lib/format'
 import {
   IconAlert,
@@ -10,8 +10,6 @@ import {
   IconSpinner,
   IconX
 } from './icons'
-
-type SortOrder = 'new' | 'hot' | 'top' | 'rising'
 
 const SORT_LABELS: Record<SortOrder, string> = {
   new: 'New',
@@ -26,8 +24,8 @@ interface SubredditBarProps {
   validated: SubredditInfo | null
   validating: boolean
   validationError: string | null
-  sortOrder: SortOrder
-  onSortOrderChange: (order: SortOrder) => void
+  sortOrder: 'new' | 'hot' | 'top' | 'rising'
+  onSortOrderChange: (order: 'new' | 'hot' | 'top' | 'rising') => void
   onValidate: () => void
   onStart: (mode: 'download') => void
   onCancel: () => void

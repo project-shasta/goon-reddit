@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { AppSettings, AuthStatus, JobState, LogEntry, SubredditInfo } from '@shared/types'
+import type {
+  AppSettings,
+  AuthStatus,
+  JobState,
+  LogEntry,
+  SortOrder,
+  SubredditInfo
+} from '@shared/types'
 import { DownloaderView } from './components/DownloaderView'
 import { SettingsView } from './components/SettingsView'
 import { errorText } from './lib/format'
@@ -10,7 +17,6 @@ import {
 } from './components/icons'
 
 type View = 'download' | 'settings'
-type SortOrder = 'new' | 'hot' | 'top' | 'rising'
 
 const INITIAL_AUTH: AuthStatus = {
   loggedIn: false,
