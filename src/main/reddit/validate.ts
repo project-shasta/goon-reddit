@@ -47,9 +47,8 @@ export async function validateSubreddit(
     over18: Boolean(data.over18),
     quarantined: Boolean(data.quarantine),
     subredditType: data.subreddit_type ?? 'unknown',
-    iconUrl: data.community_icon?.split('?')[0] || data.icon_img?.split('?')[0] || null,
-    bannerUrl:
-      data.banner_background_image?.split('?')[0] || data.banner_img?.split('?')[0] || null,
+    iconUrl: (data.community_icon ?? data.icon_img)?.split('?')?.[0] ?? null,
+    bannerUrl: (data.banner_background_image ?? data.banner_img)?.split('?')?.[0] ?? null,
     validatedAt: Date.now()
   }
 }
