@@ -75,6 +75,9 @@ export function SubredditBar({
               disabled={running}
             />
           </div>
+          <p className="mt-1 text-[10px] text-zinc-600">
+            Press <kbd className="font-mono text-[10px] text-zinc-500">Enter</kbd> or click to validate
+          </p>
         </div>
 
         <div className="min-w-[130px]">

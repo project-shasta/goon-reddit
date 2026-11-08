@@ -132,9 +132,19 @@ export function JobProgress({ job, destination }: JobProgressProps): React.JSX.E
 
   if (job.phase === 'idle') {
     return (
-      <section className="card px-4 py-4 text-sm text-zinc-500">
-        Enter a subreddit and press <span className="text-zinc-300">Download new</span> to grab its
-        latest images, galleries and videos.
+      <section className="card flex items-center justify-between gap-4 px-4 py-4 text-sm text-zinc-500">
+        <span>
+          Enter a subreddit and press <span className="text-zinc-300">Download new</span> to grab its
+          latest images, galleries and videos.
+        </span>
+        <button
+          className="btn btn-ghost shrink-0 px-2 py-1 text-xs"
+          onClick={() => void window.api.openFolder(destination).catch(() => undefined)}
+          title={destination}
+        >
+          <IconFolder size={13} />
+          Open folder
+        </button>
       </section>
     )
   }

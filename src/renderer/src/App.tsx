@@ -57,6 +57,7 @@ export default function App(): React.JSX.Element {
   const [validationError, setValidationError] = useState<string | null>(null)
   const [startupError, setStartupError] = useState<string | null>(null)
   const [historyCount, setHistoryCount] = useState(0)
+  const [showClearKnownConfirm, setShowClearKnownConfirm] = useState(false)
   const [sortOrder, setSortOrder] = useState<SortOrder>('new')
 
   const addLog = useCallback((entry: LogEntry) => {
@@ -229,6 +230,42 @@ export default function App(): React.JSX.Element {
 
   return (
     <div className="flex h-full flex-col">
+      {showClearKnownConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5 text-center shadow-2xl">
+            <span className="text-2xl">🗑️</span>
+            <h3 className="mt-3 text-sm font-semibold text-zinc-100">
+              Wipe the slate clean?
+            </h3>
+            <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+              This will forget <strong>{historyCount.toLocaleString()}</strong> known posts across
+              all subreddits. Next scan will re-download everything.
+            </p>
+            <p className="mt-2 text-xs text-zinc-500">
+              (There is no undo. Your files will still be on disk, though.)
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                className="btn btn-secondary flex-1"
+                onClick={() => setShowClearKnownConfirm(false)}
+              >
+                Never mind
+              </button>
+              <button
+                className="btn btn-primary flex-1"
+                onClick={async () => {
+                  await window.api.historyClear()
+                  setHistoryCount(0)
+                  setShowClearKnownConfirm(false)
+                }}
+              >
+                Yeah, forget it all
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="flex flex-wrap items-center gap-3 border-b border-white/5 px-4 py-2.5">
         <nav className="flex items-center gap-1 rounded-xl bg-black/30 p-1">
           <button
@@ -261,10 +298,7 @@ export default function App(): React.JSX.Element {
               </span>
               <button
                 className="text-[10px] text-zinc-600 underline-offset-4 hover:text-zinc-400 hover:underline"
-                onClick={async () => {
-                  await window.api.historyClear()
-                  setHistoryCount(0)
-                }}
+                onClick={() => setShowClearKnownConfirm(true)}
               >
                 Clear known
               </button>
