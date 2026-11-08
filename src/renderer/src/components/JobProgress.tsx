@@ -248,7 +248,7 @@ export function JobProgress({
           </div>
           <ul className="max-h-64 divide-y divide-white/5 overflow-y-auto pr-1">
             {job.active.map((entry) => (
-              <ActiveRow key={entry.id} entry={entry} />
+              <ActiveRow key={entry.id} entry={entry} lang={lang} />
             ))}
           </ul>
         </div>
