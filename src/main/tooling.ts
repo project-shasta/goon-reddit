@@ -18,22 +18,6 @@ export const YTDLP_FILENAME = `yt-dlp${EXE}`
 const YTDLP_URL = `https://github.com/yt-dlp/yt-dlp/releases/latest/download/${YTDLP_FILENAME}`
 const YTDLP_SUMS_URL = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/SHA2-256SUMS'
 
-function findOnPath(filename: string): string | null {
-  for (const dir of (process.env.PATH ?? '').split(path.delimiter)) {
-    if (!dir) continue
-    const candidate = path.join(dir, filename)
-    try {
-      // accessSync is enough and avoids async in the resolver.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('node:fs').accessSync(candidate)
-      return candidate
-    } catch {
-      // keep looking
-    }
-  }
-  return null
-}
-
 export class ToolManager {
   constructor(private readonly settings: SettingsStore) {}
 
@@ -54,7 +38,7 @@ export class ToolManager {
         // try next dir
       }
     }
-    return findOnPath(filename)
+    return null
   }
 
   ffmpegPath(): string | null {
