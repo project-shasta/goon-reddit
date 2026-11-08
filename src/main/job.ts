@@ -534,9 +534,16 @@ export class JobRunner {
       } else if (item.kind === 'external-video') {
         entry.status = 'processing'
         this.emit()
+        // Throttle yt-dlp calls to avoid 429 rate-limit responses.
+        const now = Date.now()
+        const elapsed = now - this.lastYtDlpStart_
+        if (elapsed < JobRunner.YtDlpInterCallDelayMs) {
+          await sleep(JobRunner.YtDlpInterCallDelayMs - elapsed, signal)
+        }
         const resolved = await this.downloadExternalVideo(item, destination, signal, (received, total) =>
           tick(received, total, total ? received / total : null)
         )
+        this.lastYtDlpStart_ = Date.now()
         item.localPath = resolved.path
         item.filename = path.basename(resolved.path)
         item.ext = path.extname(resolved.path).replace(/^\./, '') || item.ext
@@ -740,4 +747,8 @@ export class JobRunner {
       onProgress
     })
   }
+
+  /** Pause between yt-dlp invocations to avoid 429 rate-limit responses. */
+  private static readonly YtDlpInterCallDelayMs = 3000
+  private lastYtDlpStart_ = 0
 }
