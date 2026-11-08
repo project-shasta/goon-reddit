@@ -42,7 +42,28 @@ async function cleanupPartials(dir: string, base: string): Promise<void> {
   }
 }
 
-/** Download a supported external video URL with yt-dlp. */
+/** Maximum number of retry attempts for transient yt-dlp errors. */
+const MAX_RETRIES = 3
+
+/** Base delay (ms) for exponential backoff between retries. */
+const RETRY_BASE_DELAY_MS = 5000
+
+/** Detect 429 / rate-limit or connection-reset errors in yt-dlp output. */
+function isTransientError(stderr: string, code: number): boolean {
+  if (code === 429) return true
+  const lower = stderr.toLowerCase()
+  return (
+    lower.includes('429') ||
+    lower.includes('rate limit') ||
+    lower.includes('too many requests') ||
+    lower.includes('connection reset') ||
+    lower.includes('connection refused') ||
+    lower.includes('temporary failure') ||
+    lower.includes('server temporarily unavailable')
+  )
+}
+
+/** Download a supported external video URL with yt-dlp. Retries transient errors with exponential backoff. */
 export async function downloadWithYtDlp(
   ytdlpPath: string,
   url: string,
@@ -87,84 +108,118 @@ export async function downloadWithYtDlp(
   let printedPath: string | null = null
   let killed = false
 
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const child = spawn(ytdlpPath, args, { windowsHide: true })
-      const onAbort = (): void => {
-        killed = true
-        child.kill()
-      }
-      options.signal.addEventListener('abort', onAbort, { once: true })
+  const runYtDlp = (): Promise<{ code: number | null; stderr: string; printedPath: string | null }> =>
+    new Promise<{ code: number | null; stderr: string; printedPath: string | null }>(
+      (resolve, reject) => {
+        const child = spawn(ytdlpPath, args, { windowsHide: true })
+        const onAbort = (): void => {
+          killed = true
+          child.kill()
+        }
+        options.signal.addEventListener('abort', onAbort, { once: true })
 
-      child.stdout.setEncoding('utf8')
-      let buffer = ''
-      child.stdout.on('data', (chunk: string) => {
-        buffer += chunk
-        const lines = buffer.split(/\r?\n/)
-        buffer = lines.pop() ?? ''
-        for (const line of lines) {
-          const value = line.trim()
-          if (!value) continue
+        child.stdout.setEncoding('utf8')
+        let buffer = ''
+        child.stdout.on('data', (chunk: string) => {
+          buffer += chunk
+          const lines = buffer.split(/\r?\n/)
+          buffer = lines.pop() ?? ''
+          for (const line of lines) {
+            const value = line.trim()
+            if (!value) continue
 
-          if (value.startsWith('download:')) {
-            const [receivedRaw, totalRaw, percentRaw] = value.slice('download:'.length).split('|')
-            const received = Number(receivedRaw)
-            const total = Number(totalRaw)
-            if (Number.isFinite(received)) {
-              let estimatedTotal = Number.isFinite(total) && total > 0 ? total : null
-              if (!estimatedTotal && percentRaw) {
-                const pct = Number(percentRaw.replace('%', '').trim())
-                if (Number.isFinite(pct) && pct > 0) estimatedTotal = Math.round((received / pct) * 100)
+            if (value.startsWith('download:')) {
+              const [receivedRaw, totalRaw, percentRaw] = value.slice('download:'.length).split('|')
+              const received = Number(receivedRaw)
+              const total = Number(totalRaw)
+              if (Number.isFinite(received)) {
+                let estimatedTotal = Number.isFinite(total) && total > 0 ? total : null
+                if (!estimatedTotal && percentRaw) {
+                  const pct = Number(percentRaw.replace('%', '').trim())
+                  if (Number.isFinite(pct) && pct > 0) estimatedTotal = Math.round((received / pct) * 100)
+                }
+                options.onProgress?.(received, estimatedTotal)
               }
-              options.onProgress?.(received, estimatedTotal)
+              continue
             }
-            continue
+
+            if (/^[A-Za-z]:\\|^\//.test(value) || value.includes(`${path.sep}`)) {
+              printedPath = value
+            }
           }
+        })
 
-          if (/^[A-Za-z]:\\|^\//.test(value) || value.includes(`${path.sep}`)) {
-            printedPath = value
+        child.stderr.setEncoding('utf8')
+        child.stderr.on('data', (chunk: string) => {
+          stderr = (stderr + chunk).slice(-6000)
+        })
+
+        child.on('error', (err) => {
+          options.signal.removeEventListener('abort', onAbort)
+          reject(err)
+        })
+
+        child.on('close', (code) => {
+          options.signal.removeEventListener('abort', onAbort)
+          if (killed || options.signal.aborted) {
+            reject(new DOMException('Aborted', 'AbortError'))
+            return
           }
-        }
-      })
+          resolve({ code: code ?? -1, stderr, printedPath })
+        })
+      }
+    )
 
-      child.stderr.setEncoding('utf8')
-      child.stderr.on('data', (chunk: string) => {
-        stderr = (stderr + chunk).slice(-6000)
-      })
+  let lastError: Error | null = null
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    if (options.signal.aborted) throw new DOMException('Aborted', 'AbortError')
 
-      child.on('error', (err) => {
-        options.signal.removeEventListener('abort', onAbort)
-        reject(err)
-      })
+    try {
+      const { printedPath: attemptPrintedPath } = await runYtDlp()
+      // Success — clean up and return.
+      await cleanupPartials(dir, base)
+      let output: string | null = attemptPrintedPath
+      if (!output || !(await fs.stat(output).catch(() => null))) {
+        output = await findOutputFile(dir, base)
+      }
+      if (!output) {
+        await cleanupPartials(dir, base)
+        throw new Error('yt-dlp finished but no output file was found')
+      }
 
-      child.on('close', (code) => {
-        options.signal.removeEventListener('abort', onAbort)
-        if (killed || options.signal.aborted) {
-          reject(new DOMException('Aborted', 'AbortError'))
-          return
-        }
-        if (code === 0) {
-          resolve()
-        } else {
-          reject(new Error(`yt-dlp exited with code ${code}. ${stderr.trim().slice(-1200)}`))
-        }
-      })
-    })
-  } catch (err) {
-    await cleanupPartials(dir, base)
-    throw err
+      const stat = await fs.stat(output)
+      options.onProgress?.(stat.size, stat.size)
+      return { path: output, bytes: stat.size }
+    } catch (err) {
+      // Don't retry if the user aborted.
+      if (err instanceof Error && err.name === 'AbortError') throw err
+
+      lastError = err instanceof Error ? err : new Error(String(err))
+
+      // Only retry transient errors (429, rate limits, connection issues).
+      if (attempt < MAX_RETRIES && isTransientError(lastError.message, 0)) {
+        const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt)
+        const jitter = Math.random() * 1000
+        const wait = Math.round(delay + jitter)
+        // Silent wait; the caller (job.ts) already logs retries for other
+        // download paths, and yt-dlp retries are internal to this module.
+        await new Promise<void>((resolve) => {
+          const timer = setTimeout(resolve, wait)
+          options.signal.addEventListener('abort', () => {
+            clearTimeout(timer)
+            resolve()
+          }, { once: true })
+        })
+        continue
+      }
+
+      // Non-transient or max retries reached — clean partials and throw.
+      await cleanupPartials(dir, base)
+      throw lastError
+    }
   }
 
-  let output: string | null = printedPath
-  if (!output || !(await fs.stat(output).catch(() => null))) {
-    output = await findOutputFile(dir, base)
-  }
-  if (!output) {
-    await cleanupPartials(dir, base)
-    throw new Error('yt-dlp finished but no output file was found')
-  }
-
-  const stat = await fs.stat(output)
-  options.onProgress?.(stat.size, stat.size)
-  return { path: output, bytes: stat.size }
+  // Should not reach here, but just in case.
+  await cleanupPartials(dir, base)
+  throw lastError ?? new Error('yt-dlp failed after retries')
 }
