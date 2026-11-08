@@ -17,6 +17,7 @@ extraFiles:
       - '**/*'
 
 win:
+  icon: build/icon.ico
   target:
     - target: zip
       arch:
