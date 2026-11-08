@@ -150,8 +150,7 @@ export function SettingsView({
             </button>
           </div>
           <p className="mt-1.5 text-[11px] text-zinc-500">
-            Files are saved to <span className="font-mono text-zinc-400">destination\subreddit\</span>{' '}
-            using the post date, id and title.
+            {(t.destinationHint as string)}
           </p>
         </div>
 

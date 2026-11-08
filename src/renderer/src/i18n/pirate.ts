@@ -5,9 +5,11 @@ export const pirate: Translation = {
   downloader: 'Plunder-er',
   settings: 'Scallywag\'s Orders',
   logInOnReddit: 'Sign aboard Reddit',
-  alreadyLoggedIn: 'Ye be signed in',
+  alreadyLoggedIn: 'Signed aboard',
   checkingSession: 'Checkin\' yer credentials…',
-  notLoggedIn: 'Not signed in',
+  notLoggedIn: 'Not signed aboard',
+  destinationHint:
+    'Ye treasures be buried in <span class="font-mono text-zinc-400">destination\\subreddit\\</span> by date, ID, and post title, arrr.',
   loggedInAs: (u: string) => `u/${u}`,
   cookiesStayInApp: 'Ye session cookies stay locked in the app, matey.',
   logIn: 'Sign aboard Reddit',

@@ -8,10 +8,10 @@ import type {
   SortOrder,
   SubredditInfo
 } from '@shared/types'
+import { useI18n, languageIds, languageLabel } from './i18n'
 import { DownloaderView } from './components/DownloaderView'
 import { SettingsView } from './components/SettingsView'
 import { errorText } from './lib/format'
-import { useI18n, languageIds, languageLabel } from './i18n'
 import {
   IconDownload,
   IconSettings,
@@ -64,7 +64,7 @@ export default function App(): React.JSX.Element {
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [language, setLanguage] = useState<LanguageId>('en')
   const [sortOrder, setSortOrder] = useState<SortOrder>('new')
-  void useI18n(language)
+  const t = useI18n(language)
 
   const addLog = useCallback((entry: LogEntry) => {
     setLogs((current) => {
@@ -282,14 +282,14 @@ export default function App(): React.JSX.Element {
             onClick={() => setView('download')}
           >
             <IconDownload size={14} />
-            Downloader
+            {t.downloader as string}
           </button>
           <button
             className={`tab flex items-center gap-1.5 ${view === 'settings' ? 'tab-active' : ''}`}
             onClick={() => setView('settings')}
           >
             <IconSettings size={14} />
-            Settings
+            {t.settings as string}
           </button>
         </nav>
 
@@ -298,9 +298,9 @@ export default function App(): React.JSX.Element {
             <button
               className="tab"
               onClick={() => setShowThemePicker((v) => !v)}
-              title="Change theme"
+              title={t.changeTheme as string}
             >
-              🎨 Theme
+              🎨 {t.theme as string}
             </button>
             {showThemePicker && (
               <div className="absolute top-full z-50 mt-1 w-48 rounded-xl border border-white/10 bg-zinc-900 py-1 shadow-lg">
@@ -399,10 +399,10 @@ export default function App(): React.JSX.Element {
             {auth.loggedIn
               ? auth.username
                 ? `u/${auth.username}`
-                : 'Logged in'
+                : (t.alreadyLoggedIn as string)
               : auth.checking
-                ? 'Checking…'
-                : 'Not logged in'}
+                ? (t.checkingSession as string)
+                : (t.notLoggedIn as string)}
           </span>
         </div>
       </header>

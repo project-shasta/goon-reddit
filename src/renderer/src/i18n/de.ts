@@ -8,6 +8,8 @@ export const de: Translation = {
   alreadyLoggedIn: 'Angemeldet',
   checkingSession: 'Prüfe Sitzung…',
   notLoggedIn: 'Nicht angemeldet',
+  destinationHint:
+    'Dateien werden gespeichert unter <span class="font-mono text-zinc-400">destination\\subreddit\\</span> unter Verwendung von Postdatum, ID und Titel.',
   loggedInAs: (u: string) => `u/${u}`,
   cookiesStayInApp: 'Ihre Sitzungscookies verbleiben in der App.',
   logIn: 'Bei Reddit anmelden',

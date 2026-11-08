@@ -5,9 +5,11 @@ export const fr: Translation = {
   downloader: 'Téléchargeur',
   settings: 'Paramètres',
   logInOnReddit: 'Se connecter sur Reddit',
-  alreadyLoggedIn: 'Déjà connecté',
+  alreadyLoggedIn: 'Connecté',
   checkingSession: 'Vérification…',
   notLoggedIn: 'Non connecté',
+  destinationHint:
+    'Les fichiers sont enregistrés dans <span class="font-mono text-zinc-400">destination\\subreddit\\</span> en utilisant la date, l\'ID et le titre du post.',
   loggedInAs: (u: string) => `u/${u}`,
   cookiesStayInApp: 'Vos cookies de session restent dans l\'application.',
   logIn: 'Se connecter sur Reddit',

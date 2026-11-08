@@ -8,6 +8,8 @@ export const zhTW: Translation = {
   alreadyLoggedIn: '已登入',
   checkingSession: '檢查中…',
   notLoggedIn: '未登入',
+  destinationHint:
+    '檔案保存於 <span class="font-mono text-zinc-400">destination\\subreddit\\</span> 使用帖子日期、ID 和標題。',
   loggedInAs: (u: string) => `u/${u}`,
   cookiesStayInApp: '您的工作階段 Cookie 保留在應用程式內。',
   logIn: '在 Reddit 登入',

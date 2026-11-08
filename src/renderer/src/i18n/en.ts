@@ -5,7 +5,7 @@ export const en: Translation = {
   downloader: 'Downloader',
   settings: 'Settings',
   logInOnReddit: 'Log in on Reddit',
-  alreadyLoggedIn: 'Already logged in',
+  alreadyLoggedIn: 'Logged in',
   checkingSession: 'Checking session…',
   notLoggedIn: 'Not logged in',
   loggedInAs: (u: string) => `u/${u}`,

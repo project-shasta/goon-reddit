@@ -8,6 +8,8 @@ export const enSimple: Translation = {
   alreadyLoggedIn: 'Signed in',
   checkingSession: 'Checking…',
   notLoggedIn: 'Not signed in',
+  destinationHint:
+    'Files are saved in <span class="font-mono text-zinc-400">destination\\subreddit\\</span> using date, ID, and title.',
   loggedInAs: (u: string) => `u/${u}`,
   cookiesStayInApp: 'Signed in with your own Reddit account. Your login info stays in this app.',
   logIn: 'Sign in to Reddit',

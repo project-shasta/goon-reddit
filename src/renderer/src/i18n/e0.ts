@@ -8,6 +8,8 @@ export const eo: Translation = {
   alreadyLoggedIn: 'Ensalutita',
   checkingSession: 'Kontrolado…',
   notLoggedIn: 'Ne ensalutita',
+  destinationHint:
+    'Dosieroj estas konservitaj en <span class="font-mono text-zinc-400">destination\\subreddit\\</span> laŭ dato, ID kaj afisx-titolo.',
   loggedInAs: (u: string) => `u/${u}`,
   cookiesStayInApp: 'Ensalutita per via propra Reddit-sesio. Kukoj restas en la aplikaĵo.',
   logIn: 'Ensaluti al Reddit',

@@ -8,6 +8,8 @@ export const uk: Translation = {
   alreadyLoggedIn: 'Увійдено',
   checkingSession: 'Перевірка…',
   notLoggedIn: 'Не увійдено',
+  destinationHint:
+    'Файли зберігаються в <span class="font-mono text-zinc-400">destination\\subreddit\\</span> за датою, ID та назвою посту.',
   loggedInAs: (u: string) => `u/${u}`,
   cookiesStayInApp: 'Ваші файли cookie сесії залишаються в додатку.',
   logIn: 'Увійти на Reddit',

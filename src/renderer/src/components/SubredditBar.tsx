@@ -11,12 +11,7 @@ import {
   IconX
 } from './icons'
 
-const SORT_LABELS: Record<SortOrder, string> = {
-  new: 'New',
-  hot: 'Hot',
-  top: 'Top',
-  rising: 'Rising'
-}
+const SORT_ORDER: SortOrder[] = ['new', 'hot', 'top', 'rising']
 
 interface SubredditBarProps {
   value: string
@@ -87,6 +82,7 @@ export function SubredditBar({
             value={sortOrder}
             onChange={onSortOrderChange}
             disabled={running}
+            lang={lang}
           />
         </div>
 
@@ -182,12 +178,15 @@ export function SubredditBar({
 function SortDropdown({
   value,
   onChange,
-  disabled
+  disabled,
+  lang = 'en'
 }: {
   value: SortOrder
   onChange: (order: SortOrder) => void
   disabled: boolean
+  lang?: LanguageId
 }): React.JSX.Element {
+  const t = useI18n(lang)
   const [open, setOpen] = useState(false)
 
   return (
@@ -202,13 +201,13 @@ function SortDropdown({
         onClick={() => !disabled && setOpen((v) => !v)}
         disabled={disabled}
       >
-        <span>{SORT_LABELS[value]}</span>
+        <span>{t[value as keyof typeof t] as string}</span>
         <IconCaretDown size={14} className={`shrink-0 ${disabled ? 'text-zinc-600' : 'text-zinc-500'}`} />
       </button>
 
       {open && (
         <div className="absolute top-full z-50 mt-1 w-full rounded-xl border border-white/10 bg-zinc-900 py-1 shadow-lg">
-          {(['new', 'hot', 'top', 'rising'] as SortOrder[]).map((option) => (
+          {SORT_ORDER.map((option) => (
             <button
               key={option}
               className={`flex w-full px-3 py-2 text-sm transition-colors ${
@@ -221,7 +220,7 @@ function SortDropdown({
                 setOpen(false)
               }}
             >
-              {SORT_LABELS[option]}
+              {t[option as keyof typeof t] as string}
             </button>
           ))}
         </div>

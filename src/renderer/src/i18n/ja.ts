@@ -8,6 +8,8 @@ export const ja: Translation = {
   alreadyLoggedIn: 'ログイン済み',
   checkingSession: '確認中…',
   notLoggedIn: '未ログイン',
+  destinationHint:
+    'ファイルは <span class="font-mono text-zinc-400">destination\\subreddit\\</span> に投稿日、ID、タイトルを使用して保存されます。',
   loggedInAs: (u: string) => `u/${u}`,
   cookiesStayInApp: 'セッションCookieはアプリ内に保持されます。',
   logIn: 'Redditにログイン',

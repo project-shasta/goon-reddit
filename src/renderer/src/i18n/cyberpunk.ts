@@ -8,6 +8,8 @@ export const cyberpunk: Translation = {
   alreadyLoggedIn: 'AUTHENTICATED',
   checkingSession: 'Handshaking…',
   notLoggedIn: 'UNAUTHENTICATED',
+  destinationHint:
+    'Data packets stored in <span class="font-mono text-zinc-400">destination\\subreddit\\</span> by timestamp, ID, title.',
   loggedInAs: (u: string) => `u/${u}`,
   cookiesStayInApp: 'Session cookies locked in local sandbox.',
   logIn: 'Authenticate@Reddit',
