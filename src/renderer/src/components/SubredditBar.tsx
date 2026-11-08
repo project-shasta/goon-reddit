@@ -7,6 +7,7 @@ import {
   IconDownload,
   IconExternal,
   IconGrid,
+  IconLock,
   IconSpinner,
   IconX
 } from './icons'
@@ -61,6 +62,11 @@ export function SubredditBar({
             {t.subreddit as string}
           </label>
           <div className="flex items-center gap-2">
+            {running && (
+              <span className="shrink-0 text-orange-400" title="Downloading—subreddit locked">
+                <IconLock size={14} />
+              </span>
+            )}
             <ModeDropdown
               mode={mode}
               onChange={onModeChange}
