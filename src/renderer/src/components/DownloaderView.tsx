@@ -43,6 +43,8 @@ export function DownloaderView({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <AuthPanel auth={auth} onChanged={onAuthChanged} />
+
       <SubredditBar
         value={subredditInput}
         onChange={onInputChange}
@@ -57,8 +59,6 @@ export function DownloaderView({
       />
 
       <JobProgress job={job} destination={settings.destination} />
-
-      <AuthPanel auth={auth} onChanged={onAuthChanged} />
 
       {logs.length > 0 && (
         <div>

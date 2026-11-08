@@ -245,6 +245,26 @@ export default function App(): React.JSX.Element {
               {job.phase === 'downloading' ? 'Downloading' : 'Working'}
             </span>
           )}
+          <span
+            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${
+              auth.loggedIn
+                ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
+                : 'border-amber-500/25 bg-amber-500/10 text-amber-300'
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                auth.loggedIn ? 'bg-emerald-400' : 'bg-amber-400'
+              }`}
+            />
+            {auth.loggedIn
+              ? auth.username
+                ? `u/${auth.username}`
+                : 'Logged in'
+              : auth.checking
+                ? 'Checking…'
+                : 'Not logged in'}
+          </span>
         </div>
       </header>
 
