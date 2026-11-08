@@ -111,6 +111,7 @@ export interface AppSettings {
   includeExternalVideos: boolean
   skipNsfw: boolean
   skipExisting: boolean
+  sortOrder: 'new' | 'hot' | 'top' | 'rising'
   toolsDir: string | null
 }
 
@@ -139,6 +140,7 @@ export interface JobOptions {
   includeExternalVideos: boolean
   skipNsfw: boolean
   skipExisting: boolean
+  sortOrder: 'new' | 'hot' | 'top' | 'rising'
 }
 
 export interface LogEntry {

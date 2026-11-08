@@ -15,6 +15,8 @@ interface SubredditBarProps {
   validated: SubredditInfo | null
   validating: boolean
   validationError: string | null
+  sortOrder: 'new' | 'hot' | 'top' | 'rising'
+  onSortOrderChange: (order: 'new' | 'hot' | 'top' | 'rising') => void
   onValidate: () => void
   onStart: (mode: 'download') => void
   onCancel: () => void
@@ -28,6 +30,8 @@ export function SubredditBar({
   validated,
   validating,
   validationError,
+  sortOrder,
+  onSortOrderChange,
   onValidate,
   onStart,
   onCancel,
@@ -62,6 +66,24 @@ export function SubredditBar({
               disabled={running}
             />
           </div>
+        </div>
+
+        <div className="min-w-[130px]">
+          <label className="label" htmlFor="sort-order">
+            Sort
+          </label>
+          <select
+            id="sort-order"
+            className="input"
+            value={sortOrder}
+            onChange={(event) => onSortOrderChange(event.target.value as 'new' | 'hot' | 'top' | 'rising')}
+            disabled={running}
+          >
+            <option value="new">New</option>
+            <option value="hot">Hot</option>
+            <option value="top">Top</option>
+            <option value="rising">Rising</option>
+          </select>
         </div>
 
         <button

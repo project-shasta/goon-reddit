@@ -52,7 +52,11 @@ function buildJobOptions(raw: Partial<JobOptions>, settings: AppSettings): JobOp
     includeVideos: asBool(raw.includeVideos, settings.includeVideos),
     includeExternalVideos: asBool(raw.includeExternalVideos, settings.includeExternalVideos),
     skipNsfw: asBool(raw.skipNsfw, settings.skipNsfw),
-    skipExisting: asBool(raw.skipExisting, settings.skipExisting)
+    skipExisting: asBool(raw.skipExisting, settings.skipExisting),
+    sortOrder:
+      raw.sortOrder && (['new', 'hot', 'top', 'rising'] as const).includes(raw.sortOrder)
+        ? raw.sortOrder
+        : settings.sortOrder
   }
 
   if (

@@ -1,3 +1,5 @@
+export type SortOrder = 'new' | 'hot' | 'top' | 'rising'
+
 export interface ListingRequest {
   label: string
   url: string
@@ -12,11 +14,12 @@ export interface ListingRequest {
 export function buildListingRequests(
   subreddit: string,
   after: string | null,
-  limit = 100
+  limit = 100,
+  sort: SortOrder = 'new'
 ): ListingRequest[] {
   const name = encodeURIComponent(subreddit)
   const params = new URLSearchParams({
-    sort: 'new',
+    sort,
     limit: String(Math.max(1, Math.min(100, Math.round(limit)))),
     raw_json: '1',
     include_over_18: 'on'
@@ -25,8 +28,8 @@ export function buildListingRequests(
   const query = params.toString()
 
   return [
-    { label: 'sorted listing', url: `/r/${name}.json?${query}` },
-    { label: 'api listing', url: `https://api.reddit.com/r/${name}/new?${query}` },
-    { label: 'legacy new.json', url: `/r/${name}/new.json?${query}` }
+    { label: `sorted listing (${sort})`, url: `/r/${name}.json?${query}` },
+    { label: `api listing (${sort})`, url: `https://api.reddit.com/r/${name}/${sort === 'rising' ? 'new' : sort}?${query}` },
+    { label: 'legacy', url: `/r/${name}/${sort === 'rising' ? 'new' : sort}.json?${query}` }
   ]
 }

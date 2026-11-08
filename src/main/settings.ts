@@ -17,6 +17,7 @@ function defaults(): AppSettings {
     includeExternalVideos: true,
     skipNsfw: false,
     skipExisting: true,
+    sortOrder: 'new' as const,
     toolsDir: null
   }
 }
@@ -62,6 +63,9 @@ export class SettingsStore {
       includeExternalVideos: asBool(next.includeExternalVideos, base.includeExternalVideos),
       skipNsfw: asBool(next.skipNsfw, base.skipNsfw),
       skipExisting: asBool(next.skipExisting, base.skipExisting),
+      sortOrder: (['new', 'hot', 'top', 'rising'] as const).includes(next.sortOrder)
+        ? next.sortOrder
+        : base.sortOrder,
       toolsDir:
         typeof next.toolsDir === 'string' && next.toolsDir.trim()
           ? path.resolve(next.toolsDir)

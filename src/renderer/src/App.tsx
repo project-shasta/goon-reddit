@@ -11,6 +11,7 @@ import {
 } from './components/icons'
 
 type View = 'download' | 'settings'
+type SortOrder = 'new' | 'hot' | 'top' | 'rising'
 
 const INITIAL_AUTH: AuthStatus = {
   loggedIn: false,
@@ -51,6 +52,7 @@ export default function App(): React.JSX.Element {
   const [validationError, setValidationError] = useState<string | null>(null)
   const [startupError, setStartupError] = useState<string | null>(null)
   const [historyCount, setHistoryCount] = useState(0)
+  const [sortOrder, setSortOrder] = useState<SortOrder>('new')
 
   const addLog = useCallback((entry: LogEntry) => {
     setLogs((current) => {
@@ -71,7 +73,9 @@ export default function App(): React.JSX.Element {
       if (cancelled) return
 
       if (settingsResult.status === 'fulfilled') {
-        setSettings(settingsResult.value)
+        const loadedSettings = settingsResult.value
+        setSettings(loadedSettings)
+        setSortOrder(loadedSettings.sortOrder)
       } else {
         setStartupError(errorText(settingsResult.reason))
       }
@@ -163,14 +167,15 @@ export default function App(): React.JSX.Element {
           includeVideos: settings.includeVideos,
           includeExternalVideos: settings.includeExternalVideos,
           skipNsfw: settings.skipNsfw,
-          skipExisting: settings.skipExisting
+          skipExisting: settings.skipExisting,
+          sortOrder
         })
       } catch (err) {
         setJob(INITIAL_JOB)
         addLog({ level: 'error', message: errorText(err), time: Date.now() })
       }
     },
-    [settings, subredditInput, addLog, validated]
+    [settings, subredditInput, addLog, validated, sortOrder]
   )
 
   const handleCancel = useCallback(() => {
@@ -301,6 +306,8 @@ export default function App(): React.JSX.Element {
             validated={validated}
             validating={validating}
             validationError={validationError}
+            sortOrder={sortOrder}
+            onSortOrderChange={setSortOrder}
             onInputChange={setSubredditInput}
             onValidate={() => void handleValidate()}
             onStart={(mode) => void handleStart(mode)}

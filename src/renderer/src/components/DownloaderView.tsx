@@ -13,6 +13,8 @@ export interface DownloaderViewProps {
   validated: SubredditInfo | null
   validating: boolean
   validationError: string | null
+  sortOrder: 'new' | 'hot' | 'top' | 'rising'
+  onSortOrderChange: (order: 'new' | 'hot' | 'top' | 'rising') => void
   onInputChange: (value: string) => void
   onValidate: () => void
   onStart: (mode: 'download') => void
@@ -31,6 +33,8 @@ export function DownloaderView({
   validated,
   validating,
   validationError,
+  sortOrder,
+  onSortOrderChange,
   onInputChange,
   onValidate,
   onStart,
@@ -52,6 +56,8 @@ export function DownloaderView({
         validating={validating}
         validationError={validationError}
         onValidate={onValidate}
+        sortOrder={sortOrder}
+        onSortOrderChange={onSortOrderChange}
         onStart={onStart}
         onCancel={onCancel}
         job={job}

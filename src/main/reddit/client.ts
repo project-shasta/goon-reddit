@@ -345,11 +345,12 @@ export class RedditClient {
   private async getListingPage(
     subreddit: string,
     after: string | null,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    sortOrder: 'new' | 'hot' | 'top' | 'rising' = 'new'
   ): Promise<any> {
     let lastError: unknown = null
 
-    for (const request of buildListingRequests(subreddit, after, 100)) {
+    for (const request of buildListingRequests(subreddit, after, 100, sortOrder)) {
       if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
       try {
         return await this.getJson<any>(request.url, signal)
@@ -373,13 +374,13 @@ export class RedditClient {
 
   async *pages(
     subreddit: string,
-    options: { signal?: AbortSignal } = {}
+    options: { signal?: AbortSignal; sortOrder?: 'new' | 'hot' | 'top' | 'rising' } = {}
   ): AsyncGenerator<{ posts: RedditPost[]; after: string | null }> {
     let after: string | null = null
     let previousAfter: string | null = null
 
     for (let page = 0; page < 10000; page++) {
-      const json = await this.getListingPage(subreddit, after, options.signal)
+      const json = await this.getListingPage(subreddit, after, options.signal, options.sortOrder)
       const children = json?.data?.children
 
       if (!Array.isArray(children)) {

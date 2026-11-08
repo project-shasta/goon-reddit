@@ -316,7 +316,8 @@ export class JobRunner {
           includeVideos: false,
           includeExternalVideos: false,
           skipNsfw: false,
-          skipExisting: false
+          skipExisting: false,
+          sortOrder: 'new'
         }))
         for (const item of extracted) {
           item.filename = safeFilename(item.filename)
