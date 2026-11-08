@@ -12,7 +12,6 @@ import {
   IconDownload,
   IconFolder,
   IconInfo,
-  IconSpinner,
   IconVideo
 } from './icons'
 
@@ -130,7 +129,6 @@ export function JobProgress({
   lang = 'en'
 }: JobProgressProps): React.JSX.Element {
   const t = useI18n(lang)
-  const busy = job.phase === 'validating' || job.phase === 'scanning' || job.phase === 'downloading'
   const finished = job.discovered > 0 ? job.completed + job.skipped + job.failed : 0
   const overall =
     job.discovered > 0 ? Math.min(100, (finished / job.discovered) * 100) : null
@@ -177,7 +175,6 @@ export function JobProgress({
                   : 'bg-orange-500/15 text-orange-300'
           }`}
         >
-          {busy && <IconSpinner size={12} />}
           {phaseLabel[job.phase]}
         </span>
         {job.subreddit && (
