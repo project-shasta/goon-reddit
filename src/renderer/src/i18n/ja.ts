@@ -187,5 +187,7 @@ export const ja: Translation = {
   timeoutError: 'タイムアウト。',
   timeoutErrorHint: 'リクエストに時間がかかりすぎました。',
   unknownError: '不明なエラー。',
-  unknownErrorHint: '何かが間違いました。'
+  unknownErrorHint: '何かが間違いました。',
+  retryCount: '再試行回数',
+  retriedCount: (n: number) => `${n}回再試行 — ソースURLを3回、プレビューURLを3回試行`
 }

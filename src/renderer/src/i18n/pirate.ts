@@ -187,5 +187,7 @@ export const pirate: Translation = {
   timeoutError: 'Time\'s up!',
   timeoutErrorHint: 'The request took too long.',
   unknownError: 'Unknown error.',
-  unknownErrorHint: 'Something went wrong, arrr.'
+  unknownErrorHint: 'Something went wrong, arrr.',
+  retryCount: 'Retry count',
+  retriedCount: (n: number) => `Plundered ${n} time${n > 1 ? 's' : ''} — tried source URL 3 times, then preview URL 3 times, arrr!`
 }

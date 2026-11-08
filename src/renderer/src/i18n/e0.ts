@@ -187,5 +187,7 @@ export const eo: Translation = {
   timeoutError: 'Timeout.',
   timeoutErrorHint: 'The request took too long.',
   unknownError: 'Unknown error.',
-  unknownErrorHint: 'Something went wrong.'
+  unknownErrorHint: 'Something went wrong.',
+  retryCount: 'Reprova nombro',
+  retriedCount: (n: number) => `Reprovita ${n} foj${n > 1 ? 'oj' : 'o'} — fonta URL provita 3 fojojn, antaŭvidada URL 3 fojojn`
 }

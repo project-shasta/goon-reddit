@@ -187,5 +187,7 @@ export const fr: Translation = {
   timeoutError: 'Délai d\'attente dépassé.',
   timeoutErrorHint: 'La demande a pris trop de temps.',
   unknownError: 'Erreur inconnue.',
-  unknownErrorHint: 'Quelque chose s\'est mal passé.'
+  unknownErrorHint: 'Quelque chose s\'est mal passé.',
+  retryCount: 'Nombre de tentatives',
+  retriedCount: (n: number) => `Réessayé ${n} fois — URL source tentée 3 fois, puis URL de prévisualisation 3 fois`
 }

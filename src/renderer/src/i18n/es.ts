@@ -187,5 +187,7 @@ export const es: Translation = {
   timeoutError: 'Tiempo de espera agotado.',
   timeoutErrorHint: 'La solicitud tardó demasiado.',
   unknownError: 'Error desconocido.',
-  unknownErrorHint: 'Algo salió mal.'
+  unknownErrorHint: 'Algo salió mal.',
+  retryCount: 'Número de reintentos',
+  retriedCount: (n: number) => `Reintentado ${n} veces — URL de origen intentada 3 veces, luego URL de vista previa 3 veces`
 }

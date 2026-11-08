@@ -187,5 +187,7 @@ export const zhTW: Translation = {
   timeoutError: '逾時。',
   timeoutErrorHint: '請求耗時過長。',
   unknownError: '未知錯誤。',
-  unknownErrorHint: '出了些問題。'
+  unknownErrorHint: '出了些問題。',
+  retryCount: '重試次數',
+  retriedCount: (n: number) => `重試 ${n} 次 — 嘗試源 URL 3 次，然後嘗試預覽 URL 3 次`
 }

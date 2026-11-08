@@ -187,5 +187,7 @@ export const it: Translation = {
   timeoutError: 'Timeout.',
   timeoutErrorHint: 'La richiesta ha richiesto troppo tempo.',
   unknownError: 'Errore sconosciuto.',
-  unknownErrorHint: 'Qualcosa è andato storto.'
+  unknownErrorHint: 'Qualcosa è andato storto.',
+  retryCount: 'Numero di tentativi',
+  retriedCount: (n: number) => `Riprovi ${n} volte — URL sorgente tentata 3 volte, poi URL di anteprima 3 volte`
 }

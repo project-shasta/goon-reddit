@@ -187,5 +187,7 @@ export const uk: Translation = {
   timeoutError: 'Час вичерпано.',
   timeoutErrorHint: 'Запит зайняв занадто багато часу.',
   unknownError: 'Невідома помилка.',
-  unknownErrorHint: 'Щось пішло не так.'
+  unknownErrorHint: 'Щось пішло не так.',
+  retryCount: 'Кількість повторів',
+  retriedCount: (n: number) => `Повторено ${n} раз${n > 1 ? 'и' : 'ів'} — спробовано URL джерела 3 рази, потім URL попереднього перегляду 3 рази`
 }

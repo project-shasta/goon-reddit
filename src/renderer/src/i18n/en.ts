@@ -185,5 +185,7 @@ export const en: Translation = {
   timeoutError: 'Timeout.',
   timeoutErrorHint: 'The request took too long.',
   unknownError: 'Unknown error.',
-  unknownErrorHint: 'Something went wrong.'
+  unknownErrorHint: 'Something went wrong.',
+  retryCount: 'Retry count',
+  retriedCount: (n: number) => `Retried ${n} time${n > 1 ? 's' : ''} — tried source URL 3 times, then preview URL 3 times`
 }

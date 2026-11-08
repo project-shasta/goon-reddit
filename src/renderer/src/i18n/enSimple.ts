@@ -187,5 +187,7 @@ export const enSimple: Translation = {
   timeoutError: 'Time out.',
   timeoutErrorHint: 'The request took too long.',
   unknownError: 'Unknown error.',
-  unknownErrorHint: 'Something went wrong.'
+  unknownErrorHint: 'Something went wrong.',
+  retryCount: 'Retry count',
+  retriedCount: (n: number) => `Tried again ${n} time${n > 1 ? 's' : ''} — tried the main link 3 times, then the small preview link 3 times`
 }

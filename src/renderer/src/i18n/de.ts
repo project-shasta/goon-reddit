@@ -187,5 +187,7 @@ export const de: Translation = {
   timeoutError: 'Zeitüberschreitung.',
   timeoutErrorHint: 'Die Anfrage dauerte zu lange.',
   unknownError: 'Unbekannter Fehler.',
-  unknownErrorHint: 'Etwas ist schief gelaufen.'
+  unknownErrorHint: 'Etwas ist schief gelaufen.',
+  retryCount: 'Wiederholungsanzahl',
+  retriedCount: (n: number) => `${n} Mal wiederholt — Quell-URL 3 Mal versucht, dann Vorschau-URL 3 Mal`
 }

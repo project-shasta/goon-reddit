@@ -187,5 +187,7 @@ export const cyberpunk: Translation = {
   timeoutError: 'Timeout.',
   timeoutErrorHint: 'The request took too long.',
   unknownError: 'Unknown error.',
-  unknownErrorHint: 'Something went wrong.'
+  unknownErrorHint: 'Something went wrong.',
+  retryCount: 'Retry count',
+  retriedCount: (n: number) => `Retried ${n} times — source URL 3 attempts, preview URL 3 attempts`
 }
