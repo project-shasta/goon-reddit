@@ -1,11 +1,11 @@
 @echo off
 echo ========================================
-echo  GoOn Reddit - Build Package
+echo  GoOn ReDdIt - Build Package
 echo ========================================
 echo.
 
 echo [1/5] Stopping any running Electron processes...
-taskkill /F /IM "GoOn Reddit.exe" 2>nul
+taskkill /F /IM "GoOn ReDdIt.exe" 2>nul
 taskkill /F /IM electron.exe 2>nul
 timeout /t 2 /nobreak >nul
 

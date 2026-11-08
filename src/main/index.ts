@@ -15,7 +15,7 @@ import { HistoryStore } from './history'
 registerMediaScheme()
 
 app.userAgentFallback = CHROME_UA
-app.setName('GoOn Reddit')
+app.setName('GoOn ReDdIt')
 // Everything the app writes lives next to the app itself. This must happen
 // before whenReady() and before any session is created.
 configureUserData()
@@ -47,7 +47,7 @@ function createMainWindow(): BrowserWindow {
     show: false,
     autoHideMenuBar: true,
     backgroundColor: '#0b0d12',
-    title: 'GoOn Reddit',
+    title: 'GoOn ReDdIt',
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,

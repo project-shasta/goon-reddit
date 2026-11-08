@@ -1,4 +1,4 @@
-# GoOn Reddit
+# GoOn ReDdIt
 ## The Reddit gallery downloader
 
 A small Electron app that logs into Reddit with **your own session**, scans a subreddit's newest

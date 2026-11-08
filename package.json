@@ -1,5 +1,5 @@
 {
-  "name": "goon-reddit",
+  "name": "goon-redit",
   "version": "0.1.0",
   "description": "Fetch images, galleries and videos from Reddit",
   "main": "./out/main/index.js",
