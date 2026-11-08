@@ -39,6 +39,7 @@ const api: RendererApi = {
   openFolder: (directory: string) => ipcRenderer.invoke(IPC.shellOpenFolder, directory),
   historyTotal: () => ipcRenderer.invoke(IPC.historyTotal),
   historyClear: () => ipcRenderer.invoke(IPC.historyClear),
+  shellBeep: () => ipcRenderer.invoke(IPC.shellBeep),
   onAuthState: (callback: (status: AuthStatus) => void) =>
     subscribe<AuthStatus>(IPC.authState, callback),
   onJobState: (callback: (state: JobState) => void) =>

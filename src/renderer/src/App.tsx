@@ -126,7 +126,10 @@ export default function App(): React.JSX.Element {
     const offAuth = window.api.onAuthState((status) => setAuth(status))
     const offJob = window.api.onJobState((state) => {
       setJob(state)
-      if (state.phase === 'done' || state.phase === 'cancelled' || state.phase === 'error') {
+      if (state.phase === 'done') {
+        void window.api.shellBeep().catch(() => undefined)
+        refreshHistoryCount()
+      } else if (state.phase === 'cancelled' || state.phase === 'error') {
         refreshHistoryCount()
       }
       if (state.subreddit?.name) {

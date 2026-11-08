@@ -21,5 +21,6 @@ export const IPC = {
   shellRevealFile: 'shell:reveal-file',
   shellOpenFolder: 'shell:open-folder',
   historyTotal: 'history:total',
-  historyClear: 'history:clear'
+  historyClear: 'history:clear',
+  shellBeep: 'shell:beep'
 } as const

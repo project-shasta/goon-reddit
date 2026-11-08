@@ -205,6 +205,7 @@ export interface RendererApi {
   openFolder(path: string): Promise<boolean>
   historyTotal(): Promise<number>
   historyClear(): Promise<void>
+  shellBeep(): Promise<boolean>
   setTheme(theme: string): void
   setLanguage(lang: string): void
   onAuthState(callback: (status: AuthStatus) => void): () => void

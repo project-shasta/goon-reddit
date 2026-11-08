@@ -170,4 +170,9 @@ export function registerIpcHandlers(ctx: IpcContext): void {
     if (error) throw new Error(error)
     return true
   })
+
+  ipcMain.handle(IPC.shellBeep, async () => {
+    shell.beep()
+    return true
+  })
 }
