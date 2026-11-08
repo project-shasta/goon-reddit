@@ -4,6 +4,7 @@ export const IPC = {
   authLogout: 'auth:logout',
   authState: 'auth:state',
   subredditValidate: 'subreddit:validate',
+  userValidate: 'user:validate',
   jobStart: 'job:start',
   jobCancel: 'job:cancel',
   jobState: 'job:state',

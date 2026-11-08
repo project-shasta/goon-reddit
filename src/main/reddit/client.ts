@@ -1,6 +1,6 @@
 import { BrowserWindow, type Session } from 'electron'
 import { RedditError } from './errors'
-import { buildListingRequests } from './listing'
+import { buildListingRequests, buildUserListingRequests } from './listing'
 
 export const REDDIT_BASE = 'https://www.reddit.com'
 export const REDDIT_PARTITION = 'persist:reddit'
@@ -372,6 +372,40 @@ export class RedditClient {
     throw new RedditError('UNKNOWN', 'Reddit returned an unexpected listing response.')
   }
 
+  /**
+   * User archive listing: `/user/{username}/submitted.json`.
+   * Returns posts submitted by a specific user across all subreddits.
+   */
+  private async getUserListingPage(
+    username: string,
+    after: string | null,
+    signal?: AbortSignal,
+    sortOrder: 'new' | 'hot' | 'top' | 'rising' = 'new'
+  ): Promise<any> {
+    let lastError: unknown = null
+
+    for (const request of buildUserListingRequests(username, after, 100, sortOrder)) {
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
+      try {
+        return await this.getJson<any>(request.url, signal)
+      } catch (err) {
+        if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
+        if (err instanceof RedditError && err.code === 'AUTH_REQUIRED') throw err
+        if (
+          err instanceof RedditError &&
+          (err.code === 'BLOCKED' || err.code === 'FORBIDDEN' || err.code === 'NOT_FOUND')
+        ) {
+          lastError = err
+          continue
+        }
+        throw err
+      }
+    }
+
+    if (lastError instanceof RedditError) throw lastError
+    throw new RedditError('UNKNOWN', 'Reddit returned an unexpected listing response.')
+  }
+
   async *pages(
     subreddit: string,
     options: { signal?: AbortSignal; sortOrder?: 'new' | 'hot' | 'top' | 'rising' } = {}
@@ -381,6 +415,39 @@ export class RedditClient {
 
     for (let page = 0; page < 10000; page++) {
       const json = await this.getListingPage(subreddit, after, options.signal, options.sortOrder)
+      const children = json?.data?.children
+
+      if (!Array.isArray(children)) {
+        throw new RedditError('UNKNOWN', 'Reddit returned an unexpected listing response.')
+      }
+
+      const posts = children
+        .map((child: any) => child?.data)
+        .filter((post: unknown): post is RedditPost => Boolean(post))
+
+      after = typeof json?.data?.after === 'string' ? json.data.after : null
+      yield { posts, after }
+
+      if (!after || posts.length === 0) return
+      if (after === previousAfter) return
+      previousAfter = after
+      await sleep(1100 + Math.random() * 400, options.signal)
+    }
+  }
+
+  /**
+   * Iterate through a user's submitted posts (user archive).
+   * Returns posts in the same format as `pages()`.
+   */
+  async *userPages(
+    username: string,
+    options: { signal?: AbortSignal; sortOrder?: 'new' | 'hot' | 'top' | 'rising' } = {}
+  ): AsyncGenerator<{ posts: RedditPost[]; after: string | null }> {
+    let after: string | null = null
+    let previousAfter: string | null = null
+
+    for (let page = 0; page < 10000; page++) {
+      const json = await this.getUserListingPage(username, after, options.signal, options.sortOrder)
       const children = json?.data?.children
 
       if (!Array.isArray(children)) {

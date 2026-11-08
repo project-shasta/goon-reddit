@@ -6,7 +6,8 @@ import type {
   JobOptions,
   JobState,
   MediaItem,
-  SubredditInfo
+  SubredditInfo,
+  UserInfo
 } from '@shared/types'
 import { safeFilename } from '@shared/filename'
 import type { AuthManager } from './auth'
@@ -16,7 +17,7 @@ import { allowMediaRoot } from './mediaProtocol'
 import { extractMedia } from './reddit/extract'
 import { errorMessage, isRedditError } from './reddit/errors'
 import { sleep } from './reddit/client'
-import { validateSubreddit } from './reddit/validate'
+import { validateSubreddit, validateUser } from './reddit/validate'
 import { downloadToFile, runPool, uniqueDestination } from './download/queue'
 import { downloadWithFfmpeg } from './download/ffmpeg'
 import { downloadWithYtDlp } from './download/ytdlp'
@@ -40,6 +41,7 @@ function initialState(): JobState {
     phase: 'idle',
     mode: 'download',
     subreddit: null,
+    user: null,
     scannedPosts: 0,
     discovered: 0,
     completed: 0,
@@ -128,6 +130,7 @@ export class JobRunner {
     this.running = true
     this.state = {
       ...initialState(),
+      mode: options.mode,
       startedAt: Date.now()
     }
     this.setPhase('validating')
@@ -141,48 +144,11 @@ export class JobRunner {
         )
       }
 
-      const subreddit = await validateSubreddit(
-        this.deps.auth.client,
-        options.subreddit,
-        controller.signal
-      )
-      this.state.subreddit = subreddit
-      this.deps.log(
-        'info',
-        `r/${subreddit.name} — ${subreddit.subscribers?.toLocaleString() ?? '?'} members${
-          subreddit.over18 ? ' — NSFW' : ''
-        }`
-      )
-      if (subreddit.quarantined) {
-        this.deps.log('warn', 'This subreddit is quarantined; it may require opt-in on Reddit.')
-      }
-
-      await fsp.mkdir(path.join(destination, safeFilename(subreddit.name)), { recursive: true })
-
-      const media = await this.scan(subreddit, options, destination, controller.signal)
-      const prioritized = this.prioritizeLargeImages(media)
-
-      if (prioritized.length === 0) {
-        this.state.finishedAt = Date.now()
-        this.setPhase('done', 'No downloadable media found in the scanned posts.')
-        return
-      }
-
-      await this.downloadAll(prioritized, subreddit, options, destination, controller.signal)
-
-      this.state.finishedAt = Date.now()
-      const summary = `Downloaded ${this.state.completed} file${
-        this.state.completed === 1 ? '' : 's'
-      }${this.state.skipped ? `, skipped ${this.state.skipped}` : ''}${
-        this.state.failed ? `, ${this.state.failed} failed` : ''
-      }.`
-
-      if (controller.signal.aborted) {
-        this.setPhase('cancelled', `Cancelled. ${summary}`)
+      if (options.mode === 'archive') {
+        await this.startArchive(options, destination, controller.signal)
       } else {
-        this.setPhase('done', summary)
+        await this.startDownload(options, destination, controller.signal)
       }
-      this.deps.log(controller.signal.aborted ? 'warn' : 'success', summary)
     } catch (err) {
       this.state.finishedAt = Date.now()
       if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError')) {
@@ -200,6 +166,99 @@ export class JobRunner {
       this.controller = null
       if (this.state.phase !== 'done' && this.state.phase !== 'error') this.emit()
     }
+  }
+
+  /** Start a user archive job (downloads posts from a user's archive). */
+  private async startArchive(
+    options: JobOptions,
+    destination: string,
+    signal: AbortSignal
+  ): Promise<void> {
+    const user = await validateUser(this.deps.auth.client, options.subreddit, signal)
+    this.state.user = user
+    this.deps.log(
+      'info',
+      `u/${user.name} — ${user.linkKarma?.toLocaleString() ?? '?'} link karma, ${
+        user.commentKarma?.toLocaleString() ?? '?'
+      } comment karma`
+    )
+
+    await fsp.mkdir(path.join(destination, safeFilename(user.name)), { recursive: true })
+
+    const media = await this.scanUserArchive(user, options, destination, signal)
+    const prioritized = this.prioritizeLargeImages(media)
+
+    if (prioritized.length === 0) {
+      this.state.finishedAt = Date.now()
+      this.setPhase('done', 'No downloadable media found in the scanned posts.')
+      return
+    }
+
+    await this.downloadAll(prioritized, user, options, destination, signal)
+
+    this.state.finishedAt = Date.now()
+    const summary = `Downloaded ${this.state.completed} file${
+      this.state.completed === 1 ? '' : 's'
+    }${this.state.skipped ? `, skipped ${this.state.skipped}` : ''}${
+      this.state.failed ? `, ${this.state.failed} failed` : ''
+    }.`
+
+    if (signal.aborted) {
+      this.setPhase('cancelled', `Cancelled. ${summary}`)
+    } else {
+      this.setPhase('done', summary)
+    }
+    this.deps.log(signal.aborted ? 'warn' : 'success', summary)
+  }
+
+  /** Start a subreddit download job. */
+  private async startDownload(
+    options: JobOptions,
+    destination: string,
+    signal: AbortSignal
+  ): Promise<void> {
+    const subreddit = await validateSubreddit(
+      this.deps.auth.client,
+      options.subreddit,
+      signal
+    )
+    this.state.subreddit = subreddit
+    this.deps.log(
+      'info',
+      `r/${subreddit.name} — ${subreddit.subscribers?.toLocaleString() ?? '?'} members${
+        subreddit.over18 ? ' — NSFW' : ''
+      }`
+    )
+    if (subreddit.quarantined) {
+      this.deps.log('warn', 'This subreddit is quarantined; it may require opt-in on Reddit.')
+    }
+
+    await fsp.mkdir(path.join(destination, safeFilename(subreddit.name)), { recursive: true })
+
+    const media = await this.scan(subreddit, options, destination, signal)
+    const prioritized = this.prioritizeLargeImages(media)
+
+    if (prioritized.length === 0) {
+      this.state.finishedAt = Date.now()
+      this.setPhase('done', 'No downloadable media found in the scanned posts.')
+      return
+    }
+
+    await this.downloadAll(prioritized, subreddit, options, destination, signal)
+
+    this.state.finishedAt = Date.now()
+    const summary = `Downloaded ${this.state.completed} file${
+      this.state.completed === 1 ? '' : 's'
+    }${this.state.skipped ? `, skipped ${this.state.skipped}` : ''}${
+      this.state.failed ? `, ${this.state.failed} failed` : ''
+    }.`
+
+    if (signal.aborted) {
+      this.setPhase('cancelled', `Cancelled. ${summary}`)
+    } else {
+      this.setPhase('done', summary)
+    }
+    this.deps.log(signal.aborted ? 'warn' : 'success', summary)
   }
 
   private extractOptions(options: JobOptions) {
@@ -279,6 +338,77 @@ export class JobRunner {
     return media
   }
 
+  /**
+   * Scan a user's archive (submitted posts).
+   * Uses `client.userPages()` instead of `client.pages()`.
+   */
+  private async scanUserArchive(
+    user: UserInfo,
+    options: JobOptions,
+    destination: string,
+    signal: AbortSignal
+  ): Promise<MediaItem[]> {
+    this.setPhase('scanning')
+    const media: MediaItem[] = []
+    const seen = new Set<string>()
+    const seenFiles = new Set<string>()
+    const maxPosts = options.maxPosts > 0 ? options.maxPosts : Number.POSITIVE_INFINITY
+    const folder = path.join(destination, safeFilename(user.name))
+    let scanned = 0
+
+    for await (const page of this.deps.auth.client.userPages(user.name, {
+      signal,
+      sortOrder: options.sortOrder
+    })) {
+      if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
+      const batch: MediaItem[] = []
+
+      for (const post of page.posts) {
+        if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
+        if (scanned >= maxPosts) break
+        scanned++
+
+        const extracted = extractMedia(post, this.extractOptions(options))
+        for (const item of extracted) {
+          // Crossposts keep the original post's ID in `item.postId`; check that
+          // too so a crosspost is recorded against the ID later sent to history.
+          if (this.deps.history.has(user.name, item.postId)) continue
+          if (seen.has(item.id)) continue
+          seen.add(item.id)
+
+          // Skip posts that have already been downloaded (per history).
+          if (this.deps.history.has(user.name, post.id)) {
+            continue
+          }
+
+          item.filename = safeFilename(item.filename)
+          const initialPath = path.join(folder, item.filename)
+
+          if (seenFiles.has(initialPath) && options.skipExisting) continue
+          seenFiles.add(initialPath)
+
+          if (options.skipExisting && fs.existsSync(initialPath)) {
+            item.localPath = initialPath
+          }
+
+          media.push(item)
+          batch.push(item)
+        }
+      }
+
+      this.state.scannedPosts = scanned
+      this.state.discovered = media.length
+      this.emit()
+      if (batch.length > 0) this.deps.emitMedia(batch)
+      if (scanned >= maxPosts) break
+    }
+
+    this.state.scannedPosts = scanned
+    this.state.discovered = media.length
+    this.emit()
+    return media
+  }
+
   /** Sort images so large ones download first; small/thumbnail images go to the end. */
   private prioritizeLargeImages(media: MediaItem[]): MediaItem[] {
     const THUMBNAIL_MAX = 700
@@ -292,13 +422,13 @@ export class JobRunner {
 
   private async downloadAll(
     media: MediaItem[],
-    subreddit: SubredditInfo,
+    target: SubredditInfo | UserInfo,
     options: JobOptions,
     destination: string,
     signal: AbortSignal
   ): Promise<void> {
     this.setPhase('downloading')
-    const folder = path.join(destination, safeFilename(subreddit.name))
+    const folder = path.join(destination, safeFilename(target.name))
     const reserved = new Set<string>()
 
     this.postItemTotals = new Map<string, number>()
@@ -309,7 +439,7 @@ export class JobRunner {
 
     await runPool(media, options.concurrency, async (item) => {
       if (signal.aborted) return
-      await this.downloadItem(item, folder, options.skipExisting, reserved, signal, subreddit.name)
+      await this.downloadItem(item, folder, options.skipExisting, reserved, signal, target.name)
     })
   }
 

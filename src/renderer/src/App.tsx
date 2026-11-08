@@ -2,11 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   AppSettings,
   AuthStatus,
+  DownloadMode,
   JobState,
   LogEntry,
   LanguageId,
   SortOrder,
-  SubredditInfo
+  SubredditInfo,
+  UserInfo
 } from '@shared/types'
 import { useI18n, languageIds, languageLabel } from './i18n'
 import { DownloaderView } from './components/DownloaderView'
@@ -31,6 +33,7 @@ const INITIAL_JOB: JobState = {
   phase: 'idle',
   mode: 'download',
   subreddit: null,
+  user: null,
   scannedPosts: 0,
   discovered: 0,
   completed: 0,
@@ -55,6 +58,7 @@ export default function App(): React.JSX.Element {
     () => localStorage.getItem(SUBREDDIT_STORAGE_KEY) ?? ''
   )
   const [validated, setValidated] = useState<SubredditInfo | null>(null)
+  const [user, setUser] = useState<UserInfo | null>(null)
   const [validating, setValidating] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
   const [startupError, setStartupError] = useState<string | null>(null)
@@ -64,6 +68,7 @@ export default function App(): React.JSX.Element {
   const [showLangPicker, setShowLangPicker] = useState(false)
   const [language, setLanguage] = useState<LanguageId>('en')
   const [sortOrder, setSortOrder] = useState<SortOrder>('new')
+  const [mode, setMode] = useState<DownloadMode>('download')
   const t = useI18n(language)
 
   const addLog = useCallback((entry: LogEntry) => {
@@ -160,35 +165,47 @@ export default function App(): React.JSX.Element {
     setValidating(true)
     setValidationError(null)
     try {
-      const info = await window.api.validateSubreddit(name)
-      setValidated(info)
-      setSubredditInput(info.name)
+      if (mode === 'archive') {
+        const info = await window.api.validateUser(name)
+        setUser(info)
+        setValidated(null)
+        setSubredditInput(info.name)
+      } else {
+        const info = await window.api.validateSubreddit(name)
+        setValidated(info)
+        setUser(null)
+        setSubredditInput(info.name)
+      }
     } catch (err) {
       setValidated(null)
+      setUser(null)
       setValidationError(errorText(err))
     } finally {
       setValidating(false)
       validatingRef.current = false
     }
-  }, [subredditInput])
+  }, [subredditInput, mode])
 
   const handleStart = useCallback(
-    async (mode: JobState['mode']) => {
+    async (nextMode: DownloadMode) => {
       if (!settings) return
       const name = subredditInput.trim()
       if (!name) return
 
       setValidationError(null)
-      if (validated && validated.name.toLowerCase() !== name.replace(/^r\//i, '').toLowerCase()) {
+      if (mode !== nextMode) {
+        setValidated(null)
+        setUser(null)
+      } else if (mode === 'download' && validated && validated.name.toLowerCase() !== name.replace(/^r\//i, '').toLowerCase()) {
         setValidated(null)
       }
-      setJob({ ...INITIAL_JOB, mode, phase: 'validating', startedAt: Date.now() })
+      setJob({ ...INITIAL_JOB, mode: nextMode, phase: 'validating', startedAt: Date.now() })
 
       try {
         await window.api.startJob({
           subreddit: name,
           destination: settings.destination,
-          mode,
+          mode: nextMode,
           maxPosts: settings.maxPosts,
           concurrency: settings.concurrency,
           includeImages: settings.includeImages,
@@ -204,7 +221,7 @@ export default function App(): React.JSX.Element {
         addLog({ level: 'error', message: errorText(err), time: Date.now() })
       }
     },
-    [settings, subredditInput, addLog, validated, sortOrder]
+    [settings, subredditInput, addLog, validated, mode, sortOrder]
   )
 
   const handleCancel = useCallback(() => {
@@ -460,13 +477,16 @@ export default function App(): React.JSX.Element {
             logs={logs}
             subredditInput={subredditInput}
             validated={validated}
+            user={user}
             validating={validating}
             validationError={validationError}
+            mode={mode}
+            onModeChange={setMode}
             sortOrder={sortOrder}
             onSortOrderChange={setSortOrder}
             onInputChange={setSubredditInput}
             onValidate={() => void handleValidate()}
-            onStart={(mode) => void handleStart(mode)}
+            onStart={(nextMode) => void handleStart(nextMode)}
             onCancel={handleCancel}
             onAuthChanged={refreshAuth}
             onClearLogs={() => setLogs([])}

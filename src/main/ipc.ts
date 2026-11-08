@@ -1,14 +1,14 @@
 import { BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import path from 'node:path'
 import { IPC } from '@shared/ipc'
-import type { AppSettings, JobOptions, LogEntry } from '@shared/types'
+import type { AppSettings, DownloadMode, JobOptions, LogEntry } from '@shared/types'
 import type { AuthManager } from './auth'
 import type { JobRunner } from './job'
 import type { SettingsStore } from './settings'
 import type { HistoryStore } from './history'
 import type { ToolManager } from './tooling'
 import { allowMediaRoot } from './mediaProtocol'
-import { validateSubreddit } from './reddit/validate'
+import { validateSubreddit, validateUser } from './reddit/validate'
 import { errorMessage } from './reddit/errors'
 
 export interface IpcContext {
@@ -33,7 +33,7 @@ function asBool(value: unknown, fallback: boolean): boolean {
 
 function buildJobOptions(raw: Partial<JobOptions>, settings: AppSettings): JobOptions {
   const subreddit = String(raw.subreddit ?? '').trim()
-  if (!subreddit) throw new Error('Enter a subreddit name.')
+  if (!subreddit) throw new Error('Enter a subreddit or username.')
 
   const destination = path.resolve(
     typeof raw.destination === 'string' && raw.destination.trim()
@@ -41,10 +41,13 @@ function buildJobOptions(raw: Partial<JobOptions>, settings: AppSettings): JobOp
       : settings.destination
   )
 
+  const mode: DownloadMode =
+    (raw.mode === 'archive' ? 'archive' : 'download') as DownloadMode
+
   const options: JobOptions = {
     subreddit,
     destination,
-    mode: 'download',
+    mode,
     maxPosts: clampInt(raw.maxPosts, 0, 100000, settings.maxPosts),
     concurrency: clampInt(raw.concurrency, 1, 8, settings.concurrency),
     includeImages: asBool(raw.includeImages, settings.includeImages),
@@ -84,6 +87,10 @@ export function registerIpcHandlers(ctx: IpcContext): void {
 
   ipcMain.handle(IPC.subredditValidate, async (_event, name: string) => {
     return validateSubreddit(ctx.auth.client, String(name ?? ''))
+  })
+
+  ipcMain.handle(IPC.userValidate, async (_event, name: string) => {
+    return validateUser(ctx.auth.client, String(name ?? ''))
   })
 
   ipcMain.handle(IPC.jobStart, async (_event, raw: Partial<JobOptions>) => {

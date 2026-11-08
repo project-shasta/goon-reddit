@@ -2,11 +2,13 @@ import { useState } from 'react'
 import type {
   AppSettings,
   AuthStatus,
+  DownloadMode,
   JobState,
   LanguageId,
   LogEntry,
   SortOrder,
-  SubredditInfo
+  SubredditInfo,
+  UserInfo
 } from '@shared/types'
 import { useI18n } from '../i18n'
 import { SubredditBar } from './SubredditBar'
@@ -20,13 +22,16 @@ export interface DownloaderViewProps {
   logs: LogEntry[]
   subredditInput: string
   validated: SubredditInfo | null
+  user: UserInfo | null
   validating: boolean
   validationError: string | null
+  mode: DownloadMode
+  onModeChange: (mode: DownloadMode) => void
   sortOrder: SortOrder
   onSortOrderChange: (order: SortOrder) => void
   onInputChange: (value: string) => void
   onValidate: () => void
-  onStart: (mode: 'download') => void
+  onStart: (mode: DownloadMode) => void
   onCancel: () => void
   onAuthChanged: () => void
   onClearLogs: () => void
@@ -41,8 +46,11 @@ export function DownloaderView({
   logs,
   subredditInput,
   validated,
+  user,
   validating,
   validationError,
+  mode,
+  onModeChange,
   sortOrder,
   onSortOrderChange,
   onInputChange,
@@ -65,8 +73,11 @@ export function DownloaderView({
         value={subredditInput}
         onChange={onInputChange}
         validated={validated}
+        user={user}
         validating={validating}
         validationError={validationError}
+        mode={mode}
+        onModeChange={onModeChange}
         onValidate={onValidate}
         sortOrder={sortOrder}
         onSortOrderChange={onSortOrderChange}

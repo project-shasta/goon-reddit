@@ -79,6 +79,8 @@ export const en: Translation = {
   unsavedChanges: 'Unsaved changes',
   knownPosts: 'Known posts',
   clearKnown: 'Clear known',
+  mode: 'Mode',
+  archive: 'Archive',
   wipeTheSlateClean: 'Wipe the slate clean?',
   forgetKnown: (n: number) =>
     `This will forget ${n.toLocaleString()} known posts across all subreddits. Next scan will re-download everything.`,

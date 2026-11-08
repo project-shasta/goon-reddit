@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { JobState, LanguageId, SortOrder, SubredditInfo } from '@shared/types'
+import type { DownloadMode, JobState, LanguageId, SortOrder, SubredditInfo, UserInfo } from '@shared/types'
 import { useI18n } from '../i18n'
 import {
   IconAlert,
@@ -17,12 +17,15 @@ interface SubredditBarProps {
   value: string
   onChange: (value: string) => void
   validated: SubredditInfo | null
+  user: UserInfo | null
   validating: boolean
   validationError: string | null
+  mode: DownloadMode
+  onModeChange: (mode: DownloadMode) => void
   sortOrder: 'new' | 'hot' | 'top' | 'rising'
   onSortOrderChange: (order: 'new' | 'hot' | 'top' | 'rising') => void
   onValidate: () => void
-  onStart: (mode: 'download') => void
+  onStart: (mode: DownloadMode) => void
   onCancel: () => void
   job: JobState
   canStart: boolean
@@ -32,8 +35,11 @@ export function SubredditBar({
   value,
   onChange,
   validated,
+  user,
   validating,
   validationError,
+  mode,
+  onModeChange,
   sortOrder,
   onSortOrderChange,
   onValidate,
@@ -56,7 +62,7 @@ export function SubredditBar({
           </label>
           <div className="flex items-center gap-2">
             <span className="shrink-0 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-zinc-500">
-              r/
+              {mode === 'archive' ? 'u/' : 'r/'}
             </span>
             <input
               id="subreddit"
@@ -86,6 +92,37 @@ export function SubredditBar({
           />
         </div>
 
+        <div className="min-w-[130px]">
+          <label className="label" htmlFor="download-mode">
+            {t.mode as string}
+          </label>
+          <div className="flex gap-1 rounded-xl border border-white/10 bg-black/30 p-1">
+            <button
+              id="download-mode"
+              className={`flex-1 rounded-lg px-2 py-1.5 text-xs transition-colors ${
+                mode === 'download'
+                  ? 'bg-orange-500/15 text-orange-300'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+              onClick={() => onModeChange('download')}
+              disabled={running}
+            >
+              {t.download as string}
+            </button>
+            <button
+              className={`flex-1 rounded-lg px-2 py-1.5 text-xs transition-colors ${
+                mode === 'archive'
+                  ? 'bg-orange-500/15 text-orange-300'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+              onClick={() => onModeChange('archive')}
+              disabled={running}
+            >
+              {t.archive as string}
+            </button>
+          </div>
+        </div>
+
         <button
           className="btn btn-secondary"
           onClick={() => void onValidate()}
@@ -103,7 +140,7 @@ export function SubredditBar({
         ) : (
           <button
             className="btn btn-primary"
-            onClick={() => onStart('download')}
+            onClick={() => onStart(mode)}
             disabled={!canStart}
           >
             <IconDownload size={15} />
@@ -112,10 +149,12 @@ export function SubredditBar({
         )}
       </div>
 
-      {validating && !validated && (
+      {validating && !validated && !user && (
         <p className="flex items-center gap-2 text-xs text-zinc-500">
           <IconSpinner size={13} className="text-orange-400" />
-          {(t.scanCheckingSubreddit as string)} r/{value.trim()}…
+          {mode === 'archive'
+            ? (t.scanCheckingSubreddit as string)
+            : (t.scanCheckingSubreddit as string)} {value.trim()}…
         </p>
       )}
 
@@ -162,6 +201,51 @@ export function SubredditBar({
               if (validated.name) {
                 void window.api
                   .openExternal(`https://www.reddit.com/r/${validated.name}/new/`)
+                  .catch(() => undefined)
+              }
+            }}
+            title={t.openOnReddit as string}
+          >
+            <IconExternal size={14} />
+          </a>
+        </div>
+      )}
+
+      {user && (
+        <div className="fade-in flex items-center gap-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2.5">
+          {user.iconUrl ? (
+            <img
+              src={user.iconUrl}
+              alt=""
+              className="h-9 w-9 shrink-0 rounded-full border border-white/10 object-cover"
+            />
+          ) : (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500/15 text-sm font-bold text-orange-400">
+              u/
+            </span>
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-semibold text-zinc-100">u/{user.name}</span>
+              {user.isGold && <span className="badge bg-amber-500/15 text-amber-300">Gold</span>}
+              {user.isMod && <span className="badge bg-emerald-500/15 text-emerald-300">Mod</span>}
+              <span className="text-xs text-zinc-500">
+                {user.linkKarma !== null ? `${user.linkKarma.toLocaleString()} link karma` : ''}
+                {user.commentKarma !== null ? `, ${user.commentKarma.toLocaleString()} comment karma` : ''}
+              </span>
+            </div>
+            <p className="truncate text-xs text-zinc-500">
+              {user.createdUtc ? `Created ${new Date(user.createdUtc * 1000).toLocaleDateString()}` : ''}
+            </p>
+          </div>
+          <a
+            className="btn btn-ghost shrink-0 px-2 py-1.5"
+            href={user.name ? `https://www.reddit.com/user/${user.name}/submitted/` : '#'}
+            onClick={(event) => {
+              event.preventDefault()
+              if (user.name) {
+                void window.api
+                  .openExternal(`https://www.reddit.com/user/${user.name}/submitted/`)
                   .catch(() => undefined)
               }
             }}

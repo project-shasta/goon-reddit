@@ -11,6 +11,17 @@ export interface SubredditInfo {
   validatedAt: number
 }
 
+export interface UserInfo {
+  name: string
+  linkKarma: number | null
+  commentKarma: number | null
+  iconUrl: string | null
+  createdUtc: number | null
+  isGold: boolean
+  isMod: boolean
+  validatedAt: number
+}
+
 export type MediaKind = 'image' | 'gallery' | 'video' | 'external-video' | 'external-image'
 
 export type VideoStrategy = 'dash' | 'hls' | 'fallback' | 'ytdlp'
@@ -79,10 +90,13 @@ export type JobPhase =
   | 'cancelled'
   | 'error'
 
+export type DownloadMode = 'download' | 'archive'
+
 export interface JobState {
   phase: JobPhase
-  mode: 'download'
+  mode: DownloadMode
   subreddit: SubredditInfo | null
+  user: UserInfo | null
   scannedPosts: number
   discovered: number
   completed: number
@@ -150,7 +164,7 @@ export interface ToolsStatus {
 export interface JobOptions {
   subreddit: string
   destination: string
-  mode: 'download'
+  mode: DownloadMode
   maxPosts: number
   concurrency: number
   includeImages: boolean
@@ -178,6 +192,7 @@ export interface RendererApi {
   openLogin(): Promise<boolean>
   logout(): Promise<boolean>
   validateSubreddit(name: string): Promise<SubredditInfo>
+  validateUser(name: string): Promise<UserInfo>
   startJob(options: Partial<JobOptions>): Promise<boolean>
   cancelJob(): Promise<boolean>
   getSettings(): Promise<AppSettings>

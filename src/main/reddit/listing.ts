@@ -33,3 +33,28 @@ export function buildListingRequests(
     { label: 'legacy', url: `/r/${name}/${sort === 'rising' ? 'new' : sort}.json?${query}` }
   ]
 }
+
+/**
+ * User archive listing: `/user/{username}/submitted.json`.
+ * Returns posts submitted by a specific user across all subreddits.
+ */
+export function buildUserListingRequests(
+  username: string,
+  after: string | null,
+  limit = 100,
+  sort: SortOrder = 'new'
+): ListingRequest[] {
+  const name = encodeURIComponent(username)
+  const params = new URLSearchParams({
+    sort,
+    limit: String(Math.max(1, Math.min(100, Math.round(limit)))),
+    raw_json: '1',
+    include_over_18: 'on'
+  })
+  if (after) params.set('after', after)
+  const query = params.toString()
+
+  return [
+    { label: `user archive (${sort})`, url: `/user/${name}/submitted.json?${query}` }
+  ]
+}
