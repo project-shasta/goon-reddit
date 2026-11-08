@@ -226,3 +226,15 @@ Git told it to, and a sort-order dropdown that appeared after someone asked "wha
 pick?" at 3 AM.
 
 **This is not a bug. This is the feature.**
+
+---
+
+## Personal notes
+
+This app is mostly a test of what I could do with opencode and a local Qwen 3.6 35B A3B model hosted on LM Studio on my new company MacBook M5 Pro. I am a senior frontend developer by day but this experiment has showed me what these local models are good at and where they still lack.
+
+The idea of a Reddit gallery downloader came to me because sites like peekstr.com or redditp.com had to basically shut down because Reddit blocked anonymous JSON API calls as of late 2026 which renders these services useless. As I have not seen any other project that attempts to solve this (there are some dubious browser addons that let you view the galleries?) I said *Fuck it, let's do it* and here we are.
+
+I had way too much fun with it and I think it shows. Most features are just useless fluff and/or stuff I thought was funny to add. AI is very patient. If I had to implement all of that myself I would have lost interest long before the end.
+
+And yes, I know what this app will be used for. To horny jail, all of you 🐶🔨🐕
