@@ -19,6 +19,7 @@ export const IPC = {
   toolsUpdateYtdlp: 'tools:update-ytdlp',
   toolsSetup: 'tools:setup',
   toolsDownload: 'tools:download',
+  toolsMissing: 'tools:missing',
   shellOpenExternal: 'shell:open-external',
   shellRevealFile: 'shell:reveal-file',
   shellOpenFolder: 'shell:open-folder',

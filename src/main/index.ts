@@ -122,11 +122,12 @@ if (startupError) {
     auth = new AuthManager(emitAuth)
     const historyStore = new HistoryStore()
     history = historyStore
+    const tools = new ToolManager(settings)
     job = new JobRunner({
       auth,
       settings,
       history: historyStore,
-      tools: new ToolManager(settings),
+      tools,
       emitState: (state: JobState) => send(IPC.jobState, state),
       emitMedia: (items: MediaItem[]) => send(IPC.jobMedia, items),
       emitMediaUpdate: (item: MediaItem) => send(IPC.jobMediaUpdate, item),
@@ -141,9 +142,25 @@ if (startupError) {
       job,
       settings,
       history: historyStore,
-      tools: new ToolManager(settings),
+      tools,
       getMainWindow: () => mainWindow,
       log: emitLog
+    })
+
+    // Check tools at startup and notify user if missing
+    tools.status().then((status) => {
+      const missing = []
+      if (!status.ffmpeg.ok) missing.push('ffmpeg')
+      if (!status.ytdlp.ok) missing.push('yt-dlp')
+      if (missing.length > 0) {
+        void new Notification({
+          title: 'GoOn ReDdIt',
+          body: `Missing ${missing.join(' and ')}. Open Settings to download.`
+        }).show()
+        send(IPC.toolsMissing, missing)
+      }
+    }).catch(() => {
+      // Ignore errors during startup check
     })
 
     void auth.refresh(true)

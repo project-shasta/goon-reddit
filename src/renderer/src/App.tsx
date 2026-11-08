@@ -69,6 +69,9 @@ export default function App(): React.JSX.Element {
   const [language, setLanguage] = useState<LanguageId>('en')
   const [sortOrder, setSortOrder] = useState<SortOrder>('new')
   const [mode, setMode] = useState<DownloadMode>('download')
+  const [missingTools, setMissingTools] = useState<string[]>([])
+  const [downloadingFfmpeg, setDownloadingFfmpeg] = useState(false)
+  const [downloadingYtDlp, setDownloadingYtDlp] = useState(false)
   const t = useI18n(language)
 
   const addLog = useCallback((entry: LogEntry) => {
@@ -139,12 +142,16 @@ export default function App(): React.JSX.Element {
       }
     })
     const offLog = window.api.onJobLog((entry) => addLog(entry))
+    const offToolsMissing = window.api.onToolsMissing((missing) => {
+      setMissingTools(missing)
+    })
 
     return () => {
       cancelled = true
       offAuth()
       offJob()
       offLog()
+      offToolsMissing()
     }
   }, [addLog, refreshHistoryCount])
 
@@ -236,6 +243,34 @@ export default function App(): React.JSX.Element {
       .then(setAuth)
       .catch((err) => addLog({ level: 'error', message: errorText(err), time: Date.now() }))
   }, [addLog])
+
+  const handleDownloadFfmpeg = useCallback(async () => {
+    setDownloadingFfmpeg(true)
+    try {
+      await window.api.downloadTool('ffmpeg')
+      setMissingTools([])
+    } catch (err) {
+      addLog({ level: 'error', message: errorText(err), time: Date.now() })
+    } finally {
+      setDownloadingFfmpeg(false)
+    }
+  }, [addLog])
+
+  const handleDownloadYtDlp = useCallback(async () => {
+    setDownloadingYtDlp(true)
+    try {
+      await window.api.downloadTool('yt-dlp')
+      setMissingTools([])
+    } catch (err) {
+      addLog({ level: 'error', message: errorText(err), time: Date.now() })
+    } finally {
+      setDownloadingYtDlp(false)
+    }
+  }, [addLog])
+
+  const dismissMissing = useCallback(() => {
+    setMissingTools([])
+  }, [])
 
   const handleSaveSettings = useCallback(
     async (patch: Partial<AppSettings>) => {
@@ -468,6 +503,46 @@ export default function App(): React.JSX.Element {
           </span>
         </div>
       </header>
+
+      {missingTools.length > 0 && (
+        <div className="flex items-center gap-3 border-b border-amber-500/20 bg-amber-500/5 px-4 py-2.5">
+          <span className="text-xs text-amber-300">
+            Missing{' '}
+            {missingTools.includes('ffmpeg') && missingTools.includes('yt-dlp')
+              ? 'ffmpeg and yt-dlp'
+              : missingTools.join(' and ')}
+            .
+          </span>
+          <div className="ml-auto flex items-center gap-2">
+            {missingTools.includes('ffmpeg') && (
+              <button
+                className="btn btn-secondary px-2 py-1 text-xs"
+                onClick={() => void handleDownloadFfmpeg()}
+                disabled={downloadingFfmpeg}
+              >
+                {downloadingFfmpeg ? <IconSpinner size={12} /> : null}
+                Download ffmpeg
+              </button>
+            )}
+            {missingTools.includes('yt-dlp') && (
+              <button
+                className="btn btn-secondary px-2 py-1 text-xs"
+                onClick={() => void handleDownloadYtDlp()}
+                disabled={downloadingYtDlp}
+              >
+                {downloadingYtDlp ? <IconSpinner size={12} /> : null}
+                Download yt-dlp
+              </button>
+            )}
+            <button
+              className="btn btn-ghost px-2 py-1 text-xs"
+              onClick={dismissMissing}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       <main className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4">
         {view === 'download' && (

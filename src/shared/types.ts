@@ -219,4 +219,5 @@ export interface RendererApi {
   onJobMedia(callback: (items: MediaItem[]) => void): () => void
   onJobMediaUpdate(callback: (item: MediaItem) => void): () => void
   onJobLog(callback: (entry: LogEntry) => void): () => void
+  onToolsMissing(callback: (missing: string[]) => void): () => void
 }
