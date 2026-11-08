@@ -1,8 +1,7 @@
 # Reddit Downloader
 
 A small Electron app that logs into Reddit with **your own session**, scans a subreddit's newest
-posts, and downloads images, galleries, Reddit-hosted videos, and external videos in parallel. It
-also includes a plain image slideshow of whatever it scanned.
+posts, and downloads images, galleries, Reddit-hosted videos, and external videos in parallel.
 
 Reddit blocks anonymous `.json` access, so the app opens a real Reddit login window and reuses that
 session for every request. Cookies never leave the main process.
@@ -30,13 +29,34 @@ npm run tools:setup
 
 yt-dlp is SHA-256 verified on download. You can update it later from **Settings → Tools**.
 
+## Build commands
+
+```powershell
+npm run build           # compile out/ only
+npm run build:win       # typecheck + build + zip archive
+.\build.bat             # double-click: stop processes, clean, build, pause for review
+```
+
+### Icon generation (PNG → ICO)
+
+The app icon is generated from a 256×256 PNG using Python/Pillow (installed via mise):
+
+```powershell
+mise exec -- python -c "
+from PIL import Image
+img = Image.open('node_modules/app-builder-lib/templates/icons/electron-linux/256x256.png')
+img = img.resize((256, 256), Image.LANCZOS).convert('RGBA')
+img.save('build/icon.ico', format='ICO', sizes=[(256, 256)])
+"
+```
+
+To use your own icon, replace the source path with your PNG and re-run the command.
+
 ## Run
 
 ```powershell
 npm run dev      # development, hot reload
 npm start        # preview the production build
-npm run build    # compile out/ only
-npm run build:win # typecheck + build + NSIS installer & zip archive
 ```
 
 ## Using the app
@@ -44,9 +64,7 @@ npm run build:win # typecheck + build + NSIS installer & zip archive
 1. Press **Log in on Reddit** and finish the normal Reddit login (including 2FA if enabled). The
    window closes itself once the session is verified.
 2. Type a subreddit name (for example `pics` or `r/pics`) and press **Check**.
-3. Choose one of:
-   - **Download new** — scans newest posts, then downloads matching media.
-   - **Scan only** — loads posts into the slideshow without downloading anything.
+3. Press **Download new** — scans newest posts, then downloads matching media.
 4. Watch progress in **Activity** and the transfer list. Use **Cancel** to stop mid-run.
 
 Files are saved flat per subreddit:
@@ -58,18 +76,12 @@ Files are saved flat per subreddit:
 Galleries get `_01`, `_02`, … suffixes. Existing files are skipped by default, and name collisions
 get ` (1)`, ` (2)`, … suffixes.
 
-### Slideshow
-
-The **Slideshow** tab plays every image the last scan found. Downloaded images play from disk via a
-locked-down `rdm-media://` protocol; everything else streams from Reddit. Press `←`/`→` to move,
-space to pause, and `F` for fullscreen. Speed and NSFW blur are in **Settings**.
-
 ### Settings
 
 - Destination folder, number of newest posts to scan (default 100), parallel downloads
 - Which media types to fetch (images, galleries, Reddit videos, external videos)
-- Skip NSFW, skip already-downloaded files, blur NSFW in slideshow
-- Slideshow interval and tool status/updates
+- Skip NSFW, skip already-downloaded files
+- Tool status and updates
 
 Everything the app writes lives in a self-contained `data` folder next to the app:
 `data/settings.json`, the Chromium profile, and the persisted `reddit` session. In development that is
@@ -105,19 +117,18 @@ npm run typecheck # main, preload, and renderer
 1. `npm run tools:setup` reports both tools with versions.
 2. **Log in on Reddit** completes and the header shows `u/<name>`.
 3. Check a known subreddit (e.g. `pics`) — member count and title appear.
-4. **Scan only** on a subreddit with images: slideshow fills while scanning, arrows/space work.
-5. **Download new** with `maxPosts` set to 25 on a small subreddit:
+4. **Download new** with `maxPosts` set to 25 on a small subreddit:
    - images save to the destination subreddit folder
    - a gallery produces `_01`, `_02`, … files
    - a Reddit video produces a playable MP4 with audio (ffmpeg present)
    - a YouTube/RedGifs post produces an MP4 (yt-dlp present)
-6. Cancel halfway: partial `.part*` files are removed, phase shows **Cancelled**.
-7. Re-run with **Skip files already downloaded**: counts show skipped, no duplicates.
-8. **Log out** clears the session; scanning then asks you to log in again.
+5. Cancel halfway: partial `.part*` files are removed, phase shows **Cancelled**.
+6. Re-run with **Skip files already downloaded**: counts show skipped, no duplicates.
+7. **Log out** clears the session; scanning then asks you to log in again.
 
 ## Troubleshooting
 
-- **“Reddit blocked the request”** — open the login window, confirm Reddit loads and you are signed
+- **"Reddit blocked the request"** — open the login window, confirm Reddit loads and you are signed
   in, then retry. VPN/datacenter IPs are more likely to be blocked.
 - **Verification / 2FA** — solve it in the login window; the app waits for the session cookie.
 - **Reddit video has no audio** — ffmpeg was not found. Run `npm run tools:setup` or update it in
