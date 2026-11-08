@@ -119,7 +119,7 @@ export function SubredditBar({
       {validating && !validated && (
         <p className="flex items-center gap-2 text-xs text-zinc-500">
           <IconSpinner size={13} className="text-orange-400" />
-          Checking r/{value.trim()}…
+          {(t.checkSubreddit as (name: string) => string)(value.trim())}
         </p>
       )}
 
