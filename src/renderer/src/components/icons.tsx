@@ -190,3 +190,13 @@ export function IconCaretDown(props: IconProps): React.JSX.Element {
     </svg>
   )
 }
+
+export function IconInfo(props: IconProps): React.JSX.Element {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 7v5" />
+      <path d="M12 14v2" />
+    </svg>
+  )
+}

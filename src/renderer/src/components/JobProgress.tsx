@@ -11,6 +11,7 @@ import {
   IconCheck,
   IconDownload,
   IconFolder,
+  IconInfo,
   IconSpinner,
   IconVideo
 } from './icons'
@@ -84,11 +85,8 @@ function ActiveRow({
                       : '…'}
         </span>
         {entry.retries > 0 && (
-          <span
-            className="shrink-0 rounded bg-orange-500/15 px-1.5 py-0.5 text-[10px] tabular-nums text-orange-300"
-            title={`${(t.retriedCount as (n: number) => string)(entry.retries)}`}
-          >
-            ×{entry.retries}
+          <span className="shrink-0 text-orange-400" title={`${(t.retriedCount as (n: number) => string)(entry.retries)}`}>
+            <IconInfo size={13} />
           </span>
         )}
         {entry.status === 'downloading' && entry.speedBps ? (
