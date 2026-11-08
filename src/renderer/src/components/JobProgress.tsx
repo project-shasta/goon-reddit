@@ -243,16 +243,18 @@ export function JobProgress({
         </p>
       )}
 
-      {job.active.length > 0 && (
+      {job.active.filter((entry) => entry.status !== 'done').length > 0 && (
         <div>
           <div className="mb-1 flex items-center justify-between text-[11px] font-semibold tracking-wide text-zinc-500 uppercase">
             <span>{t.transfers as string}</span>
             <span>{job.active.filter((entry) => entry.status !== 'done').length} {t.active as string}</span>
           </div>
           <ul className="max-h-64 divide-y divide-white/5 overflow-y-auto pr-1">
-            {job.active.map((entry) => (
-              <ActiveRow key={entry.id} entry={entry} lang={lang} />
-            ))}
+            {job.active
+              .filter((entry) => entry.status !== 'done')
+              .map((entry) => (
+                <ActiveRow key={entry.id} entry={entry} lang={lang} />
+              ))}
           </ul>
         </div>
       )}
