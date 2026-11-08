@@ -63,7 +63,7 @@ The app has two tabs in the header: **Downloader** and **Settings**.
 - Media types: images, galleries, Reddit videos, external videos (toggle each)
 - Behavior: skip NSFW, skip already-downloaded files
 - Sort order: New, Hot, Top, Rising
-- Tools: ffmpeg and yt-dlp status, update yt-dlp
+- Tools: ffmpeg and yt-dlp status
 
 ### Workflow
 
@@ -103,9 +103,8 @@ skip anything already in the known list, so you only pick up new posts.
 - **"Reddit blocked the request"** — open the login window, confirm Reddit loads and you are signed
   in, then retry. VPN/datacenter IPs are more likely to be blocked.
 - **Verification / 2FA** — solve it in the login window; the app waits for the session cookie.
-- **Reddit video has no audio** — ffmpeg was not found. Run `npm run tools:setup` or update it in
-  Settings; the app falls back to video-only `fallback_url`.
-- **External video fails** — update yt-dlp in **Settings → Tools**; some hosts change frequently.
+- **Reddit video has no audio** — ffmpeg was not found. Run `npm run tools:setup`.
+- **External video fails** — run `npm run tools:setup` to refresh yt-dlp; some hosts change frequently.
 - **Quarantined/private subreddit** — opt in on Reddit first; the app uses your account's access.
 
 ---
@@ -144,7 +143,7 @@ npm run tools:setup
 | ffmpeg | Merges Reddit's separate DASH/HLS audio + video      |
 | yt-dlp | Downloads YouTube, RedGifs, Imgur, Streamable, etc.  |
 
-yt-dlp is SHA-256 verified on download. You can update it later from **Settings → Tools**.
+yt-dlp is SHA-256 verified on download. If it goes missing, re-run `npm run tools:setup`.
 
 ### Build commands
 

@@ -47,7 +47,6 @@ export function SettingsView({
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [tools, setTools] = useState<ToolsStatus | null>(null)
-  const [updatingTools, setUpdatingTools] = useState(false)
   const [showNsfwConfirm, setShowNsfwConfirm] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [resetting, setResetting] = useState(false)
@@ -93,18 +92,6 @@ export function SettingsView({
       if (chosen) patch('destination', chosen)
     } catch (err) {
       setError(errorText(err))
-    }
-  }
-
-  const updateYtDlp = async (): Promise<void> => {
-    setUpdatingTools(true)
-    setError(null)
-    try {
-      setTools(await window.api.updateYtDlp())
-    } catch (err) {
-      setError(errorText(err))
-    } finally {
-      setUpdatingTools(false)
     }
   }
 
@@ -293,33 +280,11 @@ export function SettingsView({
       </section>
 
       <section className="card space-y-3 p-4">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-zinc-100">{t.tools as string}</h2>
-          <button
-            className="btn btn-ghost px-2 py-1 text-xs"
-            onClick={() => void loadTools()}
-            disabled={updatingTools}
-          >
-            <IconRefresh size={12} />
-            {t.refresh as string}
-          </button>
-        </div>
+        <h2 className="text-sm font-semibold text-zinc-100">{t.tools as string}</h2>
         <p className="text-[11px] leading-relaxed text-zinc-500">
           {t.toolsHint as string}
         </p>
         {!tools && <p className="text-[11px] text-zinc-500">{t.checkingTools as string}</p>}
-        {tools && !tools.ffmpeg.ok && (
-          <p className="flex items-start gap-2 text-[11px] text-amber-300">
-            <IconAlert size={13} className="mt-0.5 shrink-0" />
-            {t.noAudioHint as string}
-          </p>
-        )}
-        {tools && !tools.ytdlp.ok && (
-          <p className="flex items-start gap-2 text-[11px] text-amber-300">
-            <IconAlert size={13} className="mt-0.5 shrink-0" />
-            {t.externalVideoFailsHint as string}
-          </p>
-        )}
         <ToolRow
           name={(t.ffmpeg as string)}
           ok={tools?.ffmpeg.ok ?? false}
@@ -333,16 +298,6 @@ export function SettingsView({
           version={tools?.ytdlp.version ?? null}
           path={tools?.ytdlp.path ?? null}
           notFound={t.notFound as string}
-          action={
-            <button
-              className="btn btn-secondary px-2 py-1 text-xs"
-              onClick={() => void updateYtDlp()}
-              disabled={updatingTools}
-            >
-              {updatingTools ? <IconSpinner size={12} /> : <IconRefresh size={12} />}
-              {t.update as string}
-            </button>
-          }
         />
       </section>
 
