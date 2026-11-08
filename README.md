@@ -8,9 +8,23 @@ session for every request. Cookies never leave the main process.
 
 ## Requirements
 
-- Windows 10/11 (x64)
-- Node.js 26 via [mise](https://mise.jdx.dev/) — `mise install`
-- npm
+Install tools via [mise](https://mise.jdx.dev/):
+
+```powershell
+mise install
+```
+
+This installs:
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| Node.js | 26.12.1 | Runtime, npm, build tools |
+| Python | latest | Icon generation (Pillow) |
+| Playwright | 1.65.0 | Browser automation (optional) |
+| Flutter | 3.47.9 | (optional, not used by this project) |
+| Yarn | 4.18.1 | (optional, not used by this project) |
+
+After `mise install`, all tools are available on PATH. No separate npm installation needed.
 
 ## Setup
 
