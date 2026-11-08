@@ -113,18 +113,14 @@ export default function App(): React.JSX.Element {
 
     const offAuth = window.api.onAuthState((status) => setAuth(status))
     const offJob = window.api.onJobState((state) => {
-      try {
-        setJob(state)
-        if (state.subreddit?.name) {
-          setValidated((current) =>
-            current && current.name.toLowerCase() === state.subreddit!.name.toLowerCase()
-              ? current
-              : state.subreddit
-          )
-          setValidationError(null)
-        }
-      } catch {
-        // Main process is still working; silently ignore renderer-side render errors
+      setJob(state)
+      if (state.subreddit?.name) {
+        setValidated((current) =>
+          current && current.name.toLowerCase() === state.subreddit!.name.toLowerCase()
+            ? current
+            : state.subreddit
+        )
+        setValidationError(null)
       }
     })
     const offLog = window.api.onJobLog((entry) => addLog(entry))

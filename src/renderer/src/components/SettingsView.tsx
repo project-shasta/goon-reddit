@@ -149,9 +149,10 @@ export function SettingsView({
               {t.openFolder as string}
             </button>
           </div>
-          <p className="mt-1.5 text-[11px] text-zinc-500">
-            {(t.destinationHint as string)}
-          </p>
+          <p
+            className="mt-1.5 text-[11px] text-zinc-500"
+            dangerouslySetInnerHTML={{ __html: t.destinationHint as string }}
+          />
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">

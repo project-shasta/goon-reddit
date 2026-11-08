@@ -1,34 +1,6 @@
 import { useMemo } from 'react'
 import type { LanguageId, Translation } from './types'
-import { en } from './en'
-import { de } from './de'
-import { uk } from './uk'
-import { zh } from './zh'
-import { zhTW } from './zh-TW'
-import { ja } from './ja'
-import { fr } from './fr'
-import { it } from './it'
-import { es } from './es'
-import { pirate } from './pirate'
-import { cyberpunk } from './cyberpunk'
-import { eo } from './e0'
-import { enSimple } from './enSimple'
-
-const translations: Record<LanguageId, Translation> = {
-  en,
-  de,
-  uk,
-  zh,
-  'zh-TW': zhTW,
-  ja,
-  fr,
-  it,
-  es,
-  pirate,
-  cyberpunk,
-  eo,
-  enSimple
-}
+import { translations, translationFor } from './catalog'
 
 const languageNames: Record<LanguageId, string> = {
   en: 'English',
@@ -47,7 +19,7 @@ const languageNames: Record<LanguageId, string> = {
 }
 
 export function useI18n(language: LanguageId): Translation {
-  return useMemo(() => translations[language] ?? en, [language])
+  return useMemo(() => translationFor(language), [language])
 }
 
 export function languageLabel(id: LanguageId): string {
