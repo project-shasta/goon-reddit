@@ -1,4 +1,5 @@
-import type { ActiveDownload, JobState } from '@shared/types'
+import type { ActiveDownload, JobState, LanguageId } from '@shared/types'
+import { useI18n } from '../i18n'
 import {
   downloadPercent,
   formatBytes,
@@ -17,16 +18,7 @@ import {
 interface JobProgressProps {
   job: JobState
   destination: string
-}
-
-const PHASE_LABEL: Record<JobState['phase'], string> = {
-  idle: 'Ready',
-  validating: 'Checking subreddit',
-  scanning: 'Scanning new posts',
-  downloading: 'Downloading',
-  done: 'Finished',
-  cancelled: 'Cancelled',
-  error: 'Error'
+  lang?: LanguageId
 }
 
 function statusTone(status: ActiveDownload['status']): string {
@@ -44,7 +36,14 @@ function statusTone(status: ActiveDownload['status']): string {
   }
 }
 
-function ActiveRow({ entry }: { entry: ActiveDownload }): React.JSX.Element {
+function ActiveRow({
+  entry,
+  lang = 'en'
+}: {
+  entry: ActiveDownload
+  lang?: LanguageId
+}): React.JSX.Element {
+  const t = useI18n(lang)
   const percent = downloadPercent(entry)
   const isVideo = entry.filename.toLowerCase().endsWith('.mp4')
 
@@ -69,15 +68,15 @@ function ActiveRow({ entry }: { entry: ActiveDownload }): React.JSX.Element {
         </span>
         <span className={`shrink-0 tabular-nums ${statusTone(entry.status)}`}>
           {entry.status === 'done'
-            ? 'done'
+            ? (t.done as string)
             : entry.status === 'failed'
-              ? 'failed'
+              ? (t.failed as string)
               : entry.status === 'cancelled'
-                ? 'cancelled'
+                ? (t.cancelled as string)
                 : entry.status === 'processing'
                   ? percent !== null
-                    ? `merging ${Math.round(percent)}%`
-                    : 'merging…'
+                    ? `${(t.merging as (n: number) => string)(Math.round(percent))}`
+                    : '…'
                   : percent !== null
                     ? `${Math.round(percent)}%`
                     : entry.totalBytes
@@ -85,7 +84,7 @@ function ActiveRow({ entry }: { entry: ActiveDownload }): React.JSX.Element {
                       : '…'}
         </span>
         {entry.retries > 0 && (
-          <span className="shrink-0 rounded bg-orange-500/15 px-1.5 py-0.5 text-[10px] tabular-nums text-orange-300" title="Retry count">
+          <span className="shrink-0 rounded bg-orange-500/15 px-1.5 py-0.5 text-[10px] tabular-nums text-orange-300" title={(t.retryCount as string)}>
             ×{entry.retries}
           </span>
         )}
@@ -124,18 +123,32 @@ function ActiveRow({ entry }: { entry: ActiveDownload }): React.JSX.Element {
   )
 }
 
-export function JobProgress({ job, destination }: JobProgressProps): React.JSX.Element {
+export function JobProgress({
+  job,
+  destination,
+  lang = 'en'
+}: JobProgressProps): React.JSX.Element {
+  const t = useI18n(lang)
   const busy = job.phase === 'validating' || job.phase === 'scanning' || job.phase === 'downloading'
   const finished = job.discovered > 0 ? job.completed + job.skipped + job.failed : 0
   const overall =
     job.discovered > 0 ? Math.min(100, (finished / job.discovered) * 100) : null
 
+  const phaseLabel: Record<JobState['phase'], string> = {
+    idle: (t.checkingSubreddit as string),
+    validating: (t.checkingSubreddit as string),
+    scanning: (t.scanningPosts as string),
+    downloading: (t.download as string),
+    done: (t.finished as string),
+    cancelled: (t.cancelled as string),
+    error: (t.error as string)
+  }
+
   if (job.phase === 'idle') {
     return (
       <section className="card flex items-center justify-between gap-4 px-4 py-4 text-sm text-zinc-500">
         <span>
-          Enter a subreddit and press <span className="text-zinc-300">Download new</span> to grab its
-          latest images, galleries and videos.
+          {(t.idleHint as string)}
         </span>
         <button
           className="btn btn-ghost shrink-0 px-2 py-1 text-xs"
@@ -143,7 +156,7 @@ export function JobProgress({ job, destination }: JobProgressProps): React.JSX.E
           title={destination}
         >
           <IconFolder size={13} />
-          Open folder
+          {(t.openFolder as string)}
         </button>
       </section>
     )
@@ -164,7 +177,7 @@ export function JobProgress({ job, destination }: JobProgressProps): React.JSX.E
           }`}
         >
           {busy && <IconSpinner size={12} />}
-          {PHASE_LABEL[job.phase]}
+          {phaseLabel[job.phase]}
         </span>
         {job.subreddit && (
           <span className="text-sm font-semibold text-zinc-200">r/{job.subreddit.name}</span>
@@ -175,16 +188,16 @@ export function JobProgress({ job, destination }: JobProgressProps): React.JSX.E
           title={destination}
         >
           <IconFolder size={13} />
-          Open folder
+          {(t.openFolder as string)}
         </button>
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Stat label="Posts scanned" value={formatCount(job.scannedPosts)} />
-        <Stat label="Media found" value={formatCount(job.discovered)} />
-        <Stat label="Downloaded" value={formatCount(job.completed)} tone="text-emerald-400" />
+        <Stat label={(t.postsScanned as string)} value={formatCount(job.scannedPosts)} />
+        <Stat label={(t.mediaFound as string)} value={formatCount(job.discovered)} />
+        <Stat label={(t.downloaded as string)} value={formatCount(job.completed)} tone="text-emerald-400" />
         <Stat
-          label={job.failed > 0 ? 'Skipped / failed' : 'Skipped'}
+          label={job.failed > 0 ? (t.skippedFailed as string) : (t.skipped as string)}
           value={formatCount(job.failed > 0 ? job.skipped + job.failed : job.skipped)}
           tone={job.failed > 0 ? 'text-red-400' : 'text-zinc-300'}
         />
@@ -229,8 +242,8 @@ export function JobProgress({ job, destination }: JobProgressProps): React.JSX.E
       {job.active.length > 0 && (
         <div>
           <div className="mb-1 flex items-center justify-between text-[11px] font-semibold tracking-wide text-zinc-500 uppercase">
-            <span>Transfers</span>
-            <span>{job.active.filter((entry) => entry.status !== 'done').length} active</span>
+            <span>{t.transfers as string}</span>
+            <span>{job.active.filter((entry) => entry.status !== 'done').length} {t.active as string}</span>
           </div>
           <ul className="max-h-64 divide-y divide-white/5 overflow-y-auto pr-1">
             {job.active.map((entry) => (

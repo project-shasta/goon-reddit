@@ -3,10 +3,12 @@ import type {
   AppSettings,
   AuthStatus,
   JobState,
+  LanguageId,
   LogEntry,
   SortOrder,
   SubredditInfo
 } from '@shared/types'
+import { useI18n } from '../i18n'
 import { SubredditBar } from './SubredditBar'
 import { JobProgress } from './JobProgress'
 import { AuthPanel } from './AuthPanel'
@@ -29,6 +31,7 @@ export interface DownloaderViewProps {
   onAuthChanged: () => void
   onClearLogs: () => void
   canStart: boolean
+  lang?: LanguageId
 }
 
 export function DownloaderView({
@@ -48,8 +51,10 @@ export function DownloaderView({
   onCancel,
   onAuthChanged,
   onClearLogs,
-  canStart
+  canStart,
+  lang = 'en'
 }: DownloaderViewProps): React.JSX.Element {
+  const t = useI18n(lang)
   const [logOpen, setLogOpen] = useState(false)
 
   return (
@@ -69,9 +74,10 @@ export function DownloaderView({
         onCancel={onCancel}
         job={job}
         canStart={canStart}
+        lang={lang}
       />
 
-      <JobProgress job={job} destination={settings.destination} />
+      <JobProgress job={job} destination={settings.destination} lang={lang} />
 
       {logs.length > 0 && (
         <div>
@@ -79,9 +85,9 @@ export function DownloaderView({
             className="btn btn-ghost mb-2 px-2 py-1 text-xs"
             onClick={() => setLogOpen((v) => !v)}
           >
-            {logOpen ? 'Hide Log' : 'Show Log'}
+            {logOpen ? (t.hideLog as string) : (t.showLog as string)}
           </button>
-          {logOpen && <ActivityLog logs={logs} onClear={onClearLogs} />}
+          {logOpen && <ActivityLog logs={logs} onClear={onClearLogs} lang={lang} />}
         </div>
       )}
     </div>
@@ -90,17 +96,20 @@ export function DownloaderView({
 
 function ActivityLog({
   logs,
-  onClear
+  onClear,
+  lang = 'en'
 }: {
   logs: LogEntry[]
   onClear: () => void
+  lang?: LanguageId
 }): React.JSX.Element {
+  const t = useI18n(lang)
   return (
     <div className="rounded-xl border border-white/10 bg-zinc-950/90">
       <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
-        <span className="text-xs font-semibold text-zinc-400">Activity Log</span>
+        <span className="text-xs font-semibold text-zinc-400">{t.activityLog as string}</span>
         <button className="btn btn-ghost px-2 py-1 text-xs" onClick={onClear}>
-          Clear
+          {t.clear as string}
         </button>
       </div>
       <ul className="max-h-48 overflow-y-auto p-2">

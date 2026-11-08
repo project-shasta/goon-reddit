@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import type { AppSettings, ToolsStatus } from '@shared/types'
+import type { AppSettings, LanguageId, ToolsStatus } from '@shared/types'
+import { useI18n } from '../i18n'
 import { errorText } from '../lib/format'
 import {
   IconAlert,
@@ -23,19 +24,24 @@ type BooleanKey =
   | 'skipNsfw'
   | 'skipExisting'
 
-const MEDIA_TOGGLES: Array<{ key: BooleanKey; label: string; hint: string }> = [
-  { key: 'includeImages', label: 'Images', hint: 'Single i.redd.it and direct image posts' },
-  { key: 'includeGalleries', label: 'Galleries', hint: 'Multi-image Reddit galleries' },
-  { key: 'includeVideos', label: 'Reddit videos', hint: 'DASH/HLS videos with audio via ffmpeg' },
-  { key: 'includeExternalVideos', label: 'External videos', hint: 'YouTube, RedGifs, Imgur, etc. via yt-dlp' }
+const MEDIA_TOGGLES: Array<{ key: BooleanKey }> = [
+  { key: 'includeImages' },
+  { key: 'includeGalleries' },
+  { key: 'includeVideos' },
+  { key: 'includeExternalVideos' }
 ]
 
-const BEHAVIOR_TOGGLES: Array<{ key: BooleanKey; label: string; hint: string }> = [
-  { key: 'skipNsfw', label: 'Skip NSFW posts', hint: 'Ignore posts marked over 18' },
-  { key: 'skipExisting', label: 'Skip files already downloaded', hint: 'Resume where you left off' }
+const BEHAVIOR_TOGGLES: Array<{ key: BooleanKey }> = [
+  { key: 'skipNsfw' },
+  { key: 'skipExisting' }
 ]
 
-export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX.Element {
+export function SettingsView({
+  settings,
+  onSave,
+  lang = 'en'
+}: SettingsViewProps & { lang?: LanguageId }): React.JSX.Element {
+  const t = useI18n(lang)
   const [draft, setDraft] = useState<AppSettings>(settings)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -124,12 +130,12 @@ export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX
       <section className="card space-y-4 p-4">
         <div className="flex items-center gap-2">
           <IconSettings size={16} className="text-orange-400" />
-          <h2 className="text-sm font-semibold text-zinc-100">Downloads</h2>
+          <h2 className="text-sm font-semibold text-zinc-100">{t.appName as string}</h2>
         </div>
 
         <div>
           <label className="label" htmlFor="destination">
-            Destination folder
+            {t.destinationFolder as string}
           </label>
           <div className="flex gap-2">
             <input
@@ -140,7 +146,7 @@ export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX
             />
             <button className="btn btn-secondary shrink-0" onClick={() => void chooseDestination()}>
               <IconFolder size={14} />
-              Browse
+              {t.openFolder as string}
             </button>
           </div>
           <p className="mt-1.5 text-[11px] text-zinc-500">
@@ -152,7 +158,7 @@ export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <label className="label" htmlFor="maxPosts">
-              Newest posts to scan
+              {t.newestPostsToScan as string}
             </label>
             <input
               id="maxPosts"
@@ -163,11 +169,11 @@ export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX
               value={draft.maxPosts}
               onChange={(event) => patch('maxPosts', Number(event.target.value))}
             />
-            <p className="mt-1 text-[11px] text-zinc-500">0 means no limit.</p>
+            <p className="mt-1 text-[11px] text-zinc-500">{t.zeroMeansNoLimit as string}</p>
           </div>
           <div>
             <label className="label" htmlFor="concurrency">
-              Parallel downloads: {draft.concurrency}
+              {t.parallelDownloads as string}: {draft.concurrency}
             </label>
             <input
               id="concurrency"
@@ -180,80 +186,101 @@ export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX
               onChange={(event) => patch('concurrency', Number(event.target.value))}
             />
             <p className="mt-1 text-[11px] text-zinc-500">
-              Higher is faster but more likely to hit Reddit rate limits.
+              {t.higherIsFaster as string}
             </p>
           </div>
         </div>
       </section>
 
       <section className="card space-y-3 p-4">
-        <h2 className="text-sm font-semibold text-zinc-100">Media types</h2>
+        <h2 className="text-sm font-semibold text-zinc-100">{t.mediaTypes as string}</h2>
         <div className="grid gap-2 sm:grid-cols-2">
-          {MEDIA_TOGGLES.map((toggle) => (
-            <label key={toggle.key} className="checkbox-row items-start">
-              <input
-                type="checkbox"
-                className="checkbox mt-0.5"
-                checked={draft[toggle.key]}
-                onChange={(event) => patch(toggle.key, event.target.checked)}
-              />
-              <span>
-                <span className="block font-medium">{toggle.label}</span>
-                <span className="block text-[11px] text-zinc-500">{toggle.hint}</span>
-              </span>
-            </label>
-          ))}
+          {MEDIA_TOGGLES.map((toggle) => {
+            const labels: Record<BooleanKey, { label: string; hint: string }> = {
+              includeImages: { label: (t.images as string), hint: (t.imagesHint as string) },
+              includeGalleries: { label: (t.galleries as string), hint: (t.galleriesHint as string) },
+              includeVideos: { label: (t.redditVideos as string), hint: (t.redditVideosHint as string) },
+              includeExternalVideos: { label: (t.externalVideos as string), hint: (t.externalVideosHint as string) },
+              skipNsfw: { label: (t.skipNsfw as string), hint: (t.skipNsfwHint as string) },
+              skipExisting: { label: (t.skipExisting as string), hint: (t.skipExistingHint as string) }
+            }
+            const { label, hint } = labels[toggle.key]
+            return (
+              <label key={toggle.key} className="checkbox-row items-start">
+                <input
+                  type="checkbox"
+                  className="checkbox mt-0.5"
+                  checked={draft[toggle.key]}
+                  onChange={(event) => patch(toggle.key, event.target.checked)}
+                />
+                <span>
+                  <span className="block font-medium">{label}</span>
+                  <span className="block text-[11px] text-zinc-500">{hint}</span>
+                </span>
+              </label>
+            )
+          })}
         </div>
       </section>
 
       <section className="card space-y-3 p-4">
-        <h2 className="text-sm font-semibold text-zinc-100">Behavior</h2>
+        <h2 className="text-sm font-semibold text-zinc-100">{t.behavior as string}</h2>
         <div className="grid gap-2 sm:grid-cols-2">
-          {BEHAVIOR_TOGGLES.map((toggle) => (
-            <label key={toggle.key} className="checkbox-row items-start">
-              <input
-                type="checkbox"
-                className="checkbox mt-0.5"
-                checked={draft[toggle.key]}
-                onChange={(event) =>
-                  toggle.key === 'skipNsfw'
-                    ? handleNsfwToggle(event.target.checked)
-                    : patch(toggle.key, event.target.checked)
-                }
-              />
-              <span>
-                <span className="block font-medium">{toggle.label}</span>
-                <span className="block text-[11px] text-zinc-500">{toggle.hint}</span>
-              </span>
-            </label>
-          ))}
+          {BEHAVIOR_TOGGLES.map((toggle) => {
+            const labels: Record<BooleanKey, { label: string; hint: string }> = {
+              includeImages: { label: (t.images as string), hint: (t.imagesHint as string) },
+              includeGalleries: { label: (t.galleries as string), hint: (t.galleriesHint as string) },
+              includeVideos: { label: (t.redditVideos as string), hint: (t.redditVideosHint as string) },
+              includeExternalVideos: { label: (t.externalVideos as string), hint: (t.externalVideosHint as string) },
+              skipNsfw: { label: (t.skipNsfw as string), hint: (t.skipNsfwHint as string) },
+              skipExisting: { label: (t.skipExisting as string), hint: (t.skipExistingHint as string) }
+            }
+            const { label, hint } = labels[toggle.key]
+            return (
+              <label key={toggle.key} className="checkbox-row items-start">
+                <input
+                  type="checkbox"
+                  className="checkbox mt-0.5"
+                  checked={draft[toggle.key]}
+                  onChange={(event) =>
+                    toggle.key === 'skipNsfw'
+                      ? handleNsfwToggle(event.target.checked)
+                      : patch(toggle.key, event.target.checked)
+                  }
+                />
+                <span>
+                  <span className="block font-medium">{label}</span>
+                  <span className="block text-[11px] text-zinc-500">{hint}</span>
+                </span>
+              </label>
+            )
+          })}
         </div>
       </section>
 
       <section className="card space-y-3 p-4">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-zinc-100">Tools</h2>
+          <h2 className="text-sm font-semibold text-zinc-100">{t.tools as string}</h2>
           <button
             className="btn btn-ghost px-2 py-1 text-xs"
             onClick={() => void loadTools()}
             disabled={updatingTools}
           >
             <IconRefresh size={12} />
-            Refresh
+            {t.refresh as string}
           </button>
         </div>
         <p className="text-[11px] leading-relaxed text-zinc-500">
-          ffmpeg merges Reddit's separate video and audio streams. yt-dlp handles external video
-          hosts. Both live in the app's tools folder so the app stays portable.
+          {t.toolsHint as string}
         </p>
         <ToolRow
-          name="ffmpeg"
+          name={(t.ffmpeg as string)}
           ok={tools?.ffmpeg.ok ?? false}
           version={tools?.ffmpeg.version ?? null}
           path={tools?.ffmpeg.path ?? null}
         />
         <ToolRow
-          name="yt-dlp"
+          name={(t.ytDlp as string)}
           ok={tools?.ytdlp.ok ?? false}
           version={tools?.ytdlp.version ?? null}
           path={tools?.ytdlp.path ?? null}
@@ -264,22 +291,21 @@ export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX
               disabled={updatingTools}
             >
               {updatingTools ? <IconSpinner size={12} /> : <IconRefresh size={12} />}
-              Update
+              {t.update as string}
             </button>
           }
         />
-        {!tools && <p className="text-[11px] text-zinc-500">Checking tools…</p>}
+        {!tools && <p className="text-[11px] text-zinc-500">{t.checkingTools as string}</p>}
         {tools && !tools.ffmpeg.ok && (
           <p className="flex items-start gap-2 text-[11px] text-amber-300">
             <IconAlert size={13} className="mt-0.5 shrink-0" />
-            ffmpeg was not found. Run <code className="font-mono">npm run tools:setup</code> or place
-            ffmpeg in the tools folder. Reddit videos will fall back to video-only downloads.
+            {t.noAudioHint as string}
           </p>
         )}
         {tools && !tools.ytdlp.ok && (
           <p className="flex items-start gap-2 text-[11px] text-amber-300">
             <IconAlert size={13} className="mt-0.5 shrink-0" />
-            yt-dlp was not found. External videos will fail until you press Update.
+            {t.externalVideoFailsHint as string}
           </p>
         )}
       </section>
@@ -313,10 +339,10 @@ export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX
       <div className="sticky bottom-0 flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur">
         <button className="btn btn-primary" onClick={() => void save()} disabled={saving || !dirty}>
           {saving ? <IconSpinner size={14} /> : <IconCheck size={14} />}
-          Save settings
+          {t.saveSettings as string}
         </button>
-        {saved && <span className="text-xs text-emerald-400">Saved</span>}
-        {dirty && !saved && <span className="text-xs text-zinc-500">Unsaved changes</span>}
+        {saved && <span className="text-xs text-emerald-400">{t.saved as string}</span>}
+        {dirty && !saved && <span className="text-xs text-zinc-500">{t.unsavedChanges as string}</span>}
         {error && <span className="ml-auto text-xs text-red-400">{error}</span>}
       </div>
     </div>

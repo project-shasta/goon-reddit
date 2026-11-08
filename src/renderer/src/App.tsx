@@ -427,11 +427,12 @@ export default function App(): React.JSX.Element {
             onAuthChanged={refreshAuth}
             onClearLogs={() => setLogs([])}
             canStart={canStart}
+            lang={language}
           />
         )}
 
         {view === 'settings' && (
-          <SettingsView settings={settings} onSave={handleSaveSettings} />
+          <SettingsView settings={settings} onSave={handleSaveSettings} lang={language} />
         )}
       </main>
     </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import type { JobState, SortOrder, SubredditInfo } from '@shared/types'
+import type { JobState, LanguageId, SortOrder, SubredditInfo } from '@shared/types'
 import { formatCount } from '../lib/format'
+import { useI18n } from '../i18n'
 import {
   IconAlert,
   IconCaretDown,
@@ -45,8 +46,10 @@ export function SubredditBar({
   onStart,
   onCancel,
   job,
-  canStart
-}: SubredditBarProps): React.JSX.Element {
+  canStart,
+  lang = 'en'
+}: SubredditBarProps & { lang?: LanguageId }): React.JSX.Element {
+  const t = useI18n(lang)
   const running =
     job.phase === 'validating' || job.phase === 'scanning' || job.phase === 'downloading'
 
@@ -55,7 +58,7 @@ export function SubredditBar({
       <div className="flex flex-wrap items-end gap-2">
         <div className="min-w-[220px] flex-1">
           <label className="label" htmlFor="subreddit">
-            Subreddit
+            {t.subreddit as string}
           </label>
           <div className="flex items-center gap-2">
             <span className="shrink-0 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-zinc-500">
@@ -64,7 +67,7 @@ export function SubredditBar({
             <input
               id="subreddit"
               className="input"
-              placeholder="pics"
+              placeholder={t.placeholderSubreddit as string | undefined}
               value={value}
               spellCheck={false}
               autoComplete="off"
@@ -75,14 +78,11 @@ export function SubredditBar({
               disabled={running}
             />
           </div>
-          <p className="mt-1 text-[10px] text-zinc-600">
-            Press <kbd className="font-mono text-[10px] text-zinc-500">Enter</kbd> or click to validate
-          </p>
         </div>
 
         <div className="min-w-[130px]">
           <label className="label" htmlFor="sort-order">
-            Sort
+            {t.sortOrder as string}
           </label>
           <SortDropdown
             value={sortOrder}
@@ -97,13 +97,13 @@ export function SubredditBar({
           disabled={running || validating || !value.trim()}
         >
           {validating ? <IconSpinner size={14} /> : <IconGrid size={14} />}
-          Check
+          {t.check as string}
         </button>
 
         {running ? (
           <button className="btn btn-danger" onClick={onCancel}>
             <IconX size={14} />
-            Cancel
+            {t.cancel as string}
           </button>
         ) : (
           <button
@@ -112,7 +112,7 @@ export function SubredditBar({
             disabled={!canStart}
           >
             <IconDownload size={15} />
-            Download new
+            {t.downloadNew as string}
           </button>
         )}
       </div>
