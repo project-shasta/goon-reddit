@@ -204,7 +204,6 @@ export interface RendererApi {
   resetToDefaults(): Promise<AppSettings>
   getToolsStatus(): Promise<ToolsStatus>
   updateYtDlp(): Promise<ToolsStatus>
-  downloadTool(tool: 'ffmpeg' | 'yt-dlp'): Promise<ToolsStatus>
   openExternal(url: string): Promise<boolean>
   revealFile(path: string): Promise<boolean>
   openFolder(path: string): Promise<boolean>
@@ -219,5 +218,4 @@ export interface RendererApi {
   onJobMedia(callback: (items: MediaItem[]) => void): () => void
   onJobMediaUpdate(callback: (item: MediaItem) => void): () => void
   onJobLog(callback: (entry: LogEntry) => void): () => void
-  onToolsMissing(callback: (missing: string[]) => void): () => void
 }

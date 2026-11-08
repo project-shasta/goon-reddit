@@ -35,16 +35,16 @@ Apache License, Version 2.0
    1. Definitions.
 
       "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
+      and distribution as defined in Sections 1 through 9 of this document.
 
       "Licensor" shall mean the copyright owner or entity authorized by
       the copyright owner that is granting the License.
 
       "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
+      other entities that control, are controlled, or are under common
       control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
+      "control" means (i) the power, direct or indirect, to cause
+      the direction or management of such entity, whether by contract or
       otherwise, or (ii) ownership of fifty percent (50%) or more of the
       outstanding shares, or (iii) beneficial ownership of such entity.
 
@@ -70,19 +70,17 @@ Apache License, Version 2.0
       editorial revisions, annotations, elaborations, or other modifications
       represent, as a whole, an original work of authorship. For the purposes
       of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
+      separable from, or merely link to the interfaces of,
       the Work and Derivative Works thereof.
 
       "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
+      the original version of the Work and any additions or modifications to that Work or Derivative Works thereof, that is intentionally
       submitted to the copyright owner by the original author, or by an
       agent or entity authorized to submit on behalf of the original author.
       The foregoing includes translations and derivative works covered
       by this License.
 
-      "Contributor" shall mean any person or entity that submits a
-      Contribution to the Work.
+      "Contributor" shall mean any person or entity that submits to the Work.
 
    2. Grant of Copyright License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
@@ -129,8 +127,8 @@ Apache License, Version 2.0
 
    6. Trademarks. This License does not grant permission to use the trade
       names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing
-      the origin of the Work and reproducing the content of any accompanying
+      except as required by reasonable and customary use in describing the
+      origin of the Work and reproducing the content of any accompanying
       NOTICE file.
 
    7. Disclaimer of Warranty. Unless required by applicable law or
@@ -143,19 +141,18 @@ Apache License, Version 2.0
 
    8. Limitation of Liability. In no event and under no legal theory,
       whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
+      unless required by applicable law (such as deliberate and gross negligence acts) or agreed to in writing, shall any Contributor be
       liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
+      incidental, or consequential damages of any character arising as
+      a result of this License or out of the use or inability to use the
       Work (including but not limited to damages for loss of goodwill,
       work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
+      other commercial damages or losses), even if such Contributor has
+      been advised of the possibility of such damages.
 
    9. Accepting Warranty or Additional Liability. While redistributing
       the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
+      and charge a fee, acceptance of support, warranty, indemnity,
       or other liability obligations and/or rights consistent with this
       License. However, in accepting such obligations, You may act only
       on Your own behalf and on Your sole responsibility, not on behalf
@@ -167,6 +164,15 @@ Apache License, Version 2.0
 ---
 
 ## Bundled Tools
+
+### FFmpeg
+
+Licensed under the **GNU Lesser General Public License, version 2.1** (or at your option, any later version).
+
+FFmpeg is dynamically linked at runtime. The LGPL requires that you provide the ability to relink against a modified version of FFmpeg. This is satisfied by shipping the full FFmpeg binaries in the `tools/` directory alongside the app.
+
+- Website: https://ffmpeg.org
+- License: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 
 ### yt-dlp
 
@@ -194,4 +200,5 @@ Electron bundles Chromium and Node.js, both of which carry their own licenses (B
 |---------|-------|
 | MIT | 10 packages |
 | Apache-2.0 | 1 package (TypeScript) |
+| LGPL-2.1 | 1 tool (FFmpeg) |
 | Unlicense | 1 tool (yt-dlp) |

@@ -1,7 +1,7 @@
 import { app, BrowserWindow, dialog, Notification, session, shell } from 'electron'
 import path from 'node:path'
 import { IPC } from '@shared/ipc'
-import type { AuthStatus, JobState, LogEntry, MediaItem } from '@shared/types'
+import type { AuthStatus, JobState, LogEntry, MediaItem, ToolsStatus } from '@shared/types'
 import { AuthManager } from './auth'
 import { registerIpcHandlers } from './ipc'
 import { JobRunner } from './job'
@@ -43,6 +43,21 @@ function emitAuth(status: AuthStatus): void {
 
 function emitLog(level: LogEntry['level'], message: string): void {
   send(IPC.jobLog, { level, message, time: Date.now() } satisfies LogEntry)
+}
+
+function checkToolsAndNotify(tools: ToolManager): void {
+  tools.status().then((status: ToolsStatus) => {
+    const missing: string[] = []
+    if (!status.ffmpeg.ok) missing.push('ffmpeg')
+    if (!status.ytdlp.ok) missing.push('yt-dlp')
+    if (missing.length > 0) {
+      const body = `Missing ${missing.join(' and ')}. Check Settings → Tools.`
+      void new Notification({ title: 'GoOn ReDdIt', body }).show()
+      send(IPC.toolsMissing, missing)
+    }
+  }).catch(() => {
+    // Ignore status check failures
+  })
 }
 
 function createMainWindow(): BrowserWindow {
@@ -122,12 +137,12 @@ if (startupError) {
     auth = new AuthManager(emitAuth)
     const historyStore = new HistoryStore()
     history = historyStore
-    const tools = new ToolManager(settings)
+    const toolManager = new ToolManager(settings)
     job = new JobRunner({
       auth,
       settings,
       history: historyStore,
-      tools,
+      tools: toolManager,
       emitState: (state: JobState) => send(IPC.jobState, state),
       emitMedia: (items: MediaItem[]) => send(IPC.jobMedia, items),
       emitMediaUpdate: (item: MediaItem) => send(IPC.jobMediaUpdate, item),
@@ -142,28 +157,13 @@ if (startupError) {
       job,
       settings,
       history: historyStore,
-      tools,
+      tools: toolManager,
       getMainWindow: () => mainWindow,
       log: emitLog
     })
 
-    // Check tools at startup and notify user if missing
-    tools.status().then((status) => {
-      const missing = []
-      if (!status.ffmpeg.ok) missing.push('ffmpeg')
-      if (!status.ytdlp.ok) missing.push('yt-dlp')
-      if (missing.length > 0) {
-        void new Notification({
-          title: 'GoOn ReDdIt',
-          body: `Missing ${missing.join(' and ')}. Open Settings to download.`
-        }).show()
-        send(IPC.toolsMissing, missing)
-      }
-    }).catch(() => {
-      // Ignore errors during startup check
-    })
-
     void auth.refresh(true)
+    checkToolsAndNotify(toolManager)
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {

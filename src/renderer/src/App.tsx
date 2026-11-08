@@ -61,7 +61,7 @@ export default function App(): React.JSX.Element {
   const [user, setUser] = useState<UserInfo | null>(null)
   const [validating, setValidating] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
-  const [startupError, setStartupError] = useState<string | null>(null)
+    const [startupError, setStartupError] = useState<string | null>(null)
   const [historyCount, setHistoryCount] = useState(0)
   const [showClearKnownConfirm, setShowClearKnownConfirm] = useState(false)
   const [showThemePicker, setShowThemePicker] = useState(false)
@@ -484,20 +484,10 @@ export default function App(): React.JSX.Element {
       </header>
 
       {missingTools.length > 0 && (
-        <div className="flex items-center gap-3 border-b border-amber-500/20 bg-amber-500/5 px-4 py-2.5">
+        <div className="border-b border-amber-500/20 bg-amber-500/5 px-4 py-2.5">
           <span className="text-xs text-amber-300">
-            Missing{' '}
-            {missingTools.includes('ffmpeg') && missingTools.includes('yt-dlp')
-              ? 'ffmpeg and yt-dlp'
-              : missingTools.join(' and ')}
-            . Download from Settings.
+            Missing {missingTools.join(' and ')}. Check Settings → Tools.
           </span>
-          <button
-            className="btn btn-secondary ml-auto px-2 py-1 text-xs"
-            onClick={() => setView('settings')}
-          >
-            Open Settings
-          </button>
         </div>
       )}
 
@@ -525,7 +515,6 @@ export default function App(): React.JSX.Element {
             onClearLogs={() => setLogs([])}
             onOpenSettings={() => setView('settings')}
             canStart={canStart}
-            toolsMissing={missingTools}
             lang={language}
           />
         )}

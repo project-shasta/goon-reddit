@@ -35,7 +35,6 @@ const api: RendererApi = {
   resetToDefaults: () => ipcRenderer.invoke(IPC.settingsResetToDefaults),
   getToolsStatus: () => ipcRenderer.invoke(IPC.toolsStatus),
   updateYtDlp: () => ipcRenderer.invoke(IPC.toolsUpdateYtdlp),
-  downloadTool: (tool: 'ffmpeg' | 'yt-dlp') => ipcRenderer.invoke(IPC.toolsDownload, tool),
   openExternal: (url: string) => ipcRenderer.invoke(IPC.shellOpenExternal, url),
   revealFile: (file: string) => ipcRenderer.invoke(IPC.shellRevealFile, file),
   openFolder: (directory: string) => ipcRenderer.invoke(IPC.shellOpenFolder, directory),
@@ -54,8 +53,6 @@ const api: RendererApi = {
     subscribe<MediaItem>(IPC.jobMediaUpdate, callback),
   onJobLog: (callback: (entry: LogEntry) => void) =>
     subscribe<LogEntry>(IPC.jobLog, callback),
-  onToolsMissing: (callback: (missing: string[]) => void) =>
-    subscribe<string[]>(IPC.toolsMissing, callback),
   setTheme: (theme: string) => {
     document.documentElement.removeAttribute('data-theme')
     if (theme !== 'dark') document.documentElement.setAttribute('data-theme', theme)

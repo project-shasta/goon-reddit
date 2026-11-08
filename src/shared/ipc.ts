@@ -1,30 +1,43 @@
 export const IPC = {
+  // Auth
   authStatus: 'auth:status',
-  authOpenLogin: 'auth:open-login',
+  authOpenLogin: 'auth:openLogin',
   authLogout: 'auth:logout',
   authState: 'auth:state',
+
+  // Subreddit/User validation
   subredditValidate: 'subreddit:validate',
   userValidate: 'user:validate',
+
+  // Job
   jobStart: 'job:start',
   jobCancel: 'job:cancel',
   jobState: 'job:state',
   jobMedia: 'job:media',
-  jobMediaUpdate: 'job:media-update',
+  jobMediaUpdate: 'job:mediaUpdate',
   jobLog: 'job:log',
+
+  // Settings
   settingsGet: 'settings:get',
   settingsUpdate: 'settings:update',
-  settingsChooseDestination: 'settings:choose-destination',
-  settingsResetToDefaults: 'settings:reset-to-defaults',
-  toolsStatus: 'tools:status',
-  toolsUpdateYtdlp: 'tools:update-ytdlp',
-  toolsSetup: 'tools:setup',
-  toolsDownload: 'tools:download',
-  toolsMissing: 'tools:missing',
-  shellOpenExternal: 'shell:open-external',
-  shellRevealFile: 'shell:reveal-file',
-  shellOpenFolder: 'shell:open-folder',
+  settingsChooseDestination: 'settings:chooseDestination',
+  settingsResetToDefaults: 'settings:resetToDefaults',
+
+  // History
   historyTotal: 'history:total',
   historyClear: 'history:clear',
+
+  // Tools
+  toolsStatus: 'tools:status',
+  toolsUpdateYtdlp: 'tools:updateYtdlp',
+  toolsMissing: 'tools:missing',
+
+  // Shell
+  shellOpenExternal: 'shell:openExternal',
+  shellRevealFile: 'shell:revealFile',
+  shellOpenFolder: 'shell:openFolder',
   shellBeep: 'shell:beep',
+
+  // Notifications
   notificationShow: 'notification:show'
 } as const
