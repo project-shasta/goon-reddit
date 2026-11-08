@@ -151,12 +151,12 @@ export default function App(): React.JSX.Element {
     const name = subredditInput.trim()
     if (!name || validatingRef.current) return
     validatingRef.current = true
+    setValidating(true)
+    setValidationError(null)
     try {
-      setValidating(true)
-      setValidationError(null)
       const info = await window.api.validateSubreddit(name)
       setValidated(info)
-      if (info?.name) setSubredditInput(info.name)
+      setSubredditInput(info.name)
     } catch (err) {
       setValidated(null)
       setValidationError(errorText(err))
