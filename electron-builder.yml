@@ -22,3 +22,5 @@ win:
     - target: zip
       arch:
         - x64
+
+electronDist: node_modules/electron/dist

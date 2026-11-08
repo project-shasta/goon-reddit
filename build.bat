@@ -4,12 +4,24 @@ echo  GoOn ReDdIt - Build Package
 echo ========================================
 echo.
 
-echo [1/5] Stopping any running Electron processes...
+echo [0/6] Checking local Electron installation...
+if not exist "node_modules\electron\dist\electron.exe" (
+    echo.
+    echo ERROR: Electron is not installed.
+    echo Run "npm install" first, then try again.
+    echo.
+    echo Press any key to close.
+    pause >nul
+    exit /b 1
+)
+echo  OK — found Electron locally.
+
+echo [1/6] Stopping any running Electron processes...
 taskkill /F /IM "GoOn ReDdIt.exe" 2>nul
 taskkill /F /IM electron.exe 2>nul
 timeout /t 2 /nobreak >nul
 
-echo [2/5] Preserving login session from previous build...
+echo [2/6] Preserving login session from previous build...
 if exist "dist\win-unpacked\data\Partitions\reddit" (
     if not exist ".build-preserve\data\Partitions\reddit" mkdir ".build-preserve\data\Partitions\reddit" 2>nul
     xcopy /E /I /Y "dist\win-unpacked\data\Partitions\reddit" ".build-preserve\data\Partitions\reddit\" 2>nul
@@ -19,11 +31,11 @@ if exist "dist\win-unpacked\data\Local State" (
     copy /Y "dist\win-unpacked\data\Local State" ".build-preserve\data\Local State" 2>nul
 )
 
-echo [4/5] Cleaning old build artifacts...
+echo [4/6] Cleaning old build artifacts...
 if exist "dist\*.exe" del /q "dist\*.exe" 2>nul
 if exist "dist\*.blockmap" del /q "dist\*.blockmap" 2>nul
 
-echo [5/5] Building...
+echo [5/6] Building...
 call npm run build:win
 
 if %errorlevel% equ 0 (
