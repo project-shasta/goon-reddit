@@ -313,8 +313,7 @@ function ModeDropdown({
         onClick={() => !disabled && setOpen((v) => !v)}
         disabled={disabled}
       >
-        <span className="shrink-0 text-xs">{mode === 'archive' ? 'u/' : 'r/'}</span>
-        <span>{mode === 'archive' ? (t.archive as string) : (t.download as string)}</span>
+        <span className="shrink-0 text-xs">{mode === 'archive' ? '/u' : '/r'}</span>
         <IconCaretDown size={14} className={`shrink-0 ${disabled ? 'text-zinc-600' : 'text-zinc-500'}`} />
       </button>
 
@@ -331,8 +330,7 @@ function ModeDropdown({
               setOpen(false)
             }}
           >
-            <span className="shrink-0 text-xs">r/</span>
-            {t.download as string}
+            <span className="shrink-0 text-xs">/r</span>
           </button>
           <button
             className={`flex w-full px-3 py-2 text-sm transition-colors ${
@@ -345,8 +343,7 @@ function ModeDropdown({
               setOpen(false)
             }}
           >
-            <span className="shrink-0 text-xs">u/</span>
-            {t.archive as string}
+            <span className="shrink-0 text-xs">/u</span>
           </button>
         </div>
       )}
