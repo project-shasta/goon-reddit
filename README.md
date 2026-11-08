@@ -7,62 +7,6 @@ posts, and fetches images, galleries, Reddit-hosted videos, and external videos 
 Reddit blocks anonymous `.json` access, so the app opens a real Reddit login window and reuses that
 session for every request. Cookies never leave the main process.
 
-## Requirements
-
-Install tools via [mise](https://mise.jdx.dev/):
-
-```powershell
-mise install
-```
-
-This installs:
-
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Node.js | 26.12.1 | Runtime, npm, build tools |
-| Python | 3.15.2 | Icon generation (Pillow) |
-
-## Setup
-
-```powershell
-npm install
-npm run tools:setup
-```
-
-`tools:setup` puts the two external helpers into `./tools` so the app folder stays portable:
-
-| Tool   | Purpose                                              |
-| ------ | ---------------------------------------------------- |
-| ffmpeg | Merges Reddit's separate DASH/HLS audio + video      |
-| yt-dlp | Downloads YouTube, RedGifs, Imgur, Streamable, etc.  |
-
-yt-dlp is SHA-256 verified on download. You can update it later from **Settings → Tools**.
-
-## Build commands
-
-```powershell
-npm run build           # compile out/ only
-npm run build:win       # typecheck + build + zip archive
-.\build.bat             # stop processes, clean, build, pause for review
-```
-
-### Icon generation (PNG → ICO)
-
-Edit `resources/icon.png` to change the icon, then generate the ICO:
-
-```powershell
-npm run icon:gen
-```
-
-Requires Python + Pillow via mise (`mise use python` then `pip install Pillow`).
-
-## Run
-
-```powershell
-npm run dev      # development, hot reload
-npm start        # preview the production build
-```
-
 ## Using the app
 
 ### Layout
@@ -81,6 +25,7 @@ The app has two tabs in the header: **Downloader** and **Settings**.
 - Destination folder, number of newest posts to scan (default 100), parallel downloads (1–8)
 - Media types: images, galleries, Reddit videos, external videos (toggle each)
 - Behavior: skip NSFW, skip already-downloaded files
+- Sort order: New, Hot, Top, Rising
 - Tools: ffmpeg and yt-dlp status, update yt-dlp
 
 ### Workflow
@@ -110,7 +55,86 @@ If a downloaded image is still a thumbnail (detected by file size: JPEG < 12 KB,
 it is skipped and the app fetches the next unscanned posts from the subreddit, adding their media
 to the queue. This replaces low-res images with higher-quality ones from later in the scan range.
 
-## How it works
+### Known posts
+
+The app keeps a local record of posts you've already scanned. A small badge in the header shows
+the total count, and a **Clear known** link wipes the entire list. Re-scanning a subreddit will
+skip anything already in the known list, so you only pick up new posts.
+
+### Troubleshooting
+
+- **"Reddit blocked the request"** — open the login window, confirm Reddit loads and you are signed
+  in, then retry. VPN/datacenter IPs are more likely to be blocked.
+- **Verification / 2FA** — solve it in the login window; the app waits for the session cookie.
+- **Reddit video has no audio** — ffmpeg was not found. Run `npm run tools:setup` or update it in
+  Settings; the app falls back to video-only `fallback_url`.
+- **External video fails** — update yt-dlp in **Settings → Tools**; some hosts change frequently.
+- **Quarantined/private subreddit** — opt in on Reddit first; the app uses your account's access.
+
+---
+
+## Developer notes
+
+If you're reading this and thinking of forking or digging into the source — welcome. Things get
+weird down here.
+
+### Requirements
+
+Install tools via [mise](https://mise.jdx.dev/):
+
+```powershell
+mise install
+```
+
+This installs:
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| Node.js | 26.12.1 | Runtime, npm, build tools |
+| Python | 3.15.2 | Icon generation (Pillow) |
+
+### Setup
+
+```powershell
+npm install
+npm run tools:setup
+```
+
+`tools:setup` puts the two external helpers into `./tools` so the app folder stays portable:
+
+| Tool   | Purpose                                              |
+| ------ | ---------------------------------------------------- |
+| ffmpeg | Merges Reddit's separate DASH/HLS audio + video      |
+| yt-dlp | Downloads YouTube, RedGifs, Imgur, Streamable, etc.  |
+
+yt-dlp is SHA-256 verified on download. You can update it later from **Settings → Tools**.
+
+### Build commands
+
+```powershell
+npm run build           # compile out/ only
+npm run build:win       # typecheck + build + zip archive
+.\build.bat             # stop processes, clean, build, pause for review
+```
+
+### Icon generation (PNG → ICO)
+
+Edit `resources/icon.png` to change the icon, then generate the ICO:
+
+```powershell
+npm run icon:gen
+```
+
+Requires Python + Pillow via mise (`mise use python` then `pip install Pillow`).
+
+### Run
+
+```powershell
+npm run dev      # development, hot reload
+npm start        # preview the production build
+```
+
+### How it works
 
 - Main process authenticates through a persisted Chromium partition (`persist:reddit`).
 - Requests go through `session.fetch` first. If Reddit answers with its HTML block page, the same
@@ -122,14 +146,14 @@ to the queue. This replaces low-res images with higher-quality ones from later i
   hosts go through yt-dlp.
 - The renderer only sees a typed IPC bridge; Node and cookies stay in the main process.
 
-## Tests
+### Tests
 
 ```powershell
 npm test          # extraction + filename + listing unit tests
 npm run typecheck # main, preload, and renderer
 ```
 
-## Manual smoke test
+### Manual smoke test
 
 1. `npm run tools:setup` reports both tools with versions.
 2. **Log in on Reddit** completes and the header shows `u/<name>`.
@@ -142,16 +166,6 @@ npm run typecheck # main, preload, and renderer
 5. Cancel halfway: partial `.part*` files are removed, phase shows **Cancelled**.
 6. Re-run with **Skip files already downloaded**: counts show skipped, no duplicates.
 7. **Log out** clears the session; scanning then asks you to log in again.
-
-## Troubleshooting
-
-- **"Reddit blocked the request"** — open the login window, confirm Reddit loads and you are signed
-  in, then retry. VPN/datacenter IPs are more likely to be blocked.
-- **Verification / 2FA** — solve it in the login window; the app waits for the session cookie.
-- **Reddit video has no audio** — ffmpeg was not found. Run `npm run tools:setup` or update it in
-  Settings; the app falls back to video-only `fallback_url`.
-- **External video fails** — update yt-dlp in **Settings → Tools**; some hosts change frequently.
-- **Quarantined/private subreddit** — opt in on Reddit first; the app uses your account's access.
 
 ## ⚠️ Vibecoded Notice
 
