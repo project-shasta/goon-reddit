@@ -34,7 +34,7 @@ The app has two tabs in the header: **Downloader** and **Settings**.
    window closes itself once the session is verified.
 2. Type a subreddit name (for example `pics` or `r/pics`) and press **Check**.
 3. Press **Download new** — scans newest posts, then downloads matching media.
-4. Watch progress in the transfer list and the transfer list. Use **Cancel** to stop mid-run.
+4. Watch progress in the transfer list. Use **Cancel** to stop mid-run.
 
 Files are saved flat per subreddit:
 
@@ -169,7 +169,7 @@ npm run typecheck # main, preload, and renderer
 
 ## ⚠️ Vibecoded Notice
 
-This project is **100% vibecoded** — no spec, no architecture doc, no "best practices." Just one
+This project is **100% vibecoded** — no spec, no architecture doc, no "best practices". Just one
 person at 2 AM, a growing pile of `edit` calls, and the unshakable conviction that a Reddit
 downloader should spell its name like a mocking SpongeBob caption.
 
