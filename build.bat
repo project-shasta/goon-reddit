@@ -20,7 +20,7 @@ echo [1/6] Regenerating app icon...
 call npm run icon:gen >nul 2>&1
 
 echo [2/6] Stopping any running Electron processes...
-taskkill /F /IM "GoOn ReDdIt.exe" 2>nul
+taskkill /F /IM "goon-reddit.exe" 2>nul
 taskkill /F /IM electron.exe 2>nul
 timeout /t 2 /nobreak >nul
 
