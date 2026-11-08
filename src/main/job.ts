@@ -50,10 +50,34 @@ function initialState(): JobState {
   }
 }
 
+/** File-size thresholds below which an image is likely a thumbnail. */
+const THUMBNAIL_BYTES: Record<string, number> = {
+  jpg: 12_000,
+  jpeg: 12_000,
+  png: 8_000,
+  webp: 8_000
+}
+
+/** Check if a downloaded image file is likely a thumbnail (too small). */
+function isThumbnailFile(filePath: string, ext: string): boolean {
+  const threshold = THUMBNAIL_BYTES[ext.toLowerCase()]
+  if (threshold === undefined) return false
+  try {
+    const size = fs.statSync(filePath).size
+    return size < threshold
+  } catch {
+    return false
+  }
+}
+
 export class JobRunner {
   private state: JobState = initialState()
   private controller: AbortController | null = null
   private running = false
+
+  /** Track scan state for re-scanning when thumbnails are skipped. */
+  private postsScanned = 0
+  private scannedPostIds = new Set<string>()
 
   constructor(private readonly deps: JobDeps) {}
 
@@ -195,6 +219,8 @@ export class JobRunner {
     const maxPosts = options.maxPosts > 0 ? options.maxPosts : Number.POSITIVE_INFINITY
     const folder = path.join(destination, safeFilename(subreddit.name))
     let scanned = 0
+    this.postsScanned = 0
+    this.scannedPostIds = new Set<string>()
 
     for await (const page of this.deps.auth.client.pages(subreddit.name, { signal })) {
       if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
@@ -204,6 +230,8 @@ export class JobRunner {
         if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
         if (scanned >= maxPosts) break
         scanned++
+        this.postsScanned++
+        this.scannedPostIds.add(post.id)
 
         const extracted = extractMedia(post, this.extractOptions(options))
         for (const item of extracted) {
@@ -232,7 +260,7 @@ export class JobRunner {
       if (scanned >= maxPosts) break
     }
 
-    this.state.scannedPosts = scanned
+    this.state.scannedPosts = this.postsScanned
     this.state.discovered = media.length
     this.emit()
     return media
@@ -247,6 +275,61 @@ export class JobRunner {
       if (aLarge === bLarge) return 0
       return aLarge ? -1 : 1
     })
+  }
+
+  /** Fetch the next page of posts beyond what was initially scanned. */
+  private async fetchNextPosts(
+    subreddit: SubredditInfo,
+    signal: AbortSignal
+  ): Promise<{ posts: MediaItem[] }> {
+    const folder = path.join(
+      this.state.subreddit
+        ? path.resolve(this.deps.settings.get().destination, safeFilename(subreddit.name))
+        : '',
+      safeFilename(subreddit.name)
+    )
+    const posts: MediaItem[] = []
+    const seen = new Set(this.scannedPostIds)
+
+    for await (const page of this.deps.auth.client.pages(subreddit.name, { signal })) {
+      if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
+
+      for (const post of page.posts) {
+        if (seen.has(post.id)) continue
+        seen.add(post.id)
+
+        const extracted = extractMedia(post, this.extractOptions({
+          subreddit: '',
+          destination: '',
+          mode: 'download',
+          maxPosts: 0,
+          concurrency: 1,
+          includeImages: true,
+          includeGalleries: true,
+          includeVideos: false,
+          includeExternalVideos: false,
+          skipNsfw: false,
+          skipExisting: false
+        }))
+        for (const item of extracted) {
+          item.filename = safeFilename(item.filename)
+          const initialPath = path.join(folder, item.filename)
+          if (!fs.existsSync(initialPath)) {
+            posts.push(item)
+          }
+        }
+      }
+    }
+
+    // Update scan tracking
+    for (const id of seen) {
+      if (!this.scannedPostIds.has(id)) {
+        this.scannedPostIds.add(id)
+        this.postsScanned++
+      }
+    }
+
+    return { posts }
   }
 
   private async downloadAll(
@@ -363,6 +446,19 @@ export class JobRunner {
           this.emit()
           return
         }
+
+        // Check if the downloaded image is still a thumbnail.
+        if (item.kind === 'image' || item.kind === 'gallery' || item.kind === 'external-image') {
+          if (isThumbnailFile(destination, item.ext)) {
+            this.state.skipped++
+            this.deps.log('warn', `Skipped ${item.filename}: still a thumbnail after retries`)
+            this.emit()
+            // Try to fetch replacement posts.
+            await this.tryReplaceThumbnail(item, folder, signal)
+            return
+          }
+        }
+
         item.localPath = destination
         entry.receivedBytes = result.bytes
       }
@@ -393,6 +489,34 @@ export class JobRunner {
         await fsp.unlink(`${destination}.part.mp4`).catch(() => undefined)
         await fsp.unlink(destination).catch(() => undefined)
       }
+    }
+  }
+
+  /** When a thumbnail is skipped, try to fetch replacement posts. */
+  private async tryReplaceThumbnail(
+    _item: MediaItem,
+    _folder: string,
+    signal: AbortSignal
+  ): Promise<void> {
+    const subreddit = this.state.subreddit
+    if (!subreddit) return
+
+    const maxPosts = this.deps.settings.get().maxPosts
+    if (this.postsScanned >= maxPosts) {
+      // Already scanned all allowed posts — nothing left to replace with.
+      return
+    }
+
+    try {
+      const { posts } = await this.fetchNextPosts(subreddit, signal)
+      if (posts.length > 0) {
+        this.deps.emitMedia(posts)
+        this.state.discovered += posts.length
+        this.emit()
+        this.deps.log('info', `Replaced thumbnail: found ${posts.length} new media from next posts.`)
+      }
+    } catch {
+      // If fetching fails, just silently skip — don't break the download.
     }
   }
 
