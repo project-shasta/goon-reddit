@@ -368,7 +368,7 @@ export default function App(): React.JSX.Element {
           {busy && (
             <span className="flex items-center gap-1.5 text-xs text-orange-300">
               <IconSpinner size={13} />
-              {job.phase === 'downloading' ? 'Downloading' : 'Working'}
+              {job.phase === 'downloading' ? (t.download as string) : (t.working as string)}
             </span>
           )}
           {historyCount > 0 && (
@@ -380,7 +380,7 @@ export default function App(): React.JSX.Element {
                 className="text-[10px] text-zinc-600 underline-offset-4 hover:text-zinc-400 hover:underline"
                 onClick={() => setShowClearKnownConfirm(true)}
               >
-                Clear known
+                {t.clearKnown as string}
               </button>
             </>
           )}
