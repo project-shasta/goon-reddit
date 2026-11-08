@@ -142,7 +142,7 @@ export function SubredditBar({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm font-semibold text-zinc-100">r/{validated.name}</span>
-              {validated.over18 && <span className="badge bg-red-500/15 text-red-300">NSFW</span>}
+              {validated.over18 && <span className="badge bg-red-500/15 text-red-300">{t.nsfw as string}</span>}
               {validated.quarantined && (
                 <span className="badge bg-amber-500/15 text-amber-300">{t.quarantined as string}</span>
               )}

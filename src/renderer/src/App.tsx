@@ -210,7 +210,7 @@ export default function App(): React.JSX.Element {
     async (patch: Partial<AppSettings>) => {
       const next = await window.api.updateSettings(patch)
       setSettings(next)
-      addLog({ level: 'info', message: 'Settings saved.', time: Date.now() })
+      addLog({ level: 'info', message: (t.settingsSaved as string), time: Date.now() })
     },
     [addLog]
   )
