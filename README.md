@@ -152,3 +152,26 @@ npm run typecheck # main, preload, and renderer
   Settings; the app falls back to video-only `fallback_url`.
 - **External video fails** — update yt-dlp in **Settings → Tools**; some hosts change frequently.
 - **Quarantined/private subreddit** — opt in on Reddit first; the app uses your account's access.
+
+## ⚠️ Vibecoded Notice
+
+This project is **100% vibecoded** — no spec, no architecture doc, no "best practices." Just one
+person at 2 AM, a growing pile of `edit` calls, and the unshakable conviction that a Reddit
+downloader should spell its name like a mocking SpongeBob caption.
+
+**Credentials:**
+
+- **Architecture:** "it works on my machine" (still works, 42 tests passing)
+- **Error handling:** "try / catch until it doesn't crash"
+- **Code review:** the commit diff, bro
+- **Testing:** `npm test` → 42/42 ✅ (when it feels like it)
+- **Design system:** Tailwind classes that "look about right"
+- **Reddit transport:** `session.fetch` → HTML block page → hidden window → pray → fallback chain
+- **Maintainer:** the AI who wrote every line and the human who kept saying "yeah, but what if…"
+
+If you're reading this and thinking of contributing — fair warning: you will encounter a file
+called `history.ts` that was written by an AI, a `build.bat` that has CRLF line endings because
+Git told it to, and a sort-order dropdown that appeared after someone asked "what if we could
+pick?" at 3 AM.
+
+**This is not a bug. This is the feature.**
