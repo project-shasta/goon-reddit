@@ -265,7 +265,6 @@ export default function App(): React.JSX.Element {
             onCancel={handleCancel}
             onAuthChanged={refreshAuth}
             onClearLogs={() => setLogs([])}
-            onOpenSettings={() => setView('settings')}
             canStart={canStart}
           />
         )}

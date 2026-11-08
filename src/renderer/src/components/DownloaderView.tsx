@@ -19,7 +19,6 @@ export interface DownloaderViewProps {
   onCancel: () => void
   onAuthChanged: () => void
   onClearLogs: () => void
-  onOpenSettings: () => void
   canStart: boolean
 }
 
@@ -38,7 +37,6 @@ export function DownloaderView({
   onCancel,
   onAuthChanged,
   onClearLogs,
-  onOpenSettings,
   canStart
 }: DownloaderViewProps): React.JSX.Element {
   const [logOpen, setLogOpen] = useState(false)
@@ -73,12 +71,6 @@ export function DownloaderView({
           {logOpen && <ActivityLog logs={logs} onClear={onClearLogs} />}
         </div>
       )}
-
-      <div className="flex items-center gap-2">
-        <button className="btn btn-ghost px-2 py-1 text-xs" onClick={onOpenSettings}>
-          Settings
-        </button>
-      </div>
     </div>
   )
 }
