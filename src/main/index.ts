@@ -14,7 +14,7 @@ import { ToolManager } from './tooling'
 registerMediaScheme()
 
 app.userAgentFallback = CHROME_UA
-app.setName('Reddit Downloader')
+app.setName('GoOn Reddit')
 // Everything the app writes lives next to the app itself. This must happen
 // before whenReady() and before any session is created.
 configureUserData()
@@ -46,7 +46,7 @@ function createMainWindow(): BrowserWindow {
     show: false,
     autoHideMenuBar: true,
     backgroundColor: '#0b0d12',
-    title: 'Reddit Downloader',
+    title: 'GoOn Reddit',
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,

@@ -1,7 +1,7 @@
 {
-  "name": "reddit-downloader",
+  "name": "goon-reddit",
   "version": "0.1.0",
-  "description": "Download images, galleries and videos from Reddit subreddits",
+  "description": "Fetch images, galleries and videos from Reddit",
   "main": "./out/main/index.js",
   "author": "Shasta",
   "license": "MIT",

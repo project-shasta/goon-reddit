@@ -218,7 +218,7 @@ export default function App(): React.JSX.Element {
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500 text-zinc-950">
             <IconReddit size={17} />
           </span>
-          <span className="text-sm font-bold tracking-tight text-zinc-100">Reddit Downloader</span>
+          <span className="text-sm font-bold tracking-tight text-zinc-100">GoOn Reddit</span>
         </div>
 
         <nav className="ml-2 flex items-center gap-1 rounded-xl bg-black/30 p-1">

@@ -1,7 +1,7 @@
-# Reddit Downloader
+# GoOn Reddit
 
 A small Electron app that logs into Reddit with **your own session**, scans a subreddit's newest
-posts, and downloads images, galleries, Reddit-hosted videos, and external videos in parallel.
+posts, and fetches images, galleries, Reddit-hosted videos, and external videos in parallel.
 
 Reddit blocks anonymous `.json` access, so the app opens a real Reddit login window and reuses that
 session for every request. Cookies never leave the main process.
