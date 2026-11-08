@@ -130,14 +130,15 @@ export class JobRunner {
       await fsp.mkdir(path.join(destination, safeFilename(subreddit.name)), { recursive: true })
 
       const media = await this.scan(subreddit, options, destination, controller.signal)
+      const prioritized = this.prioritizeLargeImages(media)
 
-      if (media.length === 0) {
+      if (prioritized.length === 0) {
         this.state.finishedAt = Date.now()
         this.setPhase('done', 'No downloadable media found in the scanned posts.')
         return
       }
 
-      await this.downloadAll(media, subreddit, options, destination, controller.signal)
+      await this.downloadAll(prioritized, subreddit, options, destination, controller.signal)
 
       this.state.finishedAt = Date.now()
       const summary = `Downloaded ${this.state.completed} file${
@@ -235,6 +236,17 @@ export class JobRunner {
     this.state.discovered = media.length
     this.emit()
     return media
+  }
+
+  /** Sort images so large ones download first; small/thumbnail images go to the end. */
+  private prioritizeLargeImages(media: MediaItem[]): MediaItem[] {
+    const THUMBNAIL_MAX = 700
+    return [...media].sort((a, b) => {
+      const aLarge = (a.width ?? 0) >= THUMBNAIL_MAX && (a.height ?? 0) >= THUMBNAIL_MAX
+      const bLarge = (b.width ?? 0) >= THUMBNAIL_MAX && (b.height ?? 0) >= THUMBNAIL_MAX
+      if (aLarge === bLarge) return 0
+      return aLarge ? -1 : 1
+    })
   }
 
   private async downloadAll(
