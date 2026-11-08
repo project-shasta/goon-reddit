@@ -142,16 +142,12 @@ export default function App(): React.JSX.Element {
       }
     })
     const offLog = window.api.onJobLog((entry) => addLog(entry))
-    const offToolsMissing = window.api.onToolsMissing((missing) => {
-      setMissingTools(missing)
-    })
 
     return () => {
       cancelled = true
       offAuth()
       offJob()
       offLog()
-      offToolsMissing()
     }
   }, [addLog, refreshHistoryCount])
 
@@ -159,6 +155,19 @@ export default function App(): React.JSX.Element {
     const trimmed = subredditInput.trim()
     if (trimmed) localStorage.setItem(SUBREDDIT_STORAGE_KEY, trimmed)
   }, [subredditInput])
+
+  // Check tools on startup and show banner if missing
+  useEffect(() => {
+    void window.api
+      .getToolsStatus()
+      .then((status) => {
+        const missing: string[] = []
+        if (!status.ffmpeg.ok) missing.push('ffmpeg')
+        if (!status.ytdlp.ok) missing.push('yt-dlp')
+        setMissingTools(missing)
+      })
+      .catch(() => setMissingTools([]))
+  }, [])
 
   const busy =
     job.phase === 'validating' || job.phase === 'scanning' || job.phase === 'downloading'
@@ -573,7 +582,7 @@ export default function App(): React.JSX.Element {
         )}
 
         {view === 'settings' && (
-          <SettingsView settings={settings} onSave={handleSaveSettings} lang={language} />
+          <SettingsView settings={settings} onSave={handleSaveSettings} lang={language} toolsMissing={missingTools} />
         )}
       </main>
     </div>

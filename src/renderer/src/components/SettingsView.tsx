@@ -39,8 +39,9 @@ const BEHAVIOR_TOGGLES: Array<{ key: BooleanKey }> = [
 export function SettingsView({
   settings,
   onSave,
-  lang = 'en'
-}: SettingsViewProps & { lang?: LanguageId }): React.JSX.Element {
+  lang = 'en',
+  toolsMissing = []
+}: SettingsViewProps & { lang?: LanguageId; toolsMissing?: string[] }): React.JSX.Element {
   const t = useI18n(lang)
   const [draft, setDraft] = useState<AppSettings>(settings)
   const [saving, setSaving] = useState(false)
@@ -344,7 +345,7 @@ export function SettingsView({
               <button
                 className="btn btn-secondary px-2 py-1 text-xs"
                 onClick={() => void downloadFfmpeg()}
-                disabled={downloadingFfmpeg}
+                disabled={toolsMissing.includes('ffmpeg') || downloadingFfmpeg}
               >
                 {downloadingFfmpeg ? <IconSpinner size={12} /> : <IconRefresh size={12} />}
                 {t.downloadTool as string}
@@ -363,7 +364,7 @@ export function SettingsView({
               <button
                 className="btn btn-secondary px-2 py-1 text-xs"
                 onClick={() => void downloadYtDlp()}
-                disabled={downloadingYtDlp}
+                disabled={toolsMissing.includes('yt-dlp') || downloadingYtDlp}
               >
                 {downloadingYtDlp ? <IconSpinner size={12} /> : <IconRefresh size={12} />}
                 {t.downloadTool as string}
