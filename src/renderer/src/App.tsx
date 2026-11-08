@@ -5,10 +5,10 @@ import { SettingsView } from './components/SettingsView'
 import { errorText } from './lib/format'
 import {
   IconDownload,
-  IconReddit,
   IconSettings,
   IconSpinner
 } from './components/icons'
+import appIcon from '../../../resources/icon.png'
 
 type View = 'download' | 'settings'
 type SortOrder = 'new' | 'hot' | 'top' | 'rising'
@@ -226,9 +226,7 @@ export default function App(): React.JSX.Element {
     <div className="flex h-full flex-col">
       <header className="flex flex-wrap items-center gap-3 border-b border-white/5 px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500 text-zinc-950">
-            <IconReddit size={17} />
-          </span>
+          <img src={appIcon} alt="" className="h-7 w-7 rounded-lg" />
           <span className="text-sm font-bold tracking-tight text-zinc-100">GoOn ReDdIt</span>
         </div>
 
