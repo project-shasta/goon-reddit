@@ -39,18 +39,18 @@ npm run build:win       # typecheck + build + zip archive
 
 ### Icon generation (PNG → ICO)
 
-The app icon is generated from a 256×256 PNG using Python/Pillow (installed via mise):
+The app icon is generated from a source PNG using Python/Pillow (installed via mise):
 
 ```powershell
 mise exec -- python -c "
 from PIL import Image
-img = Image.open('node_modules/app-builder-lib/templates/icons/electron-linux/256x256.png')
+img = Image.open('resources/icon.png')
 img = img.resize((256, 256), Image.LANCZOS).convert('RGBA')
 img.save('build/icon.ico', format='ICO', sizes=[(256, 256)])
 "
 ```
 
-To use your own icon, replace the source path with your PNG and re-run the command.
+Edit `resources/icon.png` to change the icon, then re-run the command.
 
 ## Run
 
