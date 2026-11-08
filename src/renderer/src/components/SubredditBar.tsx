@@ -75,7 +75,7 @@ export function SubredditBar({
             />
             <input
               id="subreddit"
-              className="input"
+              className={`input ${running ? 'text-zinc-500' : ''}`}
               placeholder={t.placeholderSubreddit as string | undefined}
               value={value}
               spellCheck={false}
