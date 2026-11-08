@@ -3,7 +3,6 @@ out/
 dist/
 data/
 build/
-!/build/icon.ico
 *.log
 *.tsbuildinfo
 .DS_Store
