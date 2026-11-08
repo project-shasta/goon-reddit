@@ -182,3 +182,11 @@ export function IconReddit(props: IconProps): React.JSX.Element {
     </svg>
   )
 }
+
+export function IconCaretDown(props: IconProps): React.JSX.Element {
+  return (
+    <svg {...base(props)} fill="currentColor" stroke="none">
+      <path d="M8.5 10.5L12 14l3.5-3.5H8.5Z" />
+    </svg>
+  )
+}

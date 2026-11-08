@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import type { JobState, SubredditInfo } from '@shared/types'
 import { formatCount } from '../lib/format'
 import {
   IconAlert,
+  IconCaretDown,
   IconDownload,
   IconExternal,
   IconGrid,
@@ -9,14 +11,23 @@ import {
   IconX
 } from './icons'
 
+type SortOrder = 'new' | 'hot' | 'top' | 'rising'
+
+const SORT_LABELS: Record<SortOrder, string> = {
+  new: 'New',
+  hot: 'Hot',
+  top: 'Top',
+  rising: 'Rising'
+}
+
 interface SubredditBarProps {
   value: string
   onChange: (value: string) => void
   validated: SubredditInfo | null
   validating: boolean
   validationError: string | null
-  sortOrder: 'new' | 'hot' | 'top' | 'rising'
-  onSortOrderChange: (order: 'new' | 'hot' | 'top' | 'rising') => void
+  sortOrder: SortOrder
+  onSortOrderChange: (order: SortOrder) => void
   onValidate: () => void
   onStart: (mode: 'download') => void
   onCancel: () => void
@@ -72,18 +83,11 @@ export function SubredditBar({
           <label className="label" htmlFor="sort-order">
             Sort
           </label>
-          <select
-            id="sort-order"
-            className="input"
+          <SortDropdown
             value={sortOrder}
-            onChange={(event) => onSortOrderChange(event.target.value as 'new' | 'hot' | 'top' | 'rising')}
+            onChange={onSortOrderChange}
             disabled={running}
-          >
-            <option value="new">New</option>
-            <option value="hot">Hot</option>
-            <option value="top">Top</option>
-            <option value="rising">Rising</option>
-          </select>
+          />
         </div>
 
         <button
@@ -172,5 +176,56 @@ export function SubredditBar({
         </div>
       )}
     </section>
+  )
+}
+
+function SortDropdown({
+  value,
+  onChange,
+  disabled
+}: {
+  value: SortOrder
+  onChange: (order: SortOrder) => void
+  disabled: boolean
+}): React.JSX.Element {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        className={`flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-2 text-sm transition-colors ${
+          disabled
+            ? 'border-white/10 bg-black/30 text-zinc-600'
+            : 'border-white/10 bg-black/30 text-zinc-200 hover:border-white/20'
+        }`}
+        onClick={() => !disabled && setOpen((v) => !v)}
+        disabled={disabled}
+      >
+        <span>{SORT_LABELS[value]}</span>
+        <IconCaretDown size={10} className={`shrink-0 ${disabled ? 'text-zinc-600' : 'text-zinc-500'}`} />
+      </button>
+
+      {open && (
+        <div className="absolute top-full z-50 mt-1 w-full rounded-xl border border-white/10 bg-zinc-900 py-1 shadow-lg">
+          {(['new', 'hot', 'top', 'rising'] as SortOrder[]).map((option) => (
+            <button
+              key={option}
+              className={`flex w-full px-3 py-2 text-sm transition-colors ${
+                option === value
+                  ? 'bg-orange-500/15 text-orange-300'
+                  : 'text-zinc-300 hover:bg-white/5 hover:text-zinc-100'
+              }`}
+              onClick={() => {
+                onChange(option)
+                setOpen(false)
+              }}
+            >
+              {SORT_LABELS[option]}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
