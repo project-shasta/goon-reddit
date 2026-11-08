@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, session, shell } from 'electron'
+import { app, BrowserWindow, dialog, Notification, session, shell } from 'electron'
 import path from 'node:path'
 import { IPC } from '@shared/ipc'
 import type { AuthStatus, JobState, LogEntry, MediaItem } from '@shared/types'
@@ -130,7 +130,10 @@ if (startupError) {
       emitState: (state: JobState) => send(IPC.jobState, state),
       emitMedia: (items: MediaItem[]) => send(IPC.jobMedia, items),
       emitMediaUpdate: (item: MediaItem) => send(IPC.jobMediaUpdate, item),
-      log: emitLog
+      log: emitLog,
+      notify: (title: string, body: string) => {
+        void new Notification({ title, body }).show()
+      }
     })
 
     registerIpcHandlers({

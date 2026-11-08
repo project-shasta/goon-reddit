@@ -40,6 +40,8 @@ const api: RendererApi = {
   historyTotal: () => ipcRenderer.invoke(IPC.historyTotal),
   historyClear: () => ipcRenderer.invoke(IPC.historyClear),
   shellBeep: () => ipcRenderer.invoke(IPC.shellBeep),
+  showNotification: (title: string, body: string) =>
+    ipcRenderer.invoke(IPC.notificationShow, { title, body }),
   onAuthState: (callback: (status: AuthStatus) => void) =>
     subscribe<AuthStatus>(IPC.authState, callback),
   onJobState: (callback: (state: JobState) => void) =>

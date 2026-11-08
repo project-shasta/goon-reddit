@@ -34,6 +34,7 @@ export interface JobDeps {
   emitMedia: (items: MediaItem[]) => void
   emitMediaUpdate: (item: MediaItem) => void
   log: (level: LogLevel, message: string) => void
+  notify: (title: string, body: string) => void
 }
 
 function initialState(): JobState {
@@ -153,10 +154,12 @@ export class JobRunner {
       this.state.finishedAt = Date.now()
       if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError')) {
         this.setPhase('cancelled', 'Cancelled.')
+        this.deps.notify('Download cancelled', 'The download was cancelled.')
       } else {
         const message = errorMessage(err)
         this.setPhase('error', message)
         this.deps.log('error', message)
+        this.deps.notify('Download failed', message)
         if (isRedditError(err) && err.code === 'AUTH_REQUIRED') {
           this.deps.log('warn', 'Open the Reddit login window to refresh your session.')
         }
@@ -191,6 +194,7 @@ export class JobRunner {
     if (prioritized.length === 0) {
       this.state.finishedAt = Date.now()
       this.setPhase('done', 'No downloadable media found in the scanned posts.')
+      this.deps.notify('Download complete', 'No downloadable media found.')
       return
     }
 
@@ -205,8 +209,10 @@ export class JobRunner {
 
     if (signal.aborted) {
       this.setPhase('cancelled', `Cancelled. ${summary}`)
+      this.deps.notify('Download cancelled', summary)
     } else {
       this.setPhase('done', summary)
+      this.deps.notify('Download complete', summary)
     }
     this.deps.log(signal.aborted ? 'warn' : 'success', summary)
   }
@@ -241,6 +247,7 @@ export class JobRunner {
     if (prioritized.length === 0) {
       this.state.finishedAt = Date.now()
       this.setPhase('done', 'No downloadable media found in the scanned posts.')
+      this.deps.notify('Download complete', 'No downloadable media found.')
       return
     }
 
@@ -255,8 +262,10 @@ export class JobRunner {
 
     if (signal.aborted) {
       this.setPhase('cancelled', `Cancelled. ${summary}`)
+      this.deps.notify('Download cancelled', summary)
     } else {
       this.setPhase('done', summary)
+      this.deps.notify('Download complete', summary)
     }
     this.deps.log(signal.aborted ? 'warn' : 'success', summary)
   }

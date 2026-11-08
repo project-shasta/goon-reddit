@@ -128,8 +128,13 @@ export default function App(): React.JSX.Element {
       setJob(state)
       if (state.phase === 'done') {
         void window.api.shellBeep().catch(() => undefined)
+        void window.api.showNotification('Download complete', state.message ?? '').catch(() => undefined)
         refreshHistoryCount()
       } else if (state.phase === 'cancelled' || state.phase === 'error') {
+        void window.api.showNotification(
+          state.phase === 'error' ? 'Download failed' : 'Download cancelled',
+          state.message ?? ''
+        ).catch(() => undefined)
         refreshHistoryCount()
       }
       if (state.subreddit?.name) {

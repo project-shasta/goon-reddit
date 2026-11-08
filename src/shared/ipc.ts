@@ -22,5 +22,6 @@ export const IPC = {
   shellOpenFolder: 'shell:open-folder',
   historyTotal: 'history:total',
   historyClear: 'history:clear',
-  shellBeep: 'shell:beep'
+  shellBeep: 'shell:beep',
+  notificationShow: 'notification:show'
 } as const

@@ -1,4 +1,4 @@
-import { BrowserWindow, dialog, ipcMain, shell } from 'electron'
+import { BrowserWindow, dialog, ipcMain, Notification, shell } from 'electron'
 import path from 'node:path'
 import { IPC } from '@shared/ipc'
 import type { AppSettings, DownloadMode, JobOptions, LogEntry } from '@shared/types'
@@ -173,6 +173,15 @@ export function registerIpcHandlers(ctx: IpcContext): void {
 
   ipcMain.handle(IPC.shellBeep, async () => {
     shell.beep()
+    return true
+  })
+
+  ipcMain.handle(IPC.notificationShow, async (_event, options) => {
+    const title = String(options.title ?? 'GoOn ReDdIt')
+    const body = String(options.body ?? '')
+    const icon = typeof options.icon === 'string' ? options.icon : null
+    const n = new Notification({ title, body, ...(icon ? { icon } : {}) })
+    n.show()
     return true
   })
 }

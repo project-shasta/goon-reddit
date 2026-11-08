@@ -207,6 +207,7 @@ export interface RendererApi {
   historyTotal(): Promise<number>
   historyClear(): Promise<void>
   shellBeep(): Promise<boolean>
+  showNotification(title: string, body: string): Promise<boolean>
   setTheme(theme: string): void
   setLanguage(lang: string): void
   onAuthState(callback: (status: AuthStatus) => void): () => void
