@@ -1,4 +1,5 @@
 # GoOn Reddit
+## The Reddit gallery downloader
 
 A small Electron app that logs into Reddit with **your own session**, scans a subreddit's newest
 posts, and fetches images, galleries, Reddit-hosted videos, and external videos in parallel.
