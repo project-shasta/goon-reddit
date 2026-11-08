@@ -102,6 +102,7 @@ export const en: Translation = {
   midnight: 'Midnight',
   circuitBreaker: 'Circuit Breaker',
   corporate: 'Corporate',
+  matrix: 'Matrix',
   vaporwave: 'Vaporwave',
   sortOrder: 'Sort',
   sort: 'Sort',

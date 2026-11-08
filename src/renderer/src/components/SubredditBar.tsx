@@ -65,7 +65,6 @@ export function SubredditBar({
               mode={mode}
               onChange={onModeChange}
               disabled={running}
-              lang={lang}
             />
             <input
               id="subreddit"
@@ -288,15 +287,12 @@ function SortDropdown({
 function ModeDropdown({
   mode,
   onChange,
-  disabled,
-  lang = 'en'
+  disabled
 }: {
   mode: DownloadMode
   onChange: (mode: DownloadMode) => void
   disabled: boolean
-  lang?: LanguageId
 }): React.JSX.Element {
-  const t = useI18n(lang)
   const [open, setOpen] = useState(false)
 
   return (
