@@ -23,6 +23,6 @@ win:
     - target: zip
       arch:
         - x64
-  artifactName: "goon-reddit.${ext}"
+  artifactName: "goon-reddit-${version}.${ext}"
 
 electronDist: node_modules/electron/dist
