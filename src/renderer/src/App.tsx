@@ -70,8 +70,6 @@ export default function App(): React.JSX.Element {
   const [sortOrder, setSortOrder] = useState<SortOrder>('new')
   const [mode, setMode] = useState<DownloadMode>('download')
   const [missingTools, setMissingTools] = useState<string[]>([])
-  const [downloadingFfmpeg, setDownloadingFfmpeg] = useState(false)
-  const [downloadingYtDlp, setDownloadingYtDlp] = useState(false)
   const t = useI18n(language)
 
   const addLog = useCallback((entry: LogEntry) => {
@@ -251,30 +249,6 @@ export default function App(): React.JSX.Element {
       .getAuthStatus()
       .then(setAuth)
       .catch((err) => addLog({ level: 'error', message: errorText(err), time: Date.now() }))
-  }, [addLog])
-
-  const handleDownloadFfmpeg = useCallback(async () => {
-    setDownloadingFfmpeg(true)
-    try {
-      await window.api.downloadTool('ffmpeg')
-      setMissingTools([])
-    } catch (err) {
-      addLog({ level: 'error', message: errorText(err), time: Date.now() })
-    } finally {
-      setDownloadingFfmpeg(false)
-    }
-  }, [addLog])
-
-  const handleDownloadYtDlp = useCallback(async () => {
-    setDownloadingYtDlp(true)
-    try {
-      await window.api.downloadTool('yt-dlp')
-      setMissingTools([])
-    } catch (err) {
-      addLog({ level: 'error', message: errorText(err), time: Date.now() })
-    } finally {
-      setDownloadingYtDlp(false)
-    }
   }, [addLog])
 
   const dismissMissing = useCallback(() => {
@@ -520,29 +494,15 @@ export default function App(): React.JSX.Element {
             {missingTools.includes('ffmpeg') && missingTools.includes('yt-dlp')
               ? 'ffmpeg and yt-dlp'
               : missingTools.join(' and ')}
-            .
+            . Download from Settings.
           </span>
           <div className="ml-auto flex items-center gap-2">
-            {missingTools.includes('ffmpeg') && (
-              <button
-                className="btn btn-secondary px-2 py-1 text-xs"
-                onClick={() => void handleDownloadFfmpeg()}
-                disabled={downloadingFfmpeg}
-              >
-                {downloadingFfmpeg ? <IconSpinner size={12} /> : null}
-                Download ffmpeg
-              </button>
-            )}
-            {missingTools.includes('yt-dlp') && (
-              <button
-                className="btn btn-secondary px-2 py-1 text-xs"
-                onClick={() => void handleDownloadYtDlp()}
-                disabled={downloadingYtDlp}
-              >
-                {downloadingYtDlp ? <IconSpinner size={12} /> : null}
-                Download yt-dlp
-              </button>
-            )}
+            <button
+              className="btn btn-secondary px-2 py-1 text-xs"
+              onClick={() => setView('settings')}
+            >
+              Open Settings
+            </button>
             <button
               className="btn btn-ghost px-2 py-1 text-xs"
               onClick={dismissMissing}
@@ -577,6 +537,7 @@ export default function App(): React.JSX.Element {
             onClearLogs={() => setLogs([])}
             onOpenSettings={() => setView('settings')}
             canStart={canStart}
+            toolsMissing={missingTools}
             lang={language}
           />
         )}

@@ -29,6 +29,7 @@ interface SubredditBarProps {
   onCancel: () => void
   job: JobState
   canStart: boolean
+  toolsMissing?: string[]
 }
 
 export function SubredditBar({
@@ -47,6 +48,7 @@ export function SubredditBar({
   onCancel,
   job,
   canStart,
+  toolsMissing = [],
   lang = 'en'
 }: SubredditBarProps & { lang?: LanguageId }): React.JSX.Element {
   const t = useI18n(lang)
@@ -112,7 +114,7 @@ export function SubredditBar({
           <button
             className="btn btn-primary"
             onClick={() => onStart(mode)}
-            disabled={!canStart}
+            disabled={!canStart || toolsMissing.length > 0}
           >
             <IconDownload size={15} />
             {t.downloadNew as string}
