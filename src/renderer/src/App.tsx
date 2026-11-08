@@ -251,10 +251,6 @@ export default function App(): React.JSX.Element {
       .catch((err) => addLog({ level: 'error', message: errorText(err), time: Date.now() }))
   }, [addLog])
 
-  const dismissMissing = useCallback(() => {
-    setMissingTools([])
-  }, [])
-
   const handleSaveSettings = useCallback(
     async (patch: Partial<AppSettings>) => {
       const next = await window.api.updateSettings(patch)
@@ -496,20 +492,12 @@ export default function App(): React.JSX.Element {
               : missingTools.join(' and ')}
             . Download from Settings.
           </span>
-          <div className="ml-auto flex items-center gap-2">
-            <button
-              className="btn btn-secondary px-2 py-1 text-xs"
-              onClick={() => setView('settings')}
-            >
-              Open Settings
-            </button>
-            <button
-              className="btn btn-ghost px-2 py-1 text-xs"
-              onClick={dismissMissing}
-            >
-              Dismiss
-            </button>
-          </div>
+          <button
+            className="btn btn-secondary ml-auto px-2 py-1 text-xs"
+            onClick={() => setView('settings')}
+          >
+            Open Settings
+          </button>
         </div>
       )}
 
@@ -543,7 +531,7 @@ export default function App(): React.JSX.Element {
         )}
 
         {view === 'settings' && (
-          <SettingsView settings={settings} onSave={handleSaveSettings} lang={language} toolsMissing={missingTools} />
+          <SettingsView settings={settings} onSave={handleSaveSettings} lang={language} />
         )}
       </main>
     </div>
