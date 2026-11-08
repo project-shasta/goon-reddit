@@ -77,9 +77,13 @@ export class JobRunner {
   private controller: AbortController | null = null
   private running = false
 
-  /** Track scan state for re-scanning when thumbnails are skipped. */
-  private postsScanned = 0
-  private scannedPostIds = new Set<string>()
+  /**
+   * Media items per post and how many of them finished. A post is only added
+   * to history once every item succeeded, otherwise a mixed gallery could be
+   * marked done while some slides are still missing.
+   */
+  private postItemTotals = new Map<string, number>()
+  private postItemsDone = new Map<string, number>()
 
   constructor(private readonly deps: JobDeps) {}
 
@@ -221,8 +225,6 @@ export class JobRunner {
     const maxPosts = options.maxPosts > 0 ? options.maxPosts : Number.POSITIVE_INFINITY
     const folder = path.join(destination, safeFilename(subreddit.name))
     let scanned = 0
-    this.postsScanned = 0
-    this.scannedPostIds = new Set<string>()
 
     for await (const page of this.deps.auth.client.pages(subreddit.name, { signal })) {
       if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
@@ -232,8 +234,6 @@ export class JobRunner {
         if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
         if (scanned >= maxPosts) break
         scanned++
-        this.postsScanned++
-        this.scannedPostIds.add(post.id)
 
         const extracted = extractMedia(post, this.extractOptions(options))
         for (const item of extracted) {
@@ -267,7 +267,7 @@ export class JobRunner {
       if (scanned >= maxPosts) break
     }
 
-    this.state.scannedPosts = this.postsScanned
+    this.state.scannedPosts = scanned
     this.state.discovered = media.length
     this.emit()
     return media
@@ -284,62 +284,6 @@ export class JobRunner {
     })
   }
 
-  /** Fetch the next page of posts beyond what was initially scanned. */
-  private async fetchNextPosts(
-    subreddit: SubredditInfo,
-    signal: AbortSignal
-  ): Promise<{ posts: MediaItem[] }> {
-    const folder = path.join(
-      this.state.subreddit
-        ? path.resolve(this.deps.settings.get().destination, safeFilename(subreddit.name))
-        : '',
-      safeFilename(subreddit.name)
-    )
-    const posts: MediaItem[] = []
-    const seen = new Set(this.scannedPostIds)
-
-    for await (const page of this.deps.auth.client.pages(subreddit.name, { signal })) {
-      if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
-
-      for (const post of page.posts) {
-        if (seen.has(post.id)) continue
-        seen.add(post.id)
-
-        const extracted = extractMedia(post, this.extractOptions({
-          subreddit: '',
-          destination: '',
-          mode: 'download',
-          maxPosts: 0,
-          concurrency: 1,
-          includeImages: true,
-          includeGalleries: true,
-          includeVideos: false,
-          includeExternalVideos: false,
-          skipNsfw: false,
-          skipExisting: false,
-          sortOrder: 'new'
-        }))
-        for (const item of extracted) {
-          item.filename = safeFilename(item.filename)
-          const initialPath = path.join(folder, item.filename)
-          if (!fs.existsSync(initialPath)) {
-            posts.push(item)
-          }
-        }
-      }
-    }
-
-    // Update scan tracking
-    for (const id of seen) {
-      if (!this.scannedPostIds.has(id)) {
-        this.scannedPostIds.add(id)
-        this.postsScanned++
-      }
-    }
-
-    return { posts }
-  }
-
   private async downloadAll(
     media: MediaItem[],
     subreddit: SubredditInfo,
@@ -351,10 +295,26 @@ export class JobRunner {
     const folder = path.join(destination, safeFilename(subreddit.name))
     const reserved = new Set<string>()
 
+    this.postItemTotals = new Map<string, number>()
+    this.postItemsDone = new Map<string, number>()
+    for (const item of media) {
+      this.postItemTotals.set(item.postId, (this.postItemTotals.get(item.postId) ?? 0) + 1)
+    }
+
     await runPool(media, options.concurrency, async (item) => {
       if (signal.aborted) return
       await this.downloadItem(item, folder, options.skipExisting, reserved, signal, subreddit.name)
     })
+  }
+
+  /** Mark one media item finished; only record the post once all items are done. */
+  private markItemDone(subredditName: string, postId: string): void {
+    const total = this.postItemTotals.get(postId) ?? 1
+    const done = (this.postItemsDone.get(postId) ?? 0) + 1
+    this.postItemsDone.set(postId, done)
+    if (done >= total) {
+      this.deps.history.add(subredditName, postId)
+    }
   }
 
   private activeEntry(item: MediaItem, filename: string): ActiveDownload {
@@ -387,6 +347,7 @@ export class JobRunner {
     if (skipExisting && fs.existsSync(initialPath)) {
       item.localPath = initialPath
       this.state.skipped++
+      this.markItemDone(subredditName, item.postId)
       this.deps.emitMediaUpdate({ ...item })
       this.emit()
       return
@@ -465,8 +426,6 @@ export class JobRunner {
             this.deps.log('warn', `Skipped ${item.filename}: still a thumbnail after retries`)
             entry.retries = result.retries
             this.emit()
-            // Try to fetch replacement posts.
-            await this.tryReplaceThumbnail(item, folder, signal)
             return
           }
         }
@@ -480,8 +439,7 @@ export class JobRunner {
       entry.status = 'done'
       entry.ratio = 1
       this.state.completed++
-      // Record in history.
-      this.deps.history.add(subredditName, item.postId)
+      this.markItemDone(subredditName, item.postId)
       this.deps.emitMediaUpdate({ ...item })
       this.deps.log('success', `Saved ${path.basename(item.localPath ?? destination)}`)
       tick(entry.receivedBytes, entry.totalBytes, 1, true)
@@ -507,34 +465,6 @@ export class JobRunner {
     }
   }
 
-  /** When a thumbnail is skipped, try to fetch replacement posts. */
-  private async tryReplaceThumbnail(
-    _item: MediaItem,
-    _folder: string,
-    signal: AbortSignal
-  ): Promise<void> {
-    const subreddit = this.state.subreddit
-    if (!subreddit) return
-
-    const maxPosts = this.deps.settings.get().maxPosts
-    if (this.postsScanned >= maxPosts) {
-      // Already scanned all allowed posts — nothing left to replace with.
-      return
-    }
-
-    try {
-      const { posts } = await this.fetchNextPosts(subreddit, signal)
-      if (posts.length > 0) {
-        this.deps.emitMedia(posts)
-        this.state.discovered += posts.length
-        this.emit()
-        this.deps.log('info', `Replaced thumbnail: found ${posts.length} new media from next posts.`)
-      }
-    } catch {
-      // If fetching fails, just silently skip — don't break the download.
-    }
-  }
-
   private async downloadImage(
     item: MediaItem,
     destination: string,
@@ -544,6 +474,7 @@ export class JobRunner {
     const fetchFn = this.deps.auth.session.fetch.bind(this.deps.auth.session)
     const maxRetries = 3
     let retries = 0
+    let lastError: unknown = null
 
     // Try the primary URL up to maxRetries times.
     for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -551,24 +482,38 @@ export class JobRunner {
         return { bytes: (await downloadToFile(fetchFn, item.sourceUrl, destination, { signal, onProgress })).bytes, retries }
       } catch (err) {
         if (signal.aborted) throw err
+        lastError = err
         retries++
         if (attempt < maxRetries - 1) {
-          this.deps.log('warn', `Retrying ${item.filename} (attempt ${attempt + 2}/${maxRetries})`)
+          this.deps.log(
+            'warn',
+            `Retrying ${item.filename} (attempt ${attempt + 2}/${maxRetries}): ${errorMessage(err)}`
+          )
           await sleep(800 + Math.random() * 400, signal)
         }
       }
     }
 
-    // Fallback to the preview/thumbnail URL, also retrying up to maxRetries times.
+    // Fallback to the preview URL, also retrying up to maxRetries times.
     if (item.previewUrl && item.previewUrl !== item.sourceUrl) {
+      this.deps.log(
+        'warn',
+        `Falling back to preview for ${item.filename}: ${
+          lastError ? errorMessage(lastError) : 'unknown error'
+        }`
+      )
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
-          this.deps.log('warn', `Retrying ${item.filename} with preview URL (attempt ${attempt + 1}/${maxRetries})`)
-          return { bytes: (await downloadToFile(fetchFn, item.previewUrl, destination, { signal, onProgress })).bytes, retries: retries + attempt + 1 }
+          return { bytes: (await downloadToFile(fetchFn, item.previewUrl, destination, { signal, onProgress })).bytes, retries }
         } catch (err) {
           if (signal.aborted) throw err
+          lastError = err
           retries++
           if (attempt < maxRetries - 1) {
+            this.deps.log(
+              'warn',
+              `Preview retry ${attempt + 2}/${maxRetries} for ${item.filename}: ${errorMessage(err)}`
+            )
             await sleep(800 + Math.random() * 400, signal)
           }
         }
@@ -576,7 +521,10 @@ export class JobRunner {
     }
 
     // All retries exhausted — skip this item instead of failing the whole job.
-    this.deps.log('warn', `Skipping ${item.filename}: could not fetch after ${maxRetries} attempts`)
+    this.deps.log(
+      'warn',
+      `Skipping ${item.filename}: ${lastError ? errorMessage(lastError) : 'unknown error'} (${item.sourceUrl})`
+    )
     return { skipped: true, retries }
   }
 

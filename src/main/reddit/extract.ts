@@ -113,13 +113,18 @@ function stripRedditImageParams(url: string): string {
 function previewFromPost(post: RedditPost): MediaItem['previewUrl'] {
   const images = post.preview?.images
   if (Array.isArray(images) && images[0]) {
+    const source = images[0].source
     const resolutions = images[0].resolutions
-    // Use the highest-resolution variant (last in the array) or the source.
-    const best =
+    // Resolutions are ordered smallest to largest. Prefer whichever of the
+    // source or the final resolution actually has the higher width — some
+    // payloads cap the "source" preview below the last resolution.
+    const largest =
       Array.isArray(resolutions) && resolutions.length > 0
         ? resolutions[resolutions.length - 1]
-        : images[0].source
-    const url = decodeUrl(best?.url)
+        : null
+    const best =
+      largest && (largest.width ?? 0) >= (source?.width ?? 0) ? largest : source
+    const url = decodeUrl(best?.url ?? largest?.url)
     if (url) return url
   }
   if (typeof post.thumbnail === 'string' && /^https?:\/\//.test(post.thumbnail)) {
@@ -131,7 +136,9 @@ function previewFromPost(post: RedditPost): MediaItem['previewUrl'] {
 function galleryPreview(meta: RedditPost): string | null {
   const previews = meta?.p
   if (Array.isArray(previews) && previews.length > 0) {
-    return decodeUrl(previews[0]?.u)
+    // Reddit orders these smallest to largest; the last entry is the best
+    // fallback. Using [0] here used to select the 108px thumbnail.
+    return decodeUrl(previews[previews.length - 1]?.u)
   }
   return decodeUrl(meta?.s?.u)
 }
@@ -183,12 +190,16 @@ function extractFromPost(post: RedditPost, options: ExtractOptions, depth = 0): 
         if (!mediaId || !meta) return
 
         const animated = meta.e === 'AnimatedImage'
+        const originalUrl = animated ? null : decodeUrl(meta.s?.u)
         const ext = animated
           ? 'gif'
-          : extensionFromMime(meta.m) ?? extensionFromUrl(decodeUrl(meta.s?.u) ?? '') ?? 'jpg'
+          : extensionFromUrl(originalUrl ?? '') ?? extensionFromMime(meta.m) ?? 'jpg'
+        // Use Reddit's own full-resolution URL. Reconstructing it from the
+        // MIME type broke JPEG galleries: Reddit serves those as `.jpeg`, but
+        // `extensionFromMime('image/jpeg')` returns `.jpg`, which 404s.
         const sourceUrl = animated
           ? decodeUrl(meta.s?.gif) ?? `https://i.redd.it/${mediaId}.gif`
-          : `https://i.redd.it/${mediaId}.${ext}`
+          : originalUrl ?? `https://i.redd.it/${mediaId}.${ext}`
 
         items.push({
           ...base,

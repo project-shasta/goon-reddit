@@ -62,9 +62,9 @@ describe('extractMedia', () => {
           items: [{ media_id: 'm1' }, { media_id: 'm2' }, { media_id: 'm3' }]
         },
         media_metadata: {
-          m1: { m: 'image/jpeg', s: { u: 'https://preview.redd.it/m1.jpg?width=1080', x: 1080, y: 720 } },
-          m2: { m: 'image/png', s: { u: 'https://preview.redd.it/m2.png?width=800', x: 800, y: 600 } },
-          m3: { m: 'image/webp', s: { u: 'https://preview.redd.it/m3.webp?width=640', x: 640, y: 480 } }
+          m1: { m: 'image/jpeg', s: { u: 'https://i.redd.it/m1.jpeg', x: 1080, y: 720 } },
+          m2: { m: 'image/png', s: { u: 'https://i.redd.it/m2.png', x: 800, y: 600 } },
+          m3: { m: 'image/webp', s: { u: 'https://i.redd.it/m3.webp', x: 640, y: 480 } }
         }
       }),
       ALL
@@ -73,7 +73,7 @@ describe('extractMedia', () => {
     expect(ids(items)).toEqual(['abc123:0', 'abc123:1', 'abc123:2'])
     expect(items.map((item) => item.ext)).toEqual(['jpg', 'png', 'webp'])
     expect(items.map((item) => item.sourceUrl)).toEqual([
-      'https://i.redd.it/m1.jpg',
+      'https://i.redd.it/m1.jpeg',
       'https://i.redd.it/m2.png',
       'https://i.redd.it/m3.webp'
     ])
@@ -82,6 +82,66 @@ describe('extractMedia', () => {
     expect(items[2].filename).toMatch(/_03\.webp$/)
     expect(items[1].width).toBe(800)
     expect(items[1].height).toBe(600)
+  })
+
+  it('reconstructs a gallery URL only when the original is missing', () => {
+    const items = extractMedia(
+      post({
+        is_gallery: true,
+        gallery_data: { items: [{ media_id: 'm1' }] },
+        media_metadata: { m1: { m: 'image/jpeg', s: {} } }
+      }),
+      ALL
+    )
+
+    expect(items[0].sourceUrl).toBe('https://i.redd.it/m1.jpg')
+  })
+
+  it('uses the largest gallery preview as the fallback', () => {
+    const items = extractMedia(
+      post({
+        is_gallery: true,
+        gallery_data: { items: [{ media_id: 'm1' }] },
+        media_metadata: {
+          m1: {
+            m: 'image/jpeg',
+            s: { u: 'https://i.redd.it/m1.jpeg' },
+            p: [
+              { u: 'https://preview.redd.it/m1.jpeg?width=108', x: 108, y: 144 },
+              { u: 'https://preview.redd.it/m1.jpeg?width=960', x: 960, y: 1280 }
+            ]
+          }
+        }
+      }),
+      ALL
+    )
+
+    expect(items[0].previewUrl).toBe('https://preview.redd.it/m1.jpeg?width=960')
+  })
+
+  it('picks the largest preview for a single image', () => {
+    const items = extractMedia(
+      post({
+        preview: {
+          images: [
+            {
+              source: {
+                url: 'https://preview.redd.it/x.jpg?width=960',
+                width: 960,
+                height: 1280
+              },
+              resolutions: [
+                { url: 'https://preview.redd.it/x.jpg?width=640', width: 640, height: 853 },
+                { url: 'https://preview.redd.it/x.jpg?width=1080', width: 1080, height: 1440 }
+              ]
+            }
+          ]
+        }
+      }),
+      ALL
+    )
+
+    expect(items[0].previewUrl).toBe('https://preview.redd.it/x.jpg?width=1080')
   })
 
   it('uses the animated gif for animated gallery entries', () => {
