@@ -48,6 +48,8 @@ export function SettingsView({
   const [error, setError] = useState<string | null>(null)
   const [tools, setTools] = useState<ToolsStatus | null>(null)
   const [updatingTools, setUpdatingTools] = useState(false)
+  const [downloadingFfmpeg, setDownloadingFfmpeg] = useState(false)
+  const [downloadingYtDlp, setDownloadingYtDlp] = useState(false)
   const [showNsfwConfirm, setShowNsfwConfirm] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [resetting, setResetting] = useState(false)
@@ -105,6 +107,30 @@ export function SettingsView({
       setError(errorText(err))
     } finally {
       setUpdatingTools(false)
+    }
+  }
+
+  const downloadFfmpeg = async (): Promise<void> => {
+    setDownloadingFfmpeg(true)
+    setError(null)
+    try {
+      setTools(await window.api.downloadTool('ffmpeg'))
+    } catch (err) {
+      setError(errorText(err))
+    } finally {
+      setDownloadingFfmpeg(false)
+    }
+  }
+
+  const downloadYtDlp = async (): Promise<void> => {
+    setDownloadingYtDlp(true)
+    setError(null)
+    try {
+      setTools(await window.api.downloadTool('yt-dlp'))
+    } catch (err) {
+      setError(errorText(err))
+    } finally {
+      setDownloadingYtDlp(false)
     }
   }
 
@@ -313,6 +339,18 @@ export function SettingsView({
           version={tools?.ffmpeg.version ?? null}
           path={tools?.ffmpeg.path ?? null}
           notFound={t.notFound as string}
+          action={
+            !tools?.ffmpeg.ok ? (
+              <button
+                className="btn btn-secondary px-2 py-1 text-xs"
+                onClick={() => void downloadFfmpeg()}
+                disabled={downloadingFfmpeg}
+              >
+                {downloadingFfmpeg ? <IconSpinner size={12} /> : <IconRefresh size={12} />}
+                {t.downloadTool as string}
+              </button>
+            ) : undefined
+          }
         />
         <ToolRow
           name={(t.ytDlp as string)}
@@ -321,14 +359,25 @@ export function SettingsView({
           path={tools?.ytdlp.path ?? null}
           notFound={t.notFound as string}
           action={
-            <button
-              className="btn btn-secondary px-2 py-1 text-xs"
-              onClick={() => void updateYtDlp()}
-              disabled={updatingTools}
-            >
-              {updatingTools ? <IconSpinner size={12} /> : <IconRefresh size={12} />}
-              {t.update as string}
-            </button>
+            !tools?.ytdlp.ok ? (
+              <button
+                className="btn btn-secondary px-2 py-1 text-xs"
+                onClick={() => void downloadYtDlp()}
+                disabled={downloadingYtDlp}
+              >
+                {downloadingYtDlp ? <IconSpinner size={12} /> : <IconRefresh size={12} />}
+                {t.downloadTool as string}
+              </button>
+            ) : (
+              <button
+                className="btn btn-secondary px-2 py-1 text-xs"
+                onClick={() => void updateYtDlp()}
+                disabled={updatingTools}
+              >
+                {updatingTools ? <IconSpinner size={12} /> : <IconRefresh size={12} />}
+                {t.update as string}
+              </button>
+            )
           }
         />
         {!tools && <p className="text-[11px] text-zinc-500">{t.checkingTools as string}</p>}

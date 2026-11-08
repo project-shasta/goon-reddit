@@ -156,6 +156,7 @@ export function registerIpcHandlers(ctx: IpcContext): void {
 
   ipcMain.handle(IPC.toolsStatus, async () => ctx.tools.status())
   ipcMain.handle(IPC.toolsUpdateYtdlp, async () => ctx.tools.updateYtDlp())
+  ipcMain.handle(IPC.toolsDownload, async (_event, tool: 'ffmpeg' | 'yt-dlp') => ctx.tools.downloadTool(tool))
 
   ipcMain.handle(IPC.shellOpenExternal, async (_event, url: string) => {
     const target = String(url ?? '')

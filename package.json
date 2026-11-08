@@ -15,9 +15,8 @@
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "test": "vitest run",
     "test:watch": "vitest",
-    "tools:setup": "node scripts/setup-tools.mjs",
     "icon:gen": "node scripts/gen-icon.mjs",
-    "build:win": "npm run tools:setup && npm run typecheck && electron-vite build && electron-builder --win"
+    "build:win": "npm run typecheck && electron-vite build && electron-builder --win"
   },
   "dependencies": {
     "react": "19.3.1",
@@ -32,7 +31,6 @@
     "electron": "45.2.3",
     "electron-builder": "26.18.0",
     "electron-vite": "6.0.0",
-    "ffmpeg-static": "5.3.0",
     "tailwindcss": "4.3.5",
     "typescript": "7.0.2",
     "vite": "8.3.6",
@@ -40,7 +38,6 @@
   },
   "allowScripts": {
     "electron@45.2.3": true,
-    "ffmpeg-static@5.3.0": true,
     "electron-winstaller@5.4.0": true
   }
 }

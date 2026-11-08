@@ -168,15 +168,6 @@ Apache License, Version 2.0
 
 ## Bundled Tools
 
-### FFmpeg
-
-Licensed under the **GNU Lesser General Public License, version 2.1** (or at your option, any later version).
-
-FFmpeg is dynamically linked at runtime. The LGPL requires that you provide the ability to relink against a modified version of FFmpeg. This is satisfied by shipping the full FFmpeg binaries in the `tools/` directory alongside the app.
-
-- Website: https://ffmpeg.org
-- License: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
-
 ### yt-dlp
 
 Licensed under the **Unlicense** — this means the software is in the public domain. No license restrictions apply.
@@ -203,5 +194,4 @@ Electron bundles Chromium and Node.js, both of which carry their own licenses (B
 |---------|-------|
 | MIT | 10 packages |
 | Apache-2.0 | 1 package (TypeScript) |
-| LGPL-2.1 | 1 tool (FFmpeg) |
 | Unlicense | 1 tool (yt-dlp) |

@@ -35,6 +35,7 @@ const api: RendererApi = {
   resetToDefaults: () => ipcRenderer.invoke(IPC.settingsResetToDefaults),
   getToolsStatus: () => ipcRenderer.invoke(IPC.toolsStatus),
   updateYtDlp: () => ipcRenderer.invoke(IPC.toolsUpdateYtdlp),
+  downloadTool: (tool: 'ffmpeg' | 'yt-dlp') => ipcRenderer.invoke(IPC.toolsDownload, tool),
   openExternal: (url: string) => ipcRenderer.invoke(IPC.shellOpenExternal, url),
   revealFile: (file: string) => ipcRenderer.invoke(IPC.shellRevealFile, file),
   openFolder: (directory: string) => ipcRenderer.invoke(IPC.shellOpenFolder, directory),

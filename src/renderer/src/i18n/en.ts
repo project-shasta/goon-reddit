@@ -74,9 +74,10 @@ export const en: Translation = {
   skipExistingHint: 'Resume where you left off',
   tools: 'Tools',
   toolsHint:
-    'ffmpeg merges Reddit\'s separate video and audio streams. yt-dlp handles external video hosts. Both live in the app\'s tools folder so the app stays portable.',
+    'ffmpeg merges Reddit\'s separate video and audio streams. yt-dlp handles external video hosts. Both are downloaded on first use and stored in the app\'s tools folder.',
   refresh: 'Refresh',
   update: 'Update',
+  downloadTool: 'Download',
   checkingTools: 'Checking tools…',
   notFound: 'not found',
   saveSettings: 'Save settings',
@@ -154,10 +155,10 @@ export const en: Translation = {
   updateYtDlp: 'Update yt-dlp',
   noAudio: 'Reddit video has no audio',
   noAudioHint:
-    'ffmpeg was not found. Run npm run tools:setup or update it in Settings; the app falls back to video-only fallback_url.',
+    'ffmpeg was not found. Download it from the Tools section in Settings; the app falls back to video-only fallback_url.',
   externalVideoFails: 'External video fails',
   externalVideoFailsHint:
-    'Update yt-dlp in Settings → Tools; some hosts change frequently.',
+    'Download or update yt-dlp in Settings → Tools; some hosts change frequently.',
   quarantinedSubreddit: 'Quarantined/private subreddit',
   quarantinedSubredditHint:
     'Opt in on Reddit first; the app uses your account\'s access.',
@@ -169,10 +170,10 @@ export const en: Translation = {
     'Solve it in the login window; the app waits for the session cookie.',
   redditVideoNoAudioTitle: 'Reddit video has no audio',
   redditVideoNoAudioMessage:
-    'ffmpeg was not found. Run npm run tools:setup or update it in Settings; the app falls back to video-only fallback_url.',
+    'ffmpeg was not found. Download it from Settings → Tools; the app falls back to video-only fallback_url.',
   externalVideoFailsTitle: 'External video fails',
   externalVideoFailsMessage:
-    'Update yt-dlp in Settings → Tools; some hosts change frequently.',
+    'Download or update yt-dlp in Settings → Tools; some hosts change frequently.',
   quarantinedSubredditTitle: 'Quarantined/private subreddit',
   quarantinedSubredditMessage:
     'Opt in on Reddit first; the app uses your account\'s access.',

@@ -204,6 +204,7 @@ export interface RendererApi {
   resetToDefaults(): Promise<AppSettings>
   getToolsStatus(): Promise<ToolsStatus>
   updateYtDlp(): Promise<ToolsStatus>
+  downloadTool(tool: 'ffmpeg' | 'yt-dlp'): Promise<ToolsStatus>
   openExternal(url: string): Promise<boolean>
   revealFile(path: string): Promise<boolean>
   openFolder(path: string): Promise<boolean>
