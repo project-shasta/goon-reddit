@@ -11,6 +11,7 @@ import type {
   UserInfo
 } from '@shared/types'
 import { useI18n } from '../i18n'
+import { IconSettings } from './icons'
 import { SubredditBar } from './SubredditBar'
 import { JobProgress } from './JobProgress'
 import { AuthPanel } from './AuthPanel'
@@ -35,6 +36,7 @@ export interface DownloaderViewProps {
   onCancel: () => void
   onAuthChanged: () => void
   onClearLogs: () => void
+  onOpenSettings: () => void
   canStart: boolean
   lang?: LanguageId
 }
@@ -59,6 +61,7 @@ export function DownloaderView({
   onCancel,
   onAuthChanged,
   onClearLogs,
+  onOpenSettings,
   canStart,
   lang = 'en'
 }: DownloaderViewProps): React.JSX.Element {
@@ -87,6 +90,35 @@ export function DownloaderView({
         canStart={canStart}
         lang={lang}
       />
+
+      {(() => {
+        const types = [
+          settings.includeImages && (t.images as string),
+          settings.includeGalleries && (t.galleries as string),
+          settings.includeVideos && (t.redditVideos as string),
+          settings.includeExternalVideos && (t.externalVideos as string)
+        ].filter(Boolean)
+
+        return (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-white/5 bg-white/[0.015] px-3 py-2 text-[11px] text-zinc-500">
+            <span className="font-semibold text-zinc-400">{t.fetching as string}</span>
+            <span>{types.length ? types.join(' · ') : (t.noMediaTypesEnabled as string)}</span>
+            <span className="text-zinc-700">|</span>
+            <span>
+              newest {settings.maxPosts > 0 ? settings.maxPosts.toLocaleString() : 'all'} posts
+            </span>
+            <span className="text-zinc-700">|</span>
+            <span>{settings.concurrency} {t.parallelDownloads as string}</span>
+            <button
+              className="btn btn-ghost ml-auto gap-1 px-1.5 py-0.5 text-[11px] text-zinc-400"
+              onClick={onOpenSettings}
+            >
+              <IconSettings size={12} />
+              {t.changeSettings as string}
+            </button>
+          </div>
+        )
+      })()}
 
       <JobProgress job={job} destination={settings.destination} lang={lang} />
 
