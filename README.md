@@ -20,9 +20,6 @@ This installs:
 |------|---------|---------|
 | Node.js | 26.12.1 | Runtime, npm, build tools |
 | Python | latest | Icon generation (Pillow) |
-| Playwright | 1.65.0 | Browser automation (optional) |
-| Flutter | 3.47.9 | (optional, not used by this project) |
-| Yarn | 4.18.1 | (optional, not used by this project) |
 
 After `mise install`, all tools are available on PATH. No separate npm installation needed.
 
