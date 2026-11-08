@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { JobState, LanguageId, SortOrder, SubredditInfo } from '@shared/types'
-import { formatCount } from '../lib/format'
 import { useI18n } from '../i18n'
 import {
   IconAlert,
@@ -149,15 +148,15 @@ export function SubredditBar({
               <span className="text-sm font-semibold text-zinc-100">r/{validated.name}</span>
               {validated.over18 && <span className="badge bg-red-500/15 text-red-300">NSFW</span>}
               {validated.quarantined && (
-                <span className="badge bg-amber-500/15 text-amber-300">Quarantined</span>
+                <span className="badge bg-amber-500/15 text-amber-300">{t.quarantined as string}</span>
               )}
               <span className="text-xs text-zinc-500">
                 {validated.subscribers !== null
-                  ? `${formatCount(validated.subscribers)} members`
-                  : 'Members hidden'}
+                  ? (t.members as (n: number) => string)(validated.subscribers)
+                  : (t.membersHidden as string)}
               </span>
             </div>
-            <p className="truncate text-xs text-zinc-500">{validated.title || 'No title'}</p>
+            <p className="truncate text-xs text-zinc-500">{validated.title || (t.noTitle as string)}</p>
           </div>
           <a
             className="btn btn-ghost shrink-0 px-2 py-1.5"
@@ -170,7 +169,7 @@ export function SubredditBar({
                   .catch(() => undefined)
               }
             }}
-            title="Open on Reddit"
+            title={t.openOnReddit as string}
           >
             <IconExternal size={14} />
           </a>

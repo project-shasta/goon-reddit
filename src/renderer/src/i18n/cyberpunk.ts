@@ -78,6 +78,12 @@ export const cyberpunk: Translation = {
   noUndoFilesStillOnDisk: '(No undo. Files remain on disk.)',
   neverMind: 'Abort',
   yeahForgetItAll: 'Confirm purge',
+  nsfwConfirmTitle: 'HOLD. AUTH_REQUIRED?',
+  nsfwConfirmBody:
+    'You\'re about to enable <strong>skip NSFW packets</strong>. That\'s like firewalling art behind a velvet rope. The Internet runs on curiosity.',
+  nsfwConfirmSubtext: '(Debug: it\'s your app. Your rules.)',
+  nsfwCancel: 'Accept risk',
+  nsfwConfirm: 'Confirm purge',
   theme: 'Theme',
   changeTheme: 'Change_Theme',
   darkDefault: 'Dark (default)',

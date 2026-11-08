@@ -315,21 +315,21 @@ export function SettingsView({
           <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5 text-center shadow-2xl">
             <span className="text-2xl">🚧</span>
             <h3 className="mt-3 text-sm font-semibold text-zinc-100">
-              Hold up. Are you sure?
+              {t.nsfwConfirmTitle as string}
             </h3>
-            <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-              You're about to enable <strong>skip NSFW posts</strong>. That's like telling art to
-              go behind a velvet rope. The internet was built on curiosity, my friend.
-            </p>
+            <p
+              className="mt-2 text-xs leading-relaxed text-zinc-400"
+              dangerouslySetInnerHTML={{ __html: t.nsfwConfirmBody as string }}
+            />
             <p className="mt-2 text-xs text-zinc-500">
-              (But hey, it's your app. Your rules.)
+              {t.nsfwConfirmSubtext as string}
             </p>
             <div className="mt-4 flex gap-2">
               <button className="btn btn-secondary flex-1" onClick={cancelNsfwSkip}>
-                I'll take the risk
+                {t.nsfwCancel as string}
               </button>
               <button className="btn btn-primary flex-1" onClick={confirmNsfwSkip}>
-                Yes, buzzkill mode
+                {t.nsfwConfirm as string}
               </button>
             </div>
           </div>

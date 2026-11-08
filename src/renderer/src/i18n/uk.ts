@@ -78,6 +78,12 @@ export const uk: Translation = {
   noUndoFilesStillOnDisk: '(Скасувати не можна. Ваші файли залишаться на диску.)',
   neverMind: 'Забути',
   yeahForgetItAll: 'Так, забути все',
+  nsfwConfirmTitle: 'Зачекай. Ти впевнений?',
+  nsfwConfirmBody:
+    'Ви збираєтеся увімкнути "пропускати NSFW дописи". Це все одно, що заборонити мистецтво за оксамитовий мотузку. Інтернет був побудований на допитливості.',
+  nsfwConfirmSubtext: '(Але гаразд, це твій додаток. Твої правила.)',
+  nsfwCancel: 'Я прийму ризик',
+  nsfwConfirm: 'Так, режим нудьги',
   theme: 'Тема',
   changeTheme: 'Змінити тему',
   darkDefault: 'Темна (типова)',

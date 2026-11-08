@@ -78,6 +78,12 @@ export const ja: Translation = {
   noUndoFilesStillOnDisk: '(元に戻せません。ファイルはディスク上に残ります。)',
   neverMind: 'やめる',
   yeahForgetItAll: 'はい、すべて忘れる',
+  nsfwConfirmTitle: 'ちょっと待って。本当にいいですか？',
+  nsfwConfirmBody:
+    '「NSFW投稿をスキップ」を有効にしようとしています。それは芸術をベルベットのロープの後ろに置くようなものです。インターネットは好奇心から作られました。',
+  nsfwConfirmSubtext: '（でも、それはあなたのアプリです。あなたのルールです。）',
+  nsfwCancel: 'リスクを取ります',
+  nsfwConfirm: 'はい、退屈モード',
   theme: 'テーマ',
   changeTheme: 'テーマの変更',
   darkDefault: 'ダーク（デフォルト）',

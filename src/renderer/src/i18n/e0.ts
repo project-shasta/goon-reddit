@@ -78,6 +78,12 @@ export const eo: Translation = {
   noUndoFilesStillOnDisk: '(Neniu malfari. Viaj dosieroj ankoraux estas sur la disko.)',
   neverMind: 'Nekonsideri',
   yeahForgetItAll: 'Jes, forgesi xion',
+  nsfwConfirmTitle: 'Atendu. Ĉu vi certas?',
+  nsfwConfirmBody:
+    'Vi estas pri aktivigi "salti NSFW-afiŝojn". Tio estas kiel fermi arton malantaŭ sameta ŝnuro. La Interreto estis konstruita pro scivolemo.',
+  nsfwConfirmSubtext: '(Sed bone, ĝi estas via aplikaĵo. Viaj reguloj.)',
+  nsfwCancel: 'Mi akceptas la riskon',
+  nsfwConfirm: 'jes, larmoda reĝimo',
   theme: 'Temo',
   changeTheme: 'Sxanxi temon',
   darkDefault: 'Malhela (defaŭlta)',

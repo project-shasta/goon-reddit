@@ -78,6 +78,12 @@ export const es: Translation = {
   noUndoFilesStillOnDisk: '(Sin deshacer. Tus archivos seguirán en el disco.)',
   neverMind: 'Cancelar',
   yeahForgetItAll: 'Sí, olvidar todo',
+  nsfwConfirmTitle: 'Espera. ¿Estás seguro?',
+  nsfwConfirmBody:
+    'Estás a punto de habilitar "omitir posts NSFW". Es como encerrar el arte detrás de una cuerda de terciopelo. Internet se construyó por curiosidad.',
+  nsfwConfirmSubtext: '(Pero bueno, es tu app. Tus reglas.)',
+  nsfwCancel: 'Acepto el riesgo',
+  nsfwConfirm: 'Sí, modo aburrimiento',
   theme: 'Tema',
   changeTheme: 'Cambiar tema',
   darkDefault: 'Oscuro (predeterminado)',

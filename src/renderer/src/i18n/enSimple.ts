@@ -78,6 +78,12 @@ export const enSimple: Translation = {
   noUndoFilesStillOnDisk: '(You cannot undo this. Your files will still be on your computer.)',
   neverMind: 'Never mind',
   yeahForgetItAll: 'Yes, forget it all',
+  nsfwConfirmTitle: 'Wait. Are you sure?',
+  nsfwConfirmBody:
+    "You're about to turn on <strong>skip adult posts</strong>. That's like putting art behind a rope. The internet was made for curious people.",
+  nsfwConfirmSubtext: "(But it's your app. Your rules.)",
+  nsfwCancel: "I'll take the risk",
+  nsfwConfirm: 'Yes, boring mode',
   theme: 'Theme',
   changeTheme: 'Change theme',
   darkDefault: 'Dark (default)',

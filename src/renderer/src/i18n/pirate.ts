@@ -78,6 +78,12 @@ export const pirate: Translation = {
   noUndoFilesStillOnDisk: '(No undo. Yer files will still be on disk, though.)',
   neverMind: 'Never mind',
   yeahForgetItAll: 'Aye, forget it all',
+  nsfwConfirmTitle: 'Avast. Be ye certain?',
+  nsfwConfirmBody:
+    'Ye be about to enable "skip NSFW packets." That be like lockin\' treasure behind a velvet rope. The Internet was built on curiosity, matey!',
+  nsfwConfirmSubtext: '(But arr, it be yer app. Yer rules.)',
+  nsfwCancel: 'I accept the risk',
+  nsfwConfirm: 'Aye, boredom mode',
   theme: 'Theme',
   changeTheme: 'Change theme',
   darkDefault: 'Dark (default)',

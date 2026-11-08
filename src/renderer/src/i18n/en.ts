@@ -78,6 +78,12 @@ export const en: Translation = {
   noUndoFilesStillOnDisk: '(There is no undo. Your files will still be on disk, though.)',
   neverMind: 'Never mind',
   yeahForgetItAll: 'Yeah, forget it all',
+  nsfwConfirmTitle: 'Hold up. Are you sure?',
+  nsfwConfirmBody:
+    "You're about to enable <strong>skip NSFW posts</strong>. That's like telling art to go behind a velvet rope. The internet was built on curiosity, my friend.",
+  nsfwConfirmSubtext: '(But hey, it\'s your app. Your rules.)',
+  nsfwCancel: "I'll take the risk",
+  nsfwConfirm: 'Yes, buzzkill mode',
   theme: 'Theme',
   changeTheme: 'Change theme',
   darkDefault: 'Dark (default)',

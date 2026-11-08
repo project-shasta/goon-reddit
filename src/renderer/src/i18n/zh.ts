@@ -78,6 +78,12 @@ export const zh: Translation = {
   noUndoFilesStillOnDisk: '(无法撤销。您的文件仍保留在磁盘上。)',
   neverMind: '算了',
   yeahForgetItAll: '是，全部忘记',
+  nsfwConfirmTitle: '等一下。你确定吗？',
+  nsfwConfirmBody:
+    '您即将启用**跳过 NSFW 帖子**。这就像把艺术关在丝绒绳后面。互联网是出于好奇心建立的。',
+  nsfwConfirmSubtext: '（但这是你的应用。你的规则。）',
+  nsfwCancel: '我承担风险',
+  nsfwConfirm: '是，无聊模式',
   theme: '主题',
   changeTheme: '更改主题',
   darkDefault: '深色（默认）',

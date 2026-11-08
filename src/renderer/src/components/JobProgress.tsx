@@ -54,7 +54,7 @@ function ActiveRow({
           {entry.status === 'done' ? (
             <IconCheck size={13} />
           ) : entry.status === 'failed' ? (
-            <span title={entry.error ?? 'Unknown error'}>
+            <span title={entry.error ?? (t.unknownError as string)}>
               <IconAlert size={13} />
             </span>
           ) : entry.status === 'processing' ? (

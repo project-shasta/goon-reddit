@@ -78,6 +78,12 @@ export const de: Translation = {
   noUndoFilesStillOnDisk: '(Kein Rückgängig. Ihre Dateien verbleiben auf der Festplatte.)',
   neverMind: 'Vergessen',
   yeahForgetItAll: 'Ja, alles vergessen',
+  nsfwConfirmTitle: 'Moment. Bist du sicher?',
+  nsfwConfirmBody:
+    'Du bist dabei, "NSFW-Beiträge überspringen" zu aktivieren. Das ist, als würde man Kunst hinter ein Samtseil verbieten. Das Internet wurde aus Neugierde gebaut.',
+  nsfwConfirmSubtext: '(Aber hey, es ist deine App. Deine Regeln.)',
+  nsfwCancel: 'Ich nehme das Risiko',
+  nsfwConfirm: 'Ja, Langeweile-Modus',
   theme: 'Design',
   changeTheme: 'Design ändern',
   darkDefault: 'Dunkel (Standard)',
