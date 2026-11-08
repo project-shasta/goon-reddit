@@ -148,7 +148,7 @@ export class ToolManager {
     const arch = process.arch === 'arm64' ? 'arm64' : 'x64'
 
     // Fetch the latest release tag from GitHub (the "latest" redirect gives us the actual tag)
-    const releasesUrl = 'https://github.com/BtbN/FFmpeg-Builds/releases/latest'
+    const releasesUrl = 'https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/tag/latest'
     const releasesRes = await fetch(releasesUrl, {
       redirect: 'follow',
       headers: { 'User-Agent': 'reddit-downloader/0.1' }
@@ -156,13 +156,15 @@ export class ToolManager {
     if (!releasesRes.ok) {
       throw new Error(`Could not fetch latest FFmpeg release: HTTP ${releasesRes.status}`)
     }
-    // Final URL looks like: .../releases/download/autobuild-2024-.../...
+    // Final URL looks like: .../releases/tag/autobuild-2024-...
     const finalUrl = releasesRes.url
-    const match = finalUrl.match(/\/releases\/download\/([^/]+)/)
-    if (!match) {
+    // Extract the release tag from the redirect URL (e.g., /releases/tag/autobuild-2024-...)
+    const tagMatch = finalUrl.match(/\/releases\/tag\/([^/?]+)/)
+    const tag = tagMatch ? tagMatch[1] : null
+    if (!tag) {
+      console.warn('FFmpeg release URL:', finalUrl)
       throw new Error('Could not parse FFmpeg release tag from GitHub URL')
     }
-    const tag = match[1]
 
     // Build the actual download URL with the real tag
     const ext = isWin ? 'zip' : 'tar.xz'
@@ -171,7 +173,7 @@ export class ToolManager {
       : process.platform === 'darwin'
         ? `macos${arch}`
         : `linux${arch}`
-    const archiveUrl = `https://github.com/BtbN/FFmpeg-Builds/releases/download/${tag}/ffmpeg-master-latest-${platformPrefix}-gpl.${ext}`
+    const archiveUrl = `https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/download/${tag}/ffmpeg-master-latest-${platformPrefix}-gpl.${ext}`
 
     const res = await fetch(archiveUrl, {
       redirect: 'follow',
