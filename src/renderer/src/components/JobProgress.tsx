@@ -55,7 +55,9 @@ function ActiveRow({ entry }: { entry: ActiveDownload }): React.JSX.Element {
           {entry.status === 'done' ? (
             <IconCheck size={13} />
           ) : entry.status === 'failed' ? (
-            <IconAlert size={13} />
+            <span title={entry.error ?? 'Unknown error'}>
+              <IconAlert size={13} />
+            </span>
           ) : entry.status === 'processing' ? (
             <IconVideo size={13} />
           ) : (
@@ -82,6 +84,11 @@ function ActiveRow({ entry }: { entry: ActiveDownload }): React.JSX.Element {
                       ? formatBytes(entry.receivedBytes)
                       : '…'}
         </span>
+        {entry.retries > 0 && (
+          <span className="shrink-0 rounded bg-orange-500/15 px-1.5 py-0.5 text-[10px] tabular-nums text-orange-300" title="Retry count">
+            ×{entry.retries}
+          </span>
+        )}
         {entry.status === 'downloading' && entry.speedBps ? (
           <span className="w-20 shrink-0 text-right tabular-nums text-zinc-500">
             {formatSpeed(entry.speedBps)}

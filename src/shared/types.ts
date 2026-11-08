@@ -65,6 +65,8 @@ export interface ActiveDownload {
   /** Explicit progress for ffmpeg jobs where byte counts are unknown. 0..1 */
   ratio: number | null
   speedBps: number | null
+  /** Number of retry attempts made (sourceUrl + previewUrl). */
+  retries: number
   error?: string
 }
 

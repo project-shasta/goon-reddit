@@ -357,7 +357,8 @@ export class JobRunner {
       receivedBytes: 0,
       totalBytes: null,
       ratio: null,
-      speedBps: null
+      speedBps: null,
+      retries: 0
     }
   }
 
@@ -443,6 +444,7 @@ export class JobRunner {
         if ('skipped' in result) {
           this.state.skipped++
           this.deps.log('warn', `Skipped ${item.filename}`)
+          entry.retries = result.retries
           this.emit()
           return
         }
@@ -452,6 +454,7 @@ export class JobRunner {
           if (isThumbnailFile(destination, item.ext)) {
             this.state.skipped++
             this.deps.log('warn', `Skipped ${item.filename}: still a thumbnail after retries`)
+            entry.retries = result.retries
             this.emit()
             // Try to fetch replacement posts.
             await this.tryReplaceThumbnail(item, folder, signal)
@@ -461,6 +464,7 @@ export class JobRunner {
 
         item.localPath = destination
         entry.receivedBytes = result.bytes
+        entry.retries = result.retries
       }
 
       if (item.kind !== 'external-video') item.localPath = destination
@@ -525,16 +529,18 @@ export class JobRunner {
     destination: string,
     signal: AbortSignal,
     onProgress: (received: number, total: number | null) => void
-  ): Promise<{ bytes: number } | { skipped: true }> {
+  ): Promise<{ bytes: number; retries: number } | { skipped: true; retries: number }> {
     const fetchFn = this.deps.auth.session.fetch.bind(this.deps.auth.session)
     const maxRetries = 3
+    let retries = 0
 
     // Try the primary URL up to maxRetries times.
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        return await downloadToFile(fetchFn, item.sourceUrl, destination, { signal, onProgress })
+        return { bytes: (await downloadToFile(fetchFn, item.sourceUrl, destination, { signal, onProgress })).bytes, retries }
       } catch (err) {
         if (signal.aborted) throw err
+        retries++
         if (attempt < maxRetries - 1) {
           this.deps.log('warn', `Retrying ${item.filename} (attempt ${attempt + 2}/${maxRetries})`)
           await sleep(800 + Math.random() * 400, signal)
@@ -547,9 +553,10 @@ export class JobRunner {
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
           this.deps.log('warn', `Retrying ${item.filename} with preview URL (attempt ${attempt + 1}/${maxRetries})`)
-          return await downloadToFile(fetchFn, item.previewUrl, destination, { signal, onProgress })
+          return { bytes: (await downloadToFile(fetchFn, item.previewUrl, destination, { signal, onProgress })).bytes, retries: retries + attempt + 1 }
         } catch (err) {
           if (signal.aborted) throw err
+          retries++
           if (attempt < maxRetries - 1) {
             await sleep(800 + Math.random() * 400, signal)
           }
@@ -559,7 +566,7 @@ export class JobRunner {
 
     // All retries exhausted — skip this item instead of failing the whole job.
     this.deps.log('warn', `Skipping ${item.filename}: could not fetch after ${maxRetries} attempts`)
-    return { skipped: true }
+    return { skipped: true, retries }
   }
 
   private async downloadRedditVideo(
