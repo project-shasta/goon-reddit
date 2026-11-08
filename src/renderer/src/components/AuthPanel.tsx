@@ -1,14 +1,17 @@
 import { useState } from 'react'
-import type { AuthStatus } from '@shared/types'
+import type { AuthStatus, LanguageId } from '@shared/types'
+import { useI18n } from '../i18n'
 import { errorText } from '../lib/format'
 import { IconAlert, IconCheck, IconReddit, IconRefresh, IconSpinner } from './icons'
 
 interface AuthPanelProps {
   auth: AuthStatus
   onChanged: () => void
+  lang?: LanguageId
 }
 
-export function AuthPanel({ auth, onChanged }: AuthPanelProps): React.JSX.Element {
+export function AuthPanel({ auth, onChanged, lang = 'en' }: AuthPanelProps): React.JSX.Element {
+  const t = useI18n(lang)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -39,7 +42,7 @@ export function AuthPanel({ auth, onChanged }: AuthPanelProps): React.JSX.Elemen
     return (
       <div className="card flex items-center gap-3 px-4 py-3 text-sm text-zinc-400">
         <IconSpinner size={16} className="text-orange-400" />
-        Checking your Reddit session…
+        {t.checkingSession as string}
       </div>
     )
   }
@@ -53,18 +56,18 @@ export function AuthPanel({ auth, onChanged }: AuthPanelProps): React.JSX.Elemen
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 text-sm font-semibold text-zinc-100">
             <IconCheck size={14} className="text-emerald-400" />
-            Connected as u/{auth.username ?? 'your account'}
+            {(t.connectedAs as (u: string) => string)(auth.username ?? 'your account')}
           </div>
           <p className="truncate text-xs text-zinc-500">
-            Logged in with your own Reddit session. Cookies stay in the app.
+            {t.cookiesStayInApp as string}
           </p>
         </div>
         <button className="btn btn-secondary" disabled={busy} onClick={() => void run('refresh')}>
           <IconRefresh size={14} />
-          Recheck
+          {t.recheck as string}
         </button>
         <button className="btn btn-ghost" disabled={busy} onClick={() => void run('logout')}>
-          Log out
+          {t.logOut as string}
         </button>
         {auth.message && (
           <p className="flex w-full items-start gap-2 rounded-xl border border-amber-400/20 bg-amber-400/5 px-3 py-2 text-xs text-amber-300">
@@ -84,10 +87,9 @@ export function AuthPanel({ auth, onChanged }: AuthPanelProps): React.JSX.Elemen
           <IconReddit size={20} />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold text-zinc-100">Log in on Reddit first</h2>
+          <h2 className="text-sm font-semibold text-zinc-100">{t.logInOnReddit as string}</h2>
           <p className="mt-0.5 text-xs leading-relaxed text-zinc-400">
-            Reddit blocks anonymous content requests. A small Reddit window opens so you can sign in
-            normally — the app reuses that session for scanning and downloading.
+            {t.blockedRequestHint as string}
           </p>
         </div>
       </div>
@@ -102,11 +104,11 @@ export function AuthPanel({ auth, onChanged }: AuthPanelProps): React.JSX.Elemen
       <div className="flex flex-wrap items-center gap-2">
         <button className="btn btn-primary" disabled={busy} onClick={() => void run('login')}>
           {busy ? <IconSpinner size={15} /> : <IconReddit size={15} />}
-          Log in on Reddit
+          {t.logIn as string}
         </button>
         <button className="btn btn-secondary" disabled={busy} onClick={() => void run('refresh')}>
           <IconRefresh size={14} />
-          I'm already logged in
+          {t.imAlreadyLoggedIn as string}
         </button>
       </div>
       {error && <p className="text-xs text-red-400">{error}</p>}

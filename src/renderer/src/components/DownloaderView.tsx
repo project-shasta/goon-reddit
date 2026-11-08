@@ -59,7 +59,7 @@ export function DownloaderView({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <AuthPanel auth={auth} onChanged={onAuthChanged} />
+      <AuthPanel auth={auth} onChanged={onAuthChanged} lang={lang} />
 
       <SubredditBar
         value={subredditInput}
