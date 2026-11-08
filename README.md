@@ -19,14 +19,11 @@ This installs:
 | Tool | Version | Purpose |
 |------|---------|---------|
 | Node.js | 26.12.1 | Runtime, npm, build tools |
-| Python | latest | Icon generation (Pillow) |
-
-After `mise install`, all tools are available on PATH. No separate npm installation needed.
+| Python | 3.15.2 | Icon generation (Pillow) |
 
 ## Setup
 
 ```powershell
-mise install
 npm install
 npm run tools:setup
 ```
@@ -45,7 +42,7 @@ yt-dlp is SHA-256 verified on download. You can update it later from **Settings 
 ```powershell
 npm run build           # compile out/ only
 npm run build:win       # typecheck + build + zip archive
-.\build.bat             # double-click: stop processes, clean, build, pause for review
+.\build.bat             # stop processes, clean, build, pause for review
 ```
 
 ### Icon generation (PNG → ICO)
