@@ -147,12 +147,31 @@ export class ToolManager {
     const isWin = process.platform === 'win32'
     const arch = process.arch === 'arm64' ? 'arm64' : 'x64'
 
-    // Build the download URL for the ffmpeg archive
-    const archiveUrl = isWin
-      ? `https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win${arch}-gpl.zip`
+    // Fetch the latest release tag from GitHub (the "latest" redirect gives us the actual tag)
+    const releasesUrl = 'https://github.com/BtbN/FFmpeg-Builds/releases/latest'
+    const releasesRes = await fetch(releasesUrl, {
+      redirect: 'follow',
+      headers: { 'User-Agent': 'reddit-downloader/0.1' }
+    })
+    if (!releasesRes.ok) {
+      throw new Error(`Could not fetch latest FFmpeg release: HTTP ${releasesRes.status}`)
+    }
+    // Final URL looks like: .../releases/download/autobuild-2024-.../...
+    const finalUrl = releasesRes.url
+    const match = finalUrl.match(/\/releases\/download\/([^/]+)/)
+    if (!match) {
+      throw new Error('Could not parse FFmpeg release tag from GitHub URL')
+    }
+    const tag = match[1]
+
+    // Build the actual download URL with the real tag
+    const ext = isWin ? 'zip' : 'tar.xz'
+    const platformPrefix = isWin
+      ? `win${arch}`
       : process.platform === 'darwin'
-        ? `https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-macos${arch}-gpl.tar.xz`
-        : `https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux${arch}-gpl.tar.xz`
+        ? `macos${arch}`
+        : `linux${arch}`
+    const archiveUrl = `https://github.com/BtbN/FFmpeg-Builds/releases/download/${tag}/ffmpeg-master-latest-${platformPrefix}-gpl.${ext}`
 
     const res = await fetch(archiveUrl, {
       redirect: 'follow',
