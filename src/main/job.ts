@@ -157,7 +157,6 @@ export class JobRunner {
       this.state.finishedAt = Date.now()
       if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError')) {
         this.setPhase('cancelled', 'Cancelled.')
-        this.deps.notify('Download cancelled', 'The download was cancelled.')
       } else {
         const message = errorMessage(err)
         this.setPhase('error', message)
@@ -212,7 +211,6 @@ export class JobRunner {
 
     if (signal.aborted) {
       this.setPhase('cancelled', `Cancelled. ${summary}`)
-      this.deps.notify('Download cancelled', summary)
     } else {
       this.setPhase('done', summary)
       this.deps.notify('Download complete', summary)
@@ -265,7 +263,6 @@ export class JobRunner {
 
     if (signal.aborted) {
       this.setPhase('cancelled', `Cancelled. ${summary}`)
-      this.deps.notify('Download cancelled', summary)
     } else {
       this.setPhase('done', summary)
       this.deps.notify('Download complete', summary)
