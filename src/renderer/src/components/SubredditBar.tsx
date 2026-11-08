@@ -67,7 +67,7 @@ export function SubredditBar({
               autoComplete="off"
               onChange={(event) => onChange(event.target.value)}
               onKeyDown={(event) => {
-                if (event.key === 'Enter' && !running) void onValidate()
+                if (event.key === 'Enter' && !running && !validating) void onValidate()
               }}
               disabled={running}
             />

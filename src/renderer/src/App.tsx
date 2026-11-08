@@ -114,7 +114,7 @@ export default function App(): React.JSX.Element {
     const offAuth = window.api.onAuthState((status) => setAuth(status))
     const offJob = window.api.onJobState((state) => {
       setJob(state)
-      if (state.subreddit) {
+      if (state.subreddit?.name) {
         setValidated((current) =>
           current && current.name.toLowerCase() === state.subreddit!.name.toLowerCase()
             ? current
