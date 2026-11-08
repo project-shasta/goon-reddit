@@ -51,6 +51,8 @@ export const pirate: Translation = {
   noMediaTypesEnabled: 'No media types be plundered',
   changeSettings: 'Change yer settings',
   higherIsFaster: 'Higher be faster but more likely to anger the Reddit Admiralty.',
+  ytDlpDelayLabel: 'yt-dlp delay:',
+  ytDlpDelayHint: 'Lower be faster but more likely to anger the external site admiralty.',
   mediaTypes: 'Types of treasure',
   images: 'Images',
   imagesHint: 'Single i.redd.it and direct image posts',

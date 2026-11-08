@@ -91,6 +91,7 @@ function migrateLegacyProfile(previousDir: string, dataDir: string): void {
           // Check if there are any other custom values beyond the old defaults.
           const oldDefaults = {
             concurrency: 4,
+            ytDlpDelayMs: 1500,
             includeImages: true,
             includeGalleries: true,
             includeVideos: true,

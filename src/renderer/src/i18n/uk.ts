@@ -51,6 +51,8 @@ export const uk: Translation = {
   noMediaTypesEnabled: 'Немає увімкнених типів медіа',
   changeSettings: 'Змінити',
   higherIsFaster: 'Вище швидше, але більше ймовірність досягти лімітів Reddit.',
+  ytDlpDelayLabel: 'Затримка yt-dlp:',
+  ytDlpDelayHint: 'Менша затримка — швидше, але більше ймовірність спрацювати ліміти зовнішніх сайтів.',
   mediaTypes: 'Типи медіа',
   images: 'Зображення',
   imagesHint: 'Окремі i.redd.it та прямі зображення',

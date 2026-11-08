@@ -189,6 +189,24 @@ export function SettingsView({
               {t.higherIsFaster as string}
             </p>
           </div>
+          <div>
+            <label className="label" htmlFor="ytDlpDelayMs">
+              {(t.ytDlpDelayLabel as string)} {draft.ytDlpDelayMs}ms
+            </label>
+            <input
+              id="ytDlpDelayMs"
+              className="w-full accent-orange-500"
+              type="range"
+              min={500}
+              max={10000}
+              step={100}
+              value={draft.ytDlpDelayMs}
+              onChange={(event) => patch('ytDlpDelayMs', Number(event.target.value))}
+            />
+            <p className="mt-1 text-[11px] text-zinc-500">
+              {t.ytDlpDelayHint as string}
+            </p>
+          </div>
         </div>
       </section>
 

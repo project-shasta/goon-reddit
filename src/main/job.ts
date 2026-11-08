@@ -79,6 +79,8 @@ export class JobRunner {
   private state: JobState = initialState()
   private controller: AbortController | null = null
   private running = false
+  /** Configurable delay between yt-dlp invocations (ms); overridden per job. */
+  private ytDlpDelayMs_ = 1500
 
   /**
    * Media items per post and how many of them finished. A post is only added
@@ -134,6 +136,7 @@ export class JobRunner {
       mode: options.mode,
       startedAt: Date.now()
     }
+    this.ytDlpDelayMs_ = options.ytDlpDelayMs ?? 1500
     this.setPhase('validating')
     allowMediaRoot(destination)
 
@@ -546,8 +549,8 @@ export class JobRunner {
         // Throttle yt-dlp calls to avoid 429 rate-limit responses.
         const now = Date.now()
         const elapsed = now - this.lastYtDlpStart_
-        if (elapsed < JobRunner.YtDlpInterCallDelayMs) {
-          await sleep(JobRunner.YtDlpInterCallDelayMs - elapsed, signal)
+        if (elapsed < this.ytDlpDelayMs_) {
+          await sleep(this.ytDlpDelayMs_ - elapsed, signal)
         }
         const resolved = await this.downloadExternalVideo(item, destination, signal, (received, total) =>
           tick(received, total, total ? received / total : null)
@@ -757,9 +760,5 @@ export class JobRunner {
     })
   }
 
-  /** Pause between yt-dlp invocations to avoid 429 rate-limit responses.
-   * 1500 ms balances parallel throughput with rate-limit safety.
-   * The exponential backoff retries (commit 4ab87c6c) handle actual 429s. */
-  private static readonly YtDlpInterCallDelayMs = 1500
   private lastYtDlpStart_ = 0
 }

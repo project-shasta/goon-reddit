@@ -50,6 +50,7 @@ function buildJobOptions(raw: Partial<JobOptions>, settings: AppSettings): JobOp
     mode,
     maxPosts: clampInt(raw.maxPosts, 0, 100000, settings.maxPosts),
     concurrency: clampInt(raw.concurrency, 1, 8, settings.concurrency),
+    ytDlpDelayMs: clampInt(raw.ytDlpDelayMs, 500, 10000, settings.ytDlpDelayMs),
     includeImages: asBool(raw.includeImages, settings.includeImages),
     includeGalleries: asBool(raw.includeGalleries, settings.includeGalleries),
     includeVideos: asBool(raw.includeVideos, settings.includeVideos),

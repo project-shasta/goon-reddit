@@ -51,6 +51,8 @@ export const cyberpunk: Translation = {
   noMediaTypesEnabled: 'No_Media_Types_Active',
   changeSettings: '[CONFIG]',
   higherIsFaster: 'Higher throughput but triggers Reddit rate-limit firewalls.',
+  ytDlpDelayLabel: 'yt-dlp_Delay:',
+  ytDlpDelayHint: 'Lower throughput but fewer firewall triggers.',
   mediaTypes: 'Data_Formats',
   images: 'Images',
   imagesHint: 'Single i.redd.it and direct image streams',

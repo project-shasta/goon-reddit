@@ -51,6 +51,8 @@ export const de: Translation = {
   noMediaTypesEnabled: 'Keine Medientypen aktiviert',
   changeSettings: 'Ändern',
   higherIsFaster: 'Höher ist schneller, aber eher Reddit-Ratenlimits ausgesetzt.',
+  ytDlpDelayLabel: 'yt-dlp-Verzögerung:',
+  ytDlpDelayHint: 'Niedriger ist schneller, aber eher externe Server-Ratenlimits.',
   mediaTypes: 'Medientypen',
   images: 'Bilder',
   imagesHint: 'Einzelne i.redd.it und direkte Bildbeiträge',

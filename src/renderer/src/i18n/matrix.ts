@@ -48,6 +48,8 @@ export const matrix: Translation = {
   zeroMeansNoLimit: '0 = no limit',
   parallelDownloads: 'Parallel_Follow',
   higherIsFaster: 'Higher throughput but triggers Reddit rate-limit sentinels.',
+  ytDlpDelayLabel: 'yt-dlp_Delay:',
+  ytDlpDelayHint: 'Lower throughput but fewer sentinel triggers.',
   fetching: 'Harvest_Protocol:',
   noMediaTypesEnabled: 'No_Media_Types_Active',
   changeSettings: '[CONFIG]',

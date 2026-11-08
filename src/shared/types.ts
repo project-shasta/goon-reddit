@@ -137,6 +137,7 @@ export interface AppSettings {
   destination: string
   maxPosts: number
   concurrency: number
+  ytDlpDelayMs: number
   includeImages: boolean
   includeGalleries: boolean
   includeVideos: boolean
@@ -168,6 +169,7 @@ export interface JobOptions {
   mode: DownloadMode
   maxPosts: number
   concurrency: number
+  ytDlpDelayMs: number
   includeImages: boolean
   includeGalleries: boolean
   includeVideos: boolean

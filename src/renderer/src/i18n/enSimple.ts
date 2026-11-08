@@ -51,6 +51,8 @@ export const enSimple: Translation = {
   noMediaTypesEnabled: 'No media types enabled',
   changeSettings: 'Change',
   higherIsFaster: 'Higher number is faster but more likely to hit Reddit limits.',
+  ytDlpDelayLabel: 'yt-dlp delay:',
+  ytDlpDelayHint: 'Lower number is faster but more likely to hit external site limits.',
   mediaTypes: 'Media types',
   images: 'Images',
   imagesHint: 'Single images and direct image posts',

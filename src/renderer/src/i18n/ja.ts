@@ -51,6 +51,8 @@ export const ja: Translation = {
   noMediaTypesEnabled: 'メディアタイプが有効ではありません',
   changeSettings: '変更',
   higherIsFaster: '大きいほど速くなりますが、Redditのレート制限に達しやすくなります。',
+  ytDlpDelayLabel: 'yt-dlp遅延：',
+  ytDlpDelayHint: '遅延が短いほど速くなりますが、外部サイトのレート制限に達しやすくなります。',
   mediaTypes: 'メディアタイプ',
   images: '画像',
   imagesHint: '単一のi.redd.itと直接画像投稿',

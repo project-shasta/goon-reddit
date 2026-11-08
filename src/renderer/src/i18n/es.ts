@@ -51,6 +51,8 @@ export const es: Translation = {
   noMediaTypesEnabled: 'Ningún tipo de medio habilitado',
   changeSettings: 'Cambiar',
   higherIsFaster: 'Mayor es más rápido pero más probable que toque los límites de tasa de Reddit.',
+  ytDlpDelayLabel: 'Retraso yt-dlp:',
+  ytDlpDelayHint: 'Un retraso menor es más rápido pero puede activar los límites de sitios externos.',
   mediaTypes: 'Tipos de medios',
   images: 'Imágenes',
   imagesHint: 'Imágenes i.redd.it simples y posts de imagen directa',

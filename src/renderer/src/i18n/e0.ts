@@ -51,6 +51,8 @@ export const eo: Translation = {
   noMediaTypesEnabled: 'Neniu mediotipo aktivigita',
   changeSettings: 'Ŝanĝi',
   higherIsFaster: 'Pli alta estas pli rapida sed pli probablas atingi Reddit-ajn limojn.',
+  ytDlpDelayLabel: 'yt-dlp-tempiro:',
+  ytDlpDelayHint: 'Pli malalta estas pli rapida sed pli probablas atingi eksterajn retejo-limojn.',
   mediaTypes: 'Vidigaj tipoj',
   images: 'Bildoj',
   imagesHint: 'Unuopaj i.redd.it kaj rektaj bildafisxoj',

@@ -51,6 +51,8 @@ export const zhTW: Translation = {
   noMediaTypesEnabled: '未啟用任何媒體類型',
   changeSettings: '更改',
   higherIsFaster: '數值越大越快，但更容易觸及 Reddit 速率限制。',
+  ytDlpDelayLabel: 'yt-dlp 延遲：',
+  ytDlpDelayHint: '延遲越低越快，但更容易觸發外部網站速率限制。',
   mediaTypes: '媒體類型',
   images: '圖片',
   imagesHint: '單個 i.redd.it 和直接圖片帖子',
