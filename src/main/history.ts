@@ -79,4 +79,10 @@ export class HistoryStore {
   getAllPostIds(): Array<Set<string>> {
     return [...this.history.values()]
   }
+
+  /** Clear all known post IDs. */
+  clearAll(): void {
+    this.history.clear()
+    this.save()
+  }
 }

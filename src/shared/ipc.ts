@@ -19,5 +19,6 @@ export const IPC = {
   shellOpenExternal: 'shell:open-external',
   shellRevealFile: 'shell:reveal-file',
   shellOpenFolder: 'shell:open-folder',
-  historyTotal: 'history:total'
+  historyTotal: 'history:total',
+  historyClear: 'history:clear'
 } as const

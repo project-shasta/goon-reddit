@@ -252,9 +252,20 @@ export default function App(): React.JSX.Element {
             </span>
           )}
           {historyCount > 0 && (
-            <span className="rounded bg-white/5 px-2 py-1 text-[10px] tabular-nums text-zinc-500" title="Known posts">
-              {historyCount.toLocaleString()}
-            </span>
+            <>
+              <span className="rounded bg-white/5 px-2 py-1 text-[10px] tabular-nums text-zinc-500" title="Known posts">
+                {historyCount.toLocaleString()}
+              </span>
+              <button
+                className="text-[10px] text-zinc-600 underline-offset-4 hover:text-zinc-400 hover:underline"
+                onClick={async () => {
+                  await window.api.historyClear()
+                  setHistoryCount(0)
+                }}
+              >
+                Clear known
+              </button>
+            </>
           )}
           <span
             className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${

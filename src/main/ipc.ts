@@ -132,6 +132,10 @@ export function registerIpcHandlers(ctx: IpcContext): void {
     return total
   })
 
+  ipcMain.handle(IPC.historyClear, async () => {
+    ctx.history.clearAll()
+  })
+
   ipcMain.handle(IPC.toolsStatus, async () => ctx.tools.status())
   ipcMain.handle(IPC.toolsUpdateYtdlp, async () => ctx.tools.updateYtDlp())
 
