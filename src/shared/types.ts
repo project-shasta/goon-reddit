@@ -201,6 +201,7 @@ export interface RendererApi {
   getSettings(): Promise<AppSettings>
   updateSettings(patch: Partial<AppSettings>): Promise<AppSettings>
   chooseDestination(): Promise<string | null>
+  resetToDefaults(): Promise<AppSettings>
   getToolsStatus(): Promise<ToolsStatus>
   updateYtDlp(): Promise<ToolsStatus>
   openExternal(url: string): Promise<boolean>

@@ -77,6 +77,13 @@ export const matrix: Translation = {
   saveSettings: 'Save_Config',
   saved: 'SAVED',
   unsavedChanges: 'Unsaved_Changes',
+  resetToDefaults: 'Reset_to_Defaults',
+  resetConfirmTitle: 'Reset config?',
+  resetConfirmBody:
+    'Restoring all config to factory defaults. Download history and known packets remain intact.',
+  resetConfirmSubtext: '(No undo.)',
+  resetCancel: 'Abort',
+  resetConfirm: 'Reset config',
   knownPosts: 'Known_Packets',
   clearKnown: 'Purge_Known',
   wipeTheSlateClean: 'Wipe all known packets?',

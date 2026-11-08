@@ -6,7 +6,7 @@ import { getDataDir } from './paths'
 
 const SETTINGS_FILE = () => path.join(getDataDir(), 'settings.json')
 
-function defaults(): AppSettings {
+export function defaults(): AppSettings {
   return {
     destination: path.join(app.getPath('downloads'), 'Reddit Downloads'),
     maxPosts: 100,
@@ -100,6 +100,12 @@ export class SettingsStore {
 
   update(patch: Partial<AppSettings>): AppSettings {
     this.settings = this.sanitize({ ...this.settings, ...patch }, defaults())
+    this.save()
+    return this.get()
+  }
+
+  resetToDefaults(): AppSettings {
+    this.settings = defaults()
     this.save()
     return this.get()
   }

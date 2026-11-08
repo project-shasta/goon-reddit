@@ -32,6 +32,7 @@ const api: RendererApi = {
   getSettings: () => ipcRenderer.invoke(IPC.settingsGet),
   updateSettings: (patch: Partial<AppSettings>) => ipcRenderer.invoke(IPC.settingsUpdate, patch),
   chooseDestination: () => ipcRenderer.invoke(IPC.settingsChooseDestination),
+  resetToDefaults: () => ipcRenderer.invoke(IPC.settingsResetToDefaults),
   getToolsStatus: () => ipcRenderer.invoke(IPC.toolsStatus),
   updateYtDlp: () => ipcRenderer.invoke(IPC.toolsUpdateYtdlp),
   openExternal: (url: string) => ipcRenderer.invoke(IPC.shellOpenExternal, url),

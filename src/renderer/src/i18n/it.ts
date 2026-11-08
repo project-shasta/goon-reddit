@@ -77,6 +77,13 @@ export const it: Translation = {
   saveSettings: 'Salva impostazioni',
   saved: 'Salvato',
   unsavedChanges: 'Modifiche non salvate',
+  resetToDefaults: 'Reimposta predefiniti',
+  resetConfirmTitle: 'Reimpostare le impostazioni?',
+  resetConfirmBody:
+    'Questo ripristinerà tutte le impostazioni ai valori predefiniti. La cronologia di download e i post conosciuti non saranno interessati.',
+  resetConfirmSubtext: '(Questa azione non può essere annullata.)',
+  resetCancel: 'Annulla',
+  resetConfirm: 'Reimposta impostazioni',
   knownPosts: 'Post noti',
   clearKnown: 'Cancella noti',
   wipeTheSlateClean: 'Cancellare tutto?',

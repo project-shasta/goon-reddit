@@ -77,6 +77,13 @@ export const ja: Translation = {
   saveSettings: '設定を保存',
   saved: '保存済み',
   unsavedChanges: '未保存の変更',
+  resetToDefaults: 'デフォルトにリセット',
+  resetConfirmTitle: '設定をリセットしますか？',
+  resetConfirmBody:
+    'すべての設定がデフォルト値に復元されます。ダウンロード履歴と既知の投稿は影響を受けません。',
+  resetConfirmSubtext: '(この操作は元に戻せません。)',
+  resetCancel: 'キャンセル',
+  resetConfirm: '設定をリセット',
   knownPosts: '既知の投稿',
   clearKnown: '既知をクリア',
   wipeTheSlateClean: 'すべての既知の投稿をクリアしますか？',

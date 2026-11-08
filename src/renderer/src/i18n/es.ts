@@ -77,6 +77,13 @@ export const es: Translation = {
   saveSettings: 'Guardar configuración',
   saved: 'Guardado',
   unsavedChanges: 'Cambios no guardados',
+  resetToDefaults: 'Restablecer valores predeterminados',
+  resetConfirmTitle: '¿Restablecer configuración?',
+  resetConfirmBody:
+    'Esto restaurará toda la configuración a sus valores predeterminados. Tu historial de descargas y publicaciones conocidas no se verán afectados.',
+  resetConfirmSubtext: '(Esta acción no se puede deshacer.)',
+  resetCancel: 'Cancelar',
+  resetConfirm: 'Restablecer configuración',
   knownPosts: 'Posts conocidos',
   clearKnown: 'Limpiar conocidos',
   wipeTheSlateClean: '¿Borrar todo?',

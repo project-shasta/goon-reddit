@@ -136,6 +136,12 @@ export function registerIpcHandlers(ctx: IpcContext): void {
     return result.filePaths[0]
   })
 
+  ipcMain.handle(IPC.settingsResetToDefaults, async () => {
+    const settings = ctx.settings.resetToDefaults()
+    allowMediaRoot(settings.destination)
+    return settings
+  })
+
   ipcMain.handle(IPC.historyTotal, async () => {
     let total = 0
     for (const postIds of ctx.history.getAllPostIds()) {

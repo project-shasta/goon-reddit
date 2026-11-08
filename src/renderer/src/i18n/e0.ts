@@ -77,6 +77,13 @@ export const eo: Translation = {
   saveSettings: 'Konservi agordojn',
   saved: 'Konservita',
   unsavedChanges: 'Nekonservitaj ŝanxoj',
+  resetToDefaults: 'Restarigi al defaŭlto',
+  resetConfirmTitle: 'Restarigi agordojn?',
+  resetConfirmBody:
+    'Tio restarigos ĉiujn agordojn al iliaj defaŭltaj valoroj. Via elŝuta historio kaj konataj afisxoj ne estos tuŝitaj.',
+  resetConfirmSubtext: '(Tio ne povas esti malfarita.)',
+  resetCancel: 'Nuligi',
+  resetConfirm: 'Restarigi agordojn',
   knownPosts: 'Konataj afisxoj',
   clearKnown: 'Vakigi konatajn',
   wipeTheSlateClean: 'Vakigi la cxartojn?',

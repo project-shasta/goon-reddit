@@ -77,6 +77,13 @@ export const pirate: Translation = {
   saveSettings: 'Save yer orders',
   saved: 'Saved',
   unsavedChanges: 'Unsaved changes',
+  resetToDefaults: 'Reset t\' defaults',
+  resetConfirmTitle: 'Reset t\' defaults, matey?',
+  resetConfirmBody:
+    'This be restorein\' all yer orders to their default values. Yer plunder history and known posts won\'t be touched.',
+  resetConfirmSubtext: '(No turnin\' back once ye do it.)',
+  resetCancel: 'Abandon',
+  resetConfirm: 'Reset t\' defaults',
   knownPosts: 'Known posts',
   clearKnown: 'Clear known',
   wipeTheSlateClean: 'Wipe the slate clean, ye scurvy dog?',

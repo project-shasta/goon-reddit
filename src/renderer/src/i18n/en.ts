@@ -82,6 +82,13 @@ export const en: Translation = {
   saveSettings: 'Save settings',
   saved: 'Saved',
   unsavedChanges: 'Unsaved changes',
+  resetToDefaults: 'Reset to defaults',
+  resetConfirmTitle: 'Reset settings?',
+  resetConfirmBody:
+    'This will restore all settings to their default values. Your download history and known posts will not be affected.',
+  resetConfirmSubtext: '(This cannot be undone.)',
+  resetCancel: 'Cancel',
+  resetConfirm: 'Reset settings',
   knownPosts: 'Known posts',
   clearKnown: 'Clear known',
   mode: 'Mode',

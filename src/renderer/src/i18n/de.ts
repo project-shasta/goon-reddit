@@ -77,6 +77,13 @@ export const de: Translation = {
   saveSettings: 'Einstellungen speichern',
   saved: 'Gespeichert',
   unsavedChanges: 'Ungespeicherte Änderungen',
+  resetToDefaults: 'Auf Standardwerte zurücksetzen',
+  resetConfirmTitle: 'Einstellungen zurücksetzen?',
+  resetConfirmBody:
+    'Hiermit werden alle Einstellungen auf die Standardwerte zurückgesetzt. Der Downloadverlauf und bekannte Beiträge bleiben unberührt.',
+  resetConfirmSubtext: '(Dies kann nicht rückgängig gemacht werden.)',
+  resetCancel: 'Abbrechen',
+  resetConfirm: 'Einstellungen zurücksetzen',
   knownPosts: 'Bekannte Beiträge',
   clearKnown: 'Bekannte löschen',
   wipeTheSlateClean: 'Alles zurücksetzen?',

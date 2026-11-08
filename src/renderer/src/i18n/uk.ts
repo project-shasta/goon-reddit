@@ -77,6 +77,13 @@ export const uk: Translation = {
   saveSettings: 'Зберегти налаштування',
   saved: 'Збережено',
   unsavedChanges: 'Зміни незбережені',
+  resetToDefaults: 'Скинути до типових',
+  resetConfirmTitle: 'Скинути налаштування?',
+  resetConfirmBody:
+    'Це відновить усі налаштування до типових значень. Історію завантажень та відомі пости це не торкнеться.',
+  resetConfirmSubtext: '(Це не можна скасувати.)',
+  resetCancel: 'Скасувати',
+  resetConfirm: 'Скинути налаштування',
   knownPosts: 'Відомі дописи',
   clearKnown: 'Очистити відомі',
   wipeTheSlateClean: 'Стерти все?',

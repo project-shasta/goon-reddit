@@ -49,6 +49,8 @@ export function SettingsView({
   const [tools, setTools] = useState<ToolsStatus | null>(null)
   const [updatingTools, setUpdatingTools] = useState(false)
   const [showNsfwConfirm, setShowNsfwConfirm] = useState(false)
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
     setDraft(settings)
@@ -123,6 +125,20 @@ export function SettingsView({
 
   const cancelNsfwSkip = (): void => {
     setShowNsfwConfirm(false)
+  }
+
+  const resetToDefaults = async (): Promise<void> => {
+    setResetting(true)
+    setError(null)
+    try {
+      const next = await window.api.resetToDefaults()
+      setDraft(next)
+      setShowResetConfirm(false)
+    } catch (err) {
+      setError(errorText(err))
+    } finally {
+      setResetting(false)
+    }
   }
 
   return (
@@ -356,7 +372,50 @@ export function SettingsView({
         </div>
       )}
 
+      {showResetConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5 text-center shadow-2xl">
+            <span className="text-2xl">🔄</span>
+            <h3 className="mt-3 text-sm font-semibold text-zinc-100">
+              {t.resetConfirmTitle as string}
+            </h3>
+            <p
+              className="mt-2 text-xs leading-relaxed text-zinc-400"
+              dangerouslySetInnerHTML={{ __html: t.resetConfirmBody as string }}
+            />
+            <p className="mt-2 text-xs text-zinc-500">
+              {t.resetConfirmSubtext as string}
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                className="btn btn-secondary flex-1"
+                onClick={() => setShowResetConfirm(false)}
+                disabled={resetting}
+              >
+                {t.resetCancel as string}
+              </button>
+              <button
+                className="btn btn-primary flex-1"
+                onClick={() => void resetToDefaults()}
+                disabled={resetting}
+              >
+                {resetting ? <IconSpinner size={12} /> : <IconRefresh size={12} />}
+                {t.resetConfirm as string}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="sticky bottom-0 flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur">
+        <button
+          className="btn btn-ghost"
+          onClick={() => setShowResetConfirm(true)}
+          disabled={saving || resetting}
+        >
+          <IconRefresh size={14} />
+          {t.resetToDefaults as string}
+        </button>
         <button className="btn btn-primary" onClick={() => void save()} disabled={saving || !dirty}>
           {saving ? <IconSpinner size={14} /> : <IconCheck size={14} />}
           {t.saveSettings as string}

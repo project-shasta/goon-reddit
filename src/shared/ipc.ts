@@ -14,6 +14,7 @@ export const IPC = {
   settingsGet: 'settings:get',
   settingsUpdate: 'settings:update',
   settingsChooseDestination: 'settings:choose-destination',
+  settingsResetToDefaults: 'settings:reset-to-defaults',
   toolsStatus: 'tools:status',
   toolsUpdateYtdlp: 'tools:update-ytdlp',
   toolsSetup: 'tools:setup',

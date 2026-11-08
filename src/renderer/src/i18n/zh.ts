@@ -77,6 +77,13 @@ export const zh: Translation = {
   saveSettings: '保存设置',
   saved: '已保存',
   unsavedChanges: '未保存的更改',
+  resetToDefaults: '重置为默认值',
+  resetConfirmTitle: '重置设置？',
+  resetConfirmBody:
+    '这会将所有设置恢复为默认值。您的下载历史和已知帖子不会受到影响。',
+  resetConfirmSubtext: '(此操作无法撤销。)',
+  resetCancel: '取消',
+  resetConfirm: '重置设置',
   knownPosts: '已知帖子',
   clearKnown: '清除已知',
   wipeTheSlateClean: '清除所有已知帖子？',

@@ -77,6 +77,13 @@ export const fr: Translation = {
   saveSettings: 'Enregistrer les paramètres',
   saved: 'Enregistré',
   unsavedChanges: 'Modifications non enregistrées',
+  resetToDefaults: 'Réinitialiser par défaut',
+  resetConfirmTitle: 'Réinitialiser les paramètres ?',
+  resetConfirmBody:
+    'Cela restaurera tous les paramètres par défaut. Votre historique de téléchargement et vos posts connus ne seront pas affectés.',
+  resetConfirmSubtext: '(Cette action est irréversible.)',
+  resetCancel: 'Annuler',
+  resetConfirm: 'Réinitialiser les paramètres',
   knownPosts: 'Messages connus',
   clearKnown: 'Effacer les connus',
   wipeTheSlateClean: 'Tout effacer ?',
