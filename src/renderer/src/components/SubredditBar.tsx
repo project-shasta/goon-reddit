@@ -203,7 +203,7 @@ function SortDropdown({
         disabled={disabled}
       >
         <span>{SORT_LABELS[value]}</span>
-        <IconCaretDown size={10} className={`shrink-0 ${disabled ? 'text-zinc-600' : 'text-zinc-500'}`} />
+        <IconCaretDown size={14} className={`shrink-0 ${disabled ? 'text-zinc-600' : 'text-zinc-500'}`} />
       </button>
 
       {open && (
