@@ -230,10 +230,9 @@ export class ToolManager {
       const fileName = data.subarray(offset + 30, offset + 30 + fileNameLength).toString('utf-8')
       const fileOffset = offset + 30 + fileNameLength + extraFieldLength + commentLength
 
-      // Look for ffmpeg.exe in the bin/ directory
+      // Look for the ffmpeg binary anywhere in the archive (path may vary across releases)
       const normalizedName = fileName.replace(/\\/g, '/')
-      const binPath = `bin/${FFMPEG_FILENAME}`.replace(/\\/g, '/')
-      if (normalizedName.endsWith(binPath)) {
+      if (normalizedName.endsWith(`/${FFMPEG_FILENAME}`) || normalizedName === FFMPEG_FILENAME) {
         const compressedData = data.subarray(fileOffset, fileOffset + compressedSize)
 
         let decompressed: Buffer
@@ -276,10 +275,9 @@ export class ToolManager {
       const size = parseInt(gunzipped.subarray(offset + 124, offset + 136).toString('utf-8').trim(), 8)
       const fileOffset = offset + 512
 
-      // Look for ffmpeg in the bin/ directory
-      const binPath = `bin/${FFMPEG_FILENAME}`.replace(/\\/g, '/')
+      // Look for the ffmpeg binary anywhere in the archive (path may vary across releases)
       const normalizedName = name.replace(/\\/g, '/')
-      if (normalizedName.endsWith(binPath)) {
+      if (normalizedName.endsWith(`/${FFMPEG_FILENAME}`) || normalizedName === FFMPEG_FILENAME) {
         const fileData = gunzipped.subarray(fileOffset, fileOffset + size)
         await fs.writeFile(destination, fileData)
         return
