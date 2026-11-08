@@ -103,6 +103,20 @@ export interface AuthStatus {
 
 export type SortOrder = 'new' | 'hot' | 'top' | 'rising'
 export type Theme = 'dark' | 'midnight' | 'circuit' | 'corporate' | 'vaporwave'
+export type LanguageId =
+  | 'en'
+  | 'de'
+  | 'uk'
+  | 'zh-TW'
+  | 'zh'
+  | 'ja'
+  | 'fr'
+  | 'it'
+  | 'es'
+  | 'pirate'
+  | 'cyberpunk'
+  | 'eo'
+  | 'enSimple'
 
 export interface AppSettings {
   destination: string
@@ -116,6 +130,7 @@ export interface AppSettings {
   skipExisting: boolean
   sortOrder: SortOrder
   theme: Theme
+  language: LanguageId
   toolsDir: string | null
 }
 
@@ -176,6 +191,7 @@ export interface RendererApi {
   historyTotal(): Promise<number>
   historyClear(): Promise<void>
   setTheme(theme: string): void
+  setLanguage(lang: string): void
   onAuthState(callback: (status: AuthStatus) => void): () => void
   onJobState(callback: (state: JobState) => void): () => void
   onJobMedia(callback: (items: MediaItem[]) => void): () => void

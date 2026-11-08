@@ -51,6 +51,9 @@ const api: RendererApi = {
   setTheme: (theme: string) => {
     document.documentElement.removeAttribute('data-theme')
     if (theme !== 'dark') document.documentElement.setAttribute('data-theme', theme)
+  },
+  setLanguage: (lang: string) => {
+    document.documentElement.setAttribute('data-lang', lang)
   }
 }
 

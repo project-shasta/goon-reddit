@@ -4,12 +4,14 @@ import type {
   AuthStatus,
   JobState,
   LogEntry,
+  LanguageId,
   SortOrder,
   SubredditInfo
 } from '@shared/types'
 import { DownloaderView } from './components/DownloaderView'
 import { SettingsView } from './components/SettingsView'
 import { errorText } from './lib/format'
+import { useI18n, languageIds, languageLabel } from './i18n'
 import {
   IconDownload,
   IconSettings,
@@ -59,7 +61,10 @@ export default function App(): React.JSX.Element {
   const [historyCount, setHistoryCount] = useState(0)
   const [showClearKnownConfirm, setShowClearKnownConfirm] = useState(false)
   const [showThemePicker, setShowThemePicker] = useState(false)
+  const [showLangPicker, setShowLangPicker] = useState(false)
+  const [language, setLanguage] = useState<LanguageId>('en')
   const [sortOrder, setSortOrder] = useState<SortOrder>('new')
+  void useI18n(language)
 
   const addLog = useCallback((entry: LogEntry) => {
     setLogs((current) => {
@@ -84,6 +89,8 @@ export default function App(): React.JSX.Element {
         setSettings(loadedSettings)
         setSortOrder(loadedSettings.sortOrder)
         window.api.setTheme(loadedSettings.theme)
+        setLanguage(loadedSettings.language)
+        window.api.setLanguage(loadedSettings.language)
       } else {
         setStartupError(errorText(settingsResult.reason))
       }
@@ -286,41 +293,75 @@ export default function App(): React.JSX.Element {
           </button>
         </nav>
 
-        <div className="relative">
-          <button
-            className="tab"
-            onClick={() => setShowThemePicker((v) => !v)}
-            title="Change theme"
-          >
-            🎨 Theme
-          </button>
-          {showThemePicker && (
-            <div className="absolute top-full z-50 mt-1 w-48 rounded-xl border border-white/10 bg-zinc-900 py-1 shadow-lg">
-              {([
-                { id: 'dark', label: 'Dark (default)' },
-                { id: 'midnight', label: 'Midnight' },
-                { id: 'circuit', label: 'Circuit Breaker' },
-                { id: 'corporate', label: 'Corporate' },
-                { id: 'vaporwave', label: 'Vaporwave' }
-              ] as const).map((t) => (
-                <button
-                  key={t.id}
-                  className={`flex w-full px-3 py-2 text-sm transition-colors ${
-                    settings?.theme === t.id
-                      ? 'bg-orange-500/15 text-orange-300'
-                      : 'text-zinc-300 hover:bg-white/5 hover:text-zinc-100'
-                  }`}
-                  onClick={() => {
-                    window.api.setTheme(t.id)
-                    void window.api.updateSettings({ theme: t.id }).catch(() => undefined)
-                    setShowThemePicker(false)
-                  }}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          )}
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <button
+              className="tab"
+              onClick={() => setShowThemePicker((v) => !v)}
+              title="Change theme"
+            >
+              🎨 Theme
+            </button>
+            {showThemePicker && (
+              <div className="absolute top-full z-50 mt-1 w-48 rounded-xl border border-white/10 bg-zinc-900 py-1 shadow-lg">
+                {([
+                  { id: 'dark', label: 'Dark (default)' },
+                  { id: 'midnight', label: 'Midnight' },
+                  { id: 'circuit', label: 'Circuit Breaker' },
+                  { id: 'corporate', label: 'Corporate' },
+                  { id: 'vaporwave', label: 'Vaporwave' }
+                ] as const).map((th) => (
+                  <button
+                    key={th.id}
+                    className={`flex w-full px-3 py-2 text-sm transition-colors ${
+                      settings?.theme === th.id
+                        ? 'bg-orange-500/15 text-orange-300'
+                        : 'text-zinc-300 hover:bg-white/5 hover:text-zinc-100'
+                    }`}
+                    onClick={() => {
+                      window.api.setTheme(th.id)
+                      void window.api.updateSettings({ theme: th.id }).catch(() => undefined)
+                      setShowThemePicker(false)
+                    }}
+                  >
+                    {th.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="relative">
+            <button
+              className="tab"
+              onClick={() => setShowLangPicker((v) => !v)}
+              title="Change language"
+            >
+              🌐 {languageLabel(language)}
+            </button>
+            {showLangPicker && (
+              <div className="absolute top-full z-50 mt-1 max-h-64 w-48 overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 py-1 shadow-lg">
+                {languageIds.map((lang) => (
+                  <button
+                    key={lang}
+                    className={`flex w-full px-3 py-2 text-sm transition-colors ${
+                      language === lang
+                        ? 'bg-orange-500/15 text-orange-300'
+                        : 'text-zinc-300 hover:bg-white/5 hover:text-zinc-100'
+                    }`}
+                    onClick={() => {
+                      window.api.setLanguage(lang)
+                      void window.api.updateSettings({ language: lang }).catch(() => undefined)
+                      setLanguage(lang)
+                      setShowLangPicker(false)
+                    }}
+                  >
+                    {languageLabel(lang)}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="ml-auto flex items-center gap-2">
