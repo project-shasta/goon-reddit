@@ -46,7 +46,7 @@ function ActiveRow({
 }): React.JSX.Element {
   const t = useI18n(lang)
   const percent = downloadPercent(entry)
-  const isVideo = entry.filename.toLowerCase().endsWith('.mp4')
+  const isVideo = String(entry.filename ?? '').toLowerCase().endsWith('.mp4')
 
   return (
     <li className="space-y-1.5 py-2">
