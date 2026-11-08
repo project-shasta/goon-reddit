@@ -1,26 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type {
-  AppSettings,
-  AuthStatus,
-  JobOptions,
-  JobState,
-  LogEntry,
-  MediaItem,
-  SubredditInfo
-} from '@shared/types'
+import type { AppSettings, AuthStatus, JobState, LogEntry, SubredditInfo } from '@shared/types'
 import { DownloaderView } from './components/DownloaderView'
-import { BrowserView } from './components/BrowserView'
 import { SettingsView } from './components/SettingsView'
 import { errorText } from './lib/format'
 import {
   IconDownload,
-  IconImage,
   IconReddit,
   IconSettings,
   IconSpinner
 } from './components/icons'
 
-type View = 'download' | 'slideshow' | 'settings'
+type View = 'download' | 'settings'
 
 const INITIAL_AUTH: AuthStatus = {
   loggedIn: false,
@@ -52,7 +42,6 @@ export default function App(): React.JSX.Element {
   const [auth, setAuth] = useState<AuthStatus>(INITIAL_AUTH)
   const [settings, setSettings] = useState<AppSettings | null>(null)
   const [job, setJob] = useState<JobState>(INITIAL_JOB)
-  const [media, setMedia] = useState<MediaItem[]>([])
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [subredditInput, setSubredditInput] = useState(
     () => localStorage.getItem(SUBREDDIT_STORAGE_KEY) ?? ''
@@ -109,24 +98,12 @@ export default function App(): React.JSX.Element {
         setValidationError(null)
       }
     })
-    const offMedia = window.api.onJobMedia((items) =>
-      setMedia((current) => {
-        const map = new Map(current.map((item) => [item.id, item]))
-        for (const item of items) map.set(item.id, item)
-        return [...map.values()]
-      })
-    )
-    const offUpdate = window.api.onJobMediaUpdate((item) =>
-      setMedia((current) => current.map((existing) => (existing.id === item.id ? item : existing)))
-    )
     const offLog = window.api.onJobLog((entry) => addLog(entry))
 
     return () => {
       cancelled = true
       offAuth()
       offJob()
-      offMedia()
-      offUpdate()
       offLog()
     }
   }, [addLog])
@@ -157,17 +134,15 @@ export default function App(): React.JSX.Element {
   }, [subredditInput])
 
   const handleStart = useCallback(
-    async (mode: JobOptions['mode']) => {
+    async (mode: JobState['mode']) => {
       if (!settings) return
       const name = subredditInput.trim()
       if (!name) return
 
-      setMedia([])
       setValidationError(null)
       if (validated && validated.name.toLowerCase() !== name.replace(/^r\//i, '').toLowerCase()) {
         setValidated(null)
       }
-      setView(mode === 'scan' ? 'slideshow' : 'download')
       setJob({ ...INITIAL_JOB, mode, phase: 'validating', startedAt: Date.now() })
 
       try {
@@ -214,52 +189,9 @@ export default function App(): React.JSX.Element {
     [addLog]
   )
 
-  const handleIntervalChange = useCallback(
-    (intervalMs: number) => {
-      setSettings((current) => (current ? { ...current, slideshowIntervalMs: intervalMs } : current))
-      void window.api.updateSettings({ slideshowIntervalMs: intervalMs }).catch(() => undefined)
-    },
-    []
-  )
-
-  const handleQueueMore = useCallback(
-    async (batch: number) => {
-      if (!settings || !validated) return
-      const newMax = Math.max(settings.maxPosts, job.scannedPosts) + batch
-      setSettings({ ...settings, maxPosts: newMax })
-      await window.api.updateSettings({ maxPosts: newMax }).catch(() => undefined)
-      setMedia([])
-      setView('slideshow')
-      setJob({ ...INITIAL_JOB, mode: 'scan', phase: 'validating', startedAt: Date.now() })
-      try {
-        await window.api.startJob({
-          subreddit: validated.name,
-          destination: settings.destination,
-          mode: 'scan',
-          maxPosts: newMax,
-          concurrency: settings.concurrency,
-          includeImages: settings.includeImages,
-          includeGalleries: settings.includeGalleries,
-          includeVideos: settings.includeVideos,
-          includeExternalVideos: settings.includeExternalVideos,
-          skipNsfw: settings.skipNsfw,
-          skipExisting: settings.skipExisting
-        })
-      } catch (err) {
-        setJob(INITIAL_JOB)
-        addLog({ level: 'error', message: errorText(err), time: Date.now() })
-      }
-    },
-    [settings, validated, job.scannedPosts, addLog]
-  )
-
-  const imageCount = useMemo(
-    () =>
-      media.filter(
-        (item) => item.kind === 'image' || item.kind === 'gallery' || item.kind === 'external-image'
-      ).length,
-    [media]
-  )
+  const canStart = useMemo(() => {
+    return Boolean(settings && settings.destination && (validated || subredditInput.trim()))
+  }, [settings, validated, subredditInput])
 
   if (!settings) {
     return (
@@ -296,18 +228,6 @@ export default function App(): React.JSX.Element {
           >
             <IconDownload size={14} />
             Downloader
-          </button>
-          <button
-            className={`tab flex items-center gap-1.5 ${view === 'slideshow' ? 'tab-active' : ''}`}
-            onClick={() => setView('slideshow')}
-          >
-            <IconImage size={14} />
-            Slideshow
-            {imageCount > 0 && (
-              <span className="rounded bg-white/10 px-1 text-[10px] tabular-nums text-zinc-300">
-                {imageCount > 999 ? '999+' : imageCount}
-              </span>
-            )}
           </button>
           <button
             className={`tab flex items-center gap-1.5 ${view === 'settings' ? 'tab-active' : ''}`}
@@ -366,18 +286,7 @@ export default function App(): React.JSX.Element {
             onAuthChanged={refreshAuth}
             onClearLogs={() => setLogs([])}
             onOpenSettings={() => setView('settings')}
-          />
-        )}
-
-        {view === 'slideshow' && (
-          <BrowserView
-            media={media}
-            job={job}
-            settings={settings}
-            subreddit={validated ?? job.subreddit}
-            onIntervalChange={handleIntervalChange}
-            onGoDownload={() => setView('download')}
-            onQueueMore={handleQueueMore}
+            canStart={canStart}
           />
         )}
 

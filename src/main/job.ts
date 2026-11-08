@@ -98,7 +98,6 @@ export class JobRunner {
     this.running = true
     this.state = {
       ...initialState(),
-      mode: options.mode,
       startedAt: Date.now()
     }
     this.setPhase('validating')
@@ -128,22 +127,9 @@ export class JobRunner {
         this.deps.log('warn', 'This subreddit is quarantined; it may require opt-in on Reddit.')
       }
 
-      if (options.mode === 'download') {
-        await fsp.mkdir(path.join(destination, safeFilename(subreddit.name)), { recursive: true })
-      }
+      await fsp.mkdir(path.join(destination, safeFilename(subreddit.name)), { recursive: true })
 
       const media = await this.scan(subreddit, options, destination, controller.signal)
-
-      if (options.mode === 'scan') {
-        this.state.finishedAt = Date.now()
-        this.setPhase(
-          'done',
-          media.length > 0
-            ? `Found ${media.length} media item${media.length === 1 ? '' : 's'} in ${this.state.scannedPosts} posts.`
-            : 'No downloadable media found in the scanned posts.'
-        )
-        return
-      }
 
       if (media.length === 0) {
         this.state.finishedAt = Date.now()

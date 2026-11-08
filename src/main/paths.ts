@@ -96,9 +96,7 @@ function migrateLegacyProfile(previousDir: string, dataDir: string): void {
             includeVideos: true,
             includeExternalVideos: true,
             skipNsfw: false,
-            skipExisting: true,
-            slideshowIntervalMs: 3000,
-            blurNsfw: false
+            skipExisting: true
           }
           const hasCustomValues = Object.entries(oldDefaults).some(
             ([key, val]) => (raw as Record<string, unknown>)[key] !== val

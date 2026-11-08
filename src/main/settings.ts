@@ -17,9 +17,6 @@ function defaults(): AppSettings {
     includeExternalVideos: true,
     skipNsfw: false,
     skipExisting: true,
-    slideshowIntervalMs: 3000,
-    slideshowAutoPlay: false,
-    blurNsfw: false,
     toolsDir: null
   }
 }
@@ -65,9 +62,6 @@ export class SettingsStore {
       includeExternalVideos: asBool(next.includeExternalVideos, base.includeExternalVideos),
       skipNsfw: asBool(next.skipNsfw, base.skipNsfw),
       skipExisting: asBool(next.skipExisting, base.skipExisting),
-      slideshowIntervalMs: clampInt(next.slideshowIntervalMs, 1000, 20000, base.slideshowIntervalMs),
-      slideshowAutoPlay: asBool(next.slideshowAutoPlay, base.slideshowAutoPlay),
-      blurNsfw: asBool(next.blurNsfw, base.blurNsfw),
       toolsDir:
         typeof next.toolsDir === 'string' && next.toolsDir.trim()
           ? path.resolve(next.toolsDir)

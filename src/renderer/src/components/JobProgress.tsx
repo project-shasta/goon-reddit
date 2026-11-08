@@ -121,16 +121,13 @@ export function JobProgress({ job, destination }: JobProgressProps): React.JSX.E
   const busy = job.phase === 'validating' || job.phase === 'scanning' || job.phase === 'downloading'
   const finished = job.discovered > 0 ? job.completed + job.skipped + job.failed : 0
   const overall =
-    job.mode === 'download' && job.discovered > 0
-      ? Math.min(100, (finished / job.discovered) * 100)
-      : null
+    job.discovered > 0 ? Math.min(100, (finished / job.discovered) * 100) : null
 
   if (job.phase === 'idle') {
     return (
       <section className="card px-4 py-4 text-sm text-zinc-500">
         Enter a subreddit and press <span className="text-zinc-300">Download new</span> to grab its
-        latest images, galleries and videos. Use{' '}
-        <span className="text-zinc-300">Scan only</span> to preview it in the slideshow.
+        latest images, galleries and videos.
       </section>
     )
   }
@@ -168,11 +165,7 @@ export function JobProgress({ job, destination }: JobProgressProps): React.JSX.E
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat label="Posts scanned" value={formatCount(job.scannedPosts)} />
         <Stat label="Media found" value={formatCount(job.discovered)} />
-        <Stat
-          label={job.mode === 'scan' ? 'Loaded' : 'Downloaded'}
-          value={formatCount(job.mode === 'scan' ? job.discovered : job.completed)}
-          tone="text-emerald-400"
-        />
+        <Stat label="Downloaded" value={formatCount(job.completed)} tone="text-emerald-400" />
         <Stat
           label={job.failed > 0 ? 'Skipped / failed' : 'Skipped'}
           value={formatCount(job.failed > 0 ? job.skipped + job.failed : job.skipped)}

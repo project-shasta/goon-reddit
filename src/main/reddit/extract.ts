@@ -70,10 +70,9 @@ function isDirectVideoUrl(url: string): boolean {
  */
 /**
  * Detect Reddit's "image deleted" placeholder images and low-res previews.
- * These are served from preview hosts. For the slideshow we want full-res
- * images, so any image whose sourceUrl is from a preview host should be
- * skipped — the user will get a better version from i.redd.it or the
- * external host directly.
+ * These are served from preview hosts. Any image whose sourceUrl is from a
+ * preview host should be skipped — we want full-res images (i.redd.it or the
+ * original external host).
  */
 function isRedditPreviewHost(url: string): boolean {
   const h = hostOf(url)

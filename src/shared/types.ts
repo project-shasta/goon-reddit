@@ -22,7 +22,7 @@ export interface MediaItem {
   mediaId: string | null
   kind: MediaKind
   sourceUrl: string
-  /** URL used for grid thumbnails / slideshow fallback. */
+  /** URL used for grid thumbnails / fallback. */
   previewUrl: string | null
   ext: string
   /** Sanitized filename without directory. */
@@ -79,7 +79,7 @@ export type JobPhase =
 
 export interface JobState {
   phase: JobPhase
-  mode: 'download' | 'scan'
+  mode: 'download'
   subreddit: SubredditInfo | null
   scannedPosts: number
   discovered: number
@@ -109,9 +109,6 @@ export interface AppSettings {
   includeExternalVideos: boolean
   skipNsfw: boolean
   skipExisting: boolean
-  slideshowIntervalMs: number
-  slideshowAutoPlay: boolean
-  blurNsfw: boolean
   toolsDir: string | null
 }
 
@@ -131,7 +128,7 @@ export interface ToolsStatus {
 export interface JobOptions {
   subreddit: string
   destination: string
-  mode: 'download' | 'scan'
+  mode: 'download'
   maxPosts: number
   concurrency: number
   includeImages: boolean

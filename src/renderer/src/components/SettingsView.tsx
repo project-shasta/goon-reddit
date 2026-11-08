@@ -22,8 +22,6 @@ type BooleanKey =
   | 'includeExternalVideos'
   | 'skipNsfw'
   | 'skipExisting'
-  | 'slideshowAutoPlay'
-  | 'blurNsfw'
 
 const MEDIA_TOGGLES: Array<{ key: BooleanKey; label: string; hint: string }> = [
   { key: 'includeImages', label: 'Images', hint: 'Single i.redd.it and direct image posts' },
@@ -34,9 +32,7 @@ const MEDIA_TOGGLES: Array<{ key: BooleanKey; label: string; hint: string }> = [
 
 const BEHAVIOR_TOGGLES: Array<{ key: BooleanKey; label: string; hint: string }> = [
   { key: 'skipNsfw', label: 'Skip NSFW posts', hint: 'Ignore posts marked over 18' },
-  { key: 'skipExisting', label: 'Skip files already downloaded', hint: 'Resume where you left off' },
-  { key: 'slideshowAutoPlay', label: 'Auto-play slideshow', hint: 'Start playing when images load' },
-  { key: 'blurNsfw', label: 'Blur NSFW in slideshow', hint: 'Click to reveal each image' }
+  { key: 'skipExisting', label: 'Skip files already downloaded', hint: 'Resume where you left off' }
 ]
 
 export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX.Element {
@@ -209,21 +205,6 @@ export function SettingsView({ settings, onSave }: SettingsViewProps): React.JSX
               </span>
             </label>
           ))}
-        </div>
-        <div>
-          <label className="label" htmlFor="interval">
-            Slideshow interval: {(draft.slideshowIntervalMs / 1000).toFixed(1)}s
-          </label>
-          <input
-            id="interval"
-            className="w-full accent-orange-500"
-            type="range"
-            min={1000}
-            max={15000}
-            step={500}
-            value={draft.slideshowIntervalMs}
-            onChange={(event) => patch('slideshowIntervalMs', Number(event.target.value))}
-          />
         </div>
       </section>
 

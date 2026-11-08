@@ -42,7 +42,7 @@ function buildJobOptions(raw: Partial<JobOptions>, settings: AppSettings): JobOp
   const options: JobOptions = {
     subreddit,
     destination,
-    mode: raw.mode === 'scan' ? 'scan' : 'download',
+    mode: 'download',
     maxPosts: clampInt(raw.maxPosts, 0, 100000, settings.maxPosts),
     concurrency: clampInt(raw.concurrency, 1, 8, settings.concurrency),
     includeImages: asBool(raw.includeImages, settings.includeImages),

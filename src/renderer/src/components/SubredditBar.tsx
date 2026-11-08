@@ -16,7 +16,7 @@ interface SubredditBarProps {
   validating: boolean
   validationError: string | null
   onValidate: () => void
-  onStart: (mode: 'download' | 'scan') => void
+  onStart: (mode: 'download') => void
   onCancel: () => void
   job: JobState
   canStart: boolean
@@ -79,25 +79,14 @@ export function SubredditBar({
             Cancel
           </button>
         ) : (
-          <>
-            <button
-              className="btn btn-secondary"
-              onClick={() => onStart('scan')}
-              disabled={!canStart}
-              title="Scan the subreddit and load the slideshow without downloading"
-            >
-              <IconGrid size={14} />
-              Scan only
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => onStart('download')}
-              disabled={!canStart}
-            >
-              <IconDownload size={15} />
-              Download new
-            </button>
-          </>
+          <button
+            className="btn btn-primary"
+            onClick={() => onStart('download')}
+            disabled={!canStart}
+          >
+            <IconDownload size={15} />
+            Download new
+          </button>
         )}
       </div>
 

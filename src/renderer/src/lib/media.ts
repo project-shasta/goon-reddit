@@ -8,7 +8,7 @@ export function localMediaUrl(localPath: string): string {
   return `rdm-media://local/?path=${encodeURIComponent(localPath)}`
 }
 
-/** Full-size image source for the slideshow. */
+/** Full-size image source for rendering. */
 export function mediaSrc(item: MediaItem): string {
   if (item.localPath) return localMediaUrl(item.localPath)
   if (isViewableImage(item)) return item.sourceUrl
