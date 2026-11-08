@@ -61,9 +61,12 @@ export function SubredditBar({
             {t.subreddit as string}
           </label>
           <div className="flex items-center gap-2">
-            <span className="shrink-0 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-zinc-500">
-              {mode === 'archive' ? 'u/' : 'r/'}
-            </span>
+            <ModeDropdown
+              mode={mode}
+              onChange={onModeChange}
+              disabled={running}
+              lang={lang}
+            />
             <input
               id="subreddit"
               className="input"
@@ -90,37 +93,6 @@ export function SubredditBar({
             disabled={running}
             lang={lang}
           />
-        </div>
-
-        <div className="min-w-[130px]">
-          <label className="label" htmlFor="download-mode">
-            {t.mode as string}
-          </label>
-          <div className="flex gap-1 rounded-xl border border-white/10 bg-black/30 p-1">
-            <button
-              id="download-mode"
-              className={`flex-1 rounded-lg px-2 py-1.5 text-xs transition-colors ${
-                mode === 'download'
-                  ? 'bg-orange-500/15 text-orange-300'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-              onClick={() => onModeChange('download')}
-              disabled={running}
-            >
-              {t.download as string}
-            </button>
-            <button
-              className={`flex-1 rounded-lg px-2 py-1.5 text-xs transition-colors ${
-                mode === 'archive'
-                  ? 'bg-orange-500/15 text-orange-300'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-              onClick={() => onModeChange('archive')}
-              disabled={running}
-            >
-              {t.archive as string}
-            </button>
-          </div>
         </div>
 
         <button
@@ -307,6 +279,75 @@ function SortDropdown({
               {t[option as keyof typeof t] as string}
             </button>
           ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ModeDropdown({
+  mode,
+  onChange,
+  disabled,
+  lang = 'en'
+}: {
+  mode: DownloadMode
+  onChange: (mode: DownloadMode) => void
+  disabled: boolean
+  lang?: LanguageId
+}): React.JSX.Element {
+  const t = useI18n(lang)
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors ${
+          disabled
+            ? 'border-white/10 bg-black/30 text-zinc-600'
+            : mode === 'download'
+              ? 'border-orange-500/30 bg-orange-500/5 text-orange-300'
+              : 'border-white/10 bg-black/30 text-zinc-200 hover:border-white/20'
+        }`}
+        onClick={() => !disabled && setOpen((v) => !v)}
+        disabled={disabled}
+      >
+        <span className="shrink-0 text-xs">{mode === 'archive' ? 'u/' : 'r/'}</span>
+        <span>{mode === 'archive' ? (t.archive as string) : (t.download as string)}</span>
+        <IconCaretDown size={14} className={`shrink-0 ${disabled ? 'text-zinc-600' : 'text-zinc-500'}`} />
+      </button>
+
+      {open && (
+        <div className="absolute top-full z-50 mt-1 w-full rounded-xl border border-white/10 bg-zinc-900 py-1 shadow-lg">
+          <button
+            className={`flex w-full px-3 py-2 text-sm transition-colors ${
+              mode === 'download'
+                ? 'bg-orange-500/15 text-orange-300'
+                : 'text-zinc-300 hover:bg-white/5 hover:text-zinc-100'
+            }`}
+            onClick={() => {
+              onChange('download')
+              setOpen(false)
+            }}
+          >
+            <span className="shrink-0 text-xs">r/</span>
+            {t.download as string}
+          </button>
+          <button
+            className={`flex w-full px-3 py-2 text-sm transition-colors ${
+              mode === 'archive'
+                ? 'bg-orange-500/15 text-orange-300'
+                : 'text-zinc-300 hover:bg-white/5 hover:text-zinc-100'
+            }`}
+            onClick={() => {
+              onChange('archive')
+              setOpen(false)
+            }}
+          >
+            <span className="shrink-0 text-xs">u/</span>
+            {t.archive as string}
+          </button>
         </div>
       )}
     </div>
