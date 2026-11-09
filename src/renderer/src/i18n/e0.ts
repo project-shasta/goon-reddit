@@ -144,6 +144,17 @@ export const eo: Translation = {
   ffmpeg: 'ffmpeg',
   ytDlp: 'yt-dlp',
   updateYtDlp: 'Ĝisdatigi yt-dlp',
+  clearBrowserData: 'Forigi datumojn de la retfoliumilo',
+  clearBrowserDataHint:
+    'Forigas kromdatumojn pri retejo (bildoj, skriptoj, amasmedoj) el la retfoliumila profilo. Via Reddit-eniro estas sekura.',
+  clearCacheNow: 'Forigi nun',
+  clearingCache: 'Forigante…',
+  clearCacheConfirmTitle: 'Forigi datumojn de la retfoliumilo?',
+  clearCacheConfirmBody:
+    'Tio forigos kromdatumojn pri retejo (bildoj, skriptoj, amasmedoj) el la retfoliumila profilo. <strong>Via Reddit-eniro NE estos tuŝita.</strong>',
+  clearCacheConfirmSubtext: '(Kromdatumoj estos re-prenitaj je la sekva vizito.)',
+  clearCacheCancel: 'Nuligi',
+  clearCacheConfirm: 'Forigi datumojn de la retfoliumilo',
   noAudio: 'Reddit-video ne havas audion',
   noAudioHint:
     'ffmpeg ne trovita. Rulu npm run tools:setup aŭ gxisdatigu en Agordoj; la aplikaĵo uzas video-only fallback_url.',

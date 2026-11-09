@@ -190,6 +190,10 @@ export interface ToolsSetupResult {
   log: string[]
 }
 
+export interface CacheClearResult {
+  freedBytes: number
+}
+
 export interface RendererApi {
   getAuthStatus(): Promise<AuthStatus>
   openLogin(): Promise<boolean>
@@ -211,6 +215,7 @@ export interface RendererApi {
   historyClear(): Promise<void>
   shellBeep(): Promise<boolean>
   showNotification(title: string, body: string): Promise<boolean>
+  clearCache(): Promise<CacheClearResult>
   setTheme(theme: string): void
   setLanguage(lang: string): void
   onAuthState(callback: (status: AuthStatus) => void): () => void

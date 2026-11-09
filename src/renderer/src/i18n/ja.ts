@@ -144,6 +144,17 @@ export const ja: Translation = {
   ffmpeg: 'ffmpeg',
   ytDlp: 'yt-dlp',
   updateYtDlp: 'yt-dlpを更新',
+  clearBrowserData: 'ブラウザデータを削除',
+  clearBrowserDataHint:
+    'ブラウザプロファイルからキャッシュされたWebデータ（画像、スクリプト、メディア）を削除します。Redditのログインは安全です。',
+  clearCacheNow: '今すぐ削除',
+  clearingCache: '削除中…',
+  clearCacheConfirmTitle: 'ブラウザデータを削除しますか？',
+  clearCacheConfirmBody:
+    'ブラウザプロファイルからキャッシュされたWebデータ（画像、スクリプト、メディア）を削除します。<strong>Redditのログインには影響しません。</strong>',
+  clearCacheConfirmSubtext: '(次の訪問時にキャッシュデータが再取得されます。)',
+  clearCacheCancel: 'キャンセル',
+  clearCacheConfirm: 'ブラウザデータを削除',
   noAudio: 'Redditビデオにオーディオがありません',
   noAudioHint:
     'ffmpegが見つかりません。npm run tools:setupを実行するか、設定で更新してください。アプリはビデオのみのfallback_urlにフォールバックします。',

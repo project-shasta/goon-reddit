@@ -144,6 +144,17 @@ export const fr: Translation = {
   ffmpeg: 'ffmpeg',
   ytDlp: 'yt-dlp',
   updateYtDlp: 'Mettre à jour yt-dlp',
+  clearBrowserData: 'Effacer les données du navigateur',
+  clearBrowserDataHint:
+    'Supprime les données web mises en cache (images, scripts, médias) du profil du navigateur. Votre connexion Reddit est sauve.',
+  clearCacheNow: 'Effacer maintenant',
+  clearingCache: 'Effacement…',
+  clearCacheConfirmTitle: 'Effacer les données du navigateur ?',
+  clearCacheConfirmBody:
+    'Cela supprimera les données web mises en cache (images, scripts, médias) du profil du navigateur. <strong>Votre connexion Reddit NE sera PAS affectée.</strong>',
+  clearCacheConfirmSubtext: '(Les données mises en cache seront récupérées lors de la prochaine visite.)',
+  clearCacheCancel: 'Annuler',
+  clearCacheConfirm: 'Effacer les données du navigateur',
   noAudio: 'La vidéo Reddit n\'a pas d\'audio',
   noAudioHint:
     'ffmpeg n\'a pas été trouvé. Exécutez npm run tools:setup ou mettez à jour dans Paramètres; l\'application utilise fallback_url uniquement vidéo.',

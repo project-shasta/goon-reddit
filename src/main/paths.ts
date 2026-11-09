@@ -43,7 +43,7 @@ export function getDataDir(): string {
 }
 
 /** Profile folders that are pure caches and only slow the migration down. */
-const SKIPPED_PROFILE_DIRS = new Set([
+export const SKIPPED_PROFILE_DIRS = new Set([
   'Cache',
   'Code Cache',
   'GPUCache',

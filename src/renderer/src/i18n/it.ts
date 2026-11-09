@@ -144,6 +144,17 @@ export const it: Translation = {
   ffmpeg: 'ffmpeg',
   ytDlp: 'yt-dlp',
   updateYtDlp: 'Aggiorna yt-dlp',
+  clearBrowserData: 'Cancella dati del browser',
+  clearBrowserDataHint:
+    'Cancella i dati web memorizzati nella cache (immagini, script, media) dal profilo del browser. Il tuo accesso a Reddit è sicuro.',
+  clearCacheNow: 'Cancella ora',
+  clearingCache: 'Cancellazione…',
+  clearCacheConfirmTitle: 'Cancellare i dati del browser?',
+  clearCacheConfirmBody:
+    'Questo eliminerà i dati web memorizzati nella cache (immagini, script, media) dal profilo del browser. <strong>Il tuo accesso a Reddit NON sarà influenzato.</strong>',
+  clearCacheConfirmSubtext: '(I dati memorizzati nella cache saranno recuperati alla prossima visita.)',
+  clearCacheCancel: 'Annulla',
+  clearCacheConfirm: 'Cancella dati del browser',
   noAudio: 'Il video Reddit non ha audio',
   noAudioHint:
     'ffmpeg non trovato. Esegui npm run tools:setup o aggiorna in Impostazioni; l\'app usa fallback_url solo video.',

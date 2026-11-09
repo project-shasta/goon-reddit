@@ -27,6 +27,9 @@ export const IPC = {
   historyTotal: 'history:total',
   historyClear: 'history:clear',
 
+  // Cache
+  cacheClear: 'cache:clear',
+
   // Tools
   toolsStatus: 'tools:status',
   toolsUpdateYtdlp: 'tools:updateYtdlp',

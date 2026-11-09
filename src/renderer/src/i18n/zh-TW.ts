@@ -144,6 +144,17 @@ export const zhTW: Translation = {
   ffmpeg: 'ffmpeg',
   ytDlp: 'yt-dlp',
   updateYtDlp: '更新 yt-dlp',
+  clearBrowserData: '清除瀏覽器資料',
+  clearBrowserDataHint:
+    '清除瀏覽器設定檔中的快取網路資料（圖片、腳本、媒體）。您的 Reddit 登入不受影響。',
+  clearCacheNow: '立即清除',
+  clearingCache: '清除中…',
+  clearCacheConfirmTitle: '清除瀏覽器資料？',
+  clearCacheConfirmBody:
+    '這將刪除瀏覽器設定檔中的快取網路資料（圖片、腳本、媒體）。<strong>您的 Reddit 登入不會受到影響。</strong>',
+  clearCacheConfirmSubtext: '(下次訪問時將重新獲取快取資料。)',
+  clearCacheCancel: '取消',
+  clearCacheConfirm: '清除瀏覽器資料',
   noAudio: 'Reddit 影片沒有音訊',
   noAudioHint:
     '未找到 ffmpeg。執行 npm run tools:setup 或在設定中更新；應用程式回退到僅影片的 fallback_url。',

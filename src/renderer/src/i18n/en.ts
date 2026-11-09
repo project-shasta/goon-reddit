@@ -153,6 +153,17 @@ export const en: Translation = {
   ffmpeg: 'ffmpeg',
   ytDlp: 'yt-dlp',
   updateYtDlp: 'Update yt-dlp',
+  clearBrowserData: 'Clear browser data',
+  clearBrowserDataHint:
+    'Clears cached web data (images, scripts, media) from the browser profile. Your Reddit login is safe.',
+  clearCacheNow: 'Clear now',
+  clearingCache: 'Clearing…',
+  clearCacheConfirmTitle: 'Clear browser data?',
+  clearCacheConfirmBody:
+    'This will delete cached web data (images, scripts, media) from the browser profile. <strong>Your Reddit login will NOT be affected.</strong>',
+  clearCacheConfirmSubtext: '(Cached data will be re-fetched on next visit.)',
+  clearCacheCancel: 'Cancel',
+  clearCacheConfirm: 'Clear browser data',
   noAudio: 'Reddit video has no audio',
   noAudioHint:
     'ffmpeg was not found. Download it from the Tools section in Settings; the app falls back to video-only fallback_url.',

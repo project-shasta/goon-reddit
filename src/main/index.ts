@@ -1,4 +1,5 @@
 import { app, BrowserWindow, dialog, Notification, session, shell } from 'electron'
+import fs from 'node:fs'
 import path from 'node:path'
 import { IPC } from '@shared/ipc'
 import type { AuthStatus, JobState, LogEntry, MediaItem, ToolsStatus } from '@shared/types'
@@ -7,7 +8,7 @@ import { registerIpcHandlers } from './ipc'
 import { JobRunner } from './job'
 import { allowMediaRoot, installMediaProtocol, registerMediaScheme } from './mediaProtocol'
 import { CHROME_UA } from './reddit/client'
-import { configureUserData } from './paths'
+import { configureUserData, getDataDir, SKIPPED_PROFILE_DIRS } from './paths'
 import { SettingsStore } from './settings'
 import { ToolManager } from './tooling'
 import { HistoryStore } from './history'
@@ -164,6 +165,49 @@ if (startupError) {
 
     void auth.refresh(true)
     checkToolsAndNotify(toolManager)
+
+    // Auto-cleanup: on startup, delete cache folders older than 30 days
+    setTimeout(() => {
+      try {
+        const dataDir = getDataDir()
+        const now = Date.now()
+        const maxAgeMs = 30 * 24 * 60 * 60 * 1000 // 30 days
+        const preservationSet = new Set(['Partitions', 'Local State', 'settings.json', '.known'])
+
+        const entries = fs.readdirSync(dataDir, { withFileTypes: true })
+        for (const entry of entries) {
+          if (entry.name.startsWith('.') || preservationSet.has(entry.name)) continue
+
+          const entryPath = path.join(dataDir, entry.name)
+
+          if (entry.name === 'Partitions') {
+            const redditPath = path.join(entryPath, 'reddit')
+            if (fs.existsSync(redditPath)) {
+              const subEntries = fs.readdirSync(redditPath, { withFileTypes: true })
+              for (const sub of subEntries) {
+                if (sub.isDirectory() && SKIPPED_PROFILE_DIRS.has(sub.name)) {
+                  const subPath = path.join(redditPath, sub.name)
+                  const stat = fs.statSync(subPath)
+                  if (now - stat.mtimeMs > maxAgeMs) {
+                    fs.rmSync(subPath, { recursive: true, force: true })
+                  }
+                }
+              }
+            }
+            continue
+          }
+
+          if (entry.isDirectory() && SKIPPED_PROFILE_DIRS.has(entry.name)) {
+            const stat = fs.statSync(entryPath)
+            if (now - stat.mtimeMs > maxAgeMs) {
+              fs.rmSync(entryPath, { recursive: true, force: true })
+            }
+          }
+        }
+      } catch {
+        // Ignore — don't break startup for cache cleanup failures
+      }
+    }, 30000)
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {

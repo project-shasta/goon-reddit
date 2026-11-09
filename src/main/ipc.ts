@@ -1,13 +1,16 @@
-import { BrowserWindow, dialog, ipcMain, Notification, shell } from 'electron'
+import { BrowserWindow, dialog, ipcMain, Notification, session, shell } from 'electron'
+import fs from 'node:fs'
 import path from 'node:path'
 import { IPC } from '@shared/ipc'
-import type { AppSettings, DownloadMode, JobOptions, LogEntry } from '@shared/types'
+import type { AppSettings, CacheClearResult, DownloadMode, JobOptions, LogEntry } from '@shared/types'
 import type { AuthManager } from './auth'
 import type { JobRunner } from './job'
 import type { SettingsStore } from './settings'
 import type { HistoryStore } from './history'
 import type { ToolManager } from './tooling'
 import { allowMediaRoot } from './mediaProtocol'
+import { getDataDir, SKIPPED_PROFILE_DIRS } from './paths'
+import { REDDIT_PARTITION } from './reddit/client'
 import { validateSubreddit, validateUser } from './reddit/validate'
 import { errorMessage } from './reddit/errors'
 
@@ -74,6 +77,64 @@ function buildJobOptions(raw: Partial<JobOptions>, settings: AppSettings): JobOp
 
   return options
 }
+
+/* ------------------------------------------------------------------ */
+/* Cache cleanup helpers                                              */
+/* ------------------------------------------------------------------ */
+
+async function getDirectorySize(dir: string): Promise<number> {
+  let total = 0
+  const entries = await fs.promises.readdir(dir, { withFileTypes: true })
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      total += await getDirectorySize(fullPath)
+    } else {
+      total += (await fs.promises.stat(fullPath)).size
+    }
+  }
+  return total
+}
+
+async function clearCacheFolders(dataDir: string): Promise<number> {
+  const preservationSet = new Set(['Partitions', 'Local State', 'settings.json', '.known'])
+  let freedBytes = 0
+
+  const entries = await fs.promises.readdir(dataDir, { withFileTypes: true })
+
+  for (const entry of entries) {
+    if (entry.name.startsWith('.')) continue
+
+    const entryPath = path.join(dataDir, entry.name)
+
+    if (entry.name === 'Partitions') {
+      // Clear cache subdirs inside reddit partition
+      const redditPath = path.join(entryPath, 'reddit')
+      if (fs.existsSync(redditPath)) {
+        const subEntries = await fs.promises.readdir(redditPath, { withFileTypes: true })
+        for (const sub of subEntries) {
+          if (sub.isDirectory() && SKIPPED_PROFILE_DIRS.has(sub.name)) {
+            const subPath = path.join(redditPath, sub.name)
+            freedBytes += await getDirectorySize(subPath)
+            await fs.promises.rm(subPath, { recursive: true, force: true })
+          }
+        }
+      }
+      continue
+    }
+
+    if (preservationSet.has(entry.name)) continue
+
+    if (entry.isDirectory() && SKIPPED_PROFILE_DIRS.has(entry.name)) {
+      freedBytes += await getDirectorySize(entryPath)
+      await fs.promises.rm(entryPath, { recursive: true, force: true })
+    }
+  }
+
+  return freedBytes
+}
+
+/* ------------------------------------------------------------------ */
 
 export function registerIpcHandlers(ctx: IpcContext): void {
   ipcMain.handle(IPC.authStatus, async () => ctx.auth.refresh(false))
@@ -152,6 +213,21 @@ export function registerIpcHandlers(ctx: IpcContext): void {
 
   ipcMain.handle(IPC.historyClear, async () => {
     ctx.history.clearAll()
+  })
+
+  ipcMain.handle(IPC.cacheClear, async () => {
+    const dataDir = getDataDir()
+    const freedBytes = await clearCacheFolders(dataDir)
+
+    // Also clear Electron session state for the reddit partition
+    const redditSession = session.fromPartition(REDDIT_PARTITION)
+    await redditSession.clearCache()
+    await redditSession.clearStorageData({
+      origin: 'https://www.reddit.com',
+      storages: ['cookies', 'filesystem', 'indexdb', 'localstorage', 'serviceworkers', 'cachestorage']
+    })
+
+    return { freedBytes } satisfies CacheClearResult
   })
 
   ipcMain.handle(IPC.toolsStatus, async () => ctx.tools.status())

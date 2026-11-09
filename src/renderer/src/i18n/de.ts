@@ -144,6 +144,17 @@ export const de: Translation = {
   ffmpeg: 'ffmpeg',
   ytDlp: 'yt-dlp',
   updateYtDlp: 'yt-dlp aktualisieren',
+  clearBrowserData: 'Browserdaten löschen',
+  clearBrowserDataHint:
+    'Löscht zwischengespeicherte Webdaten (Bilder, Skripte, Medien) aus dem Browserprofil. Ihr Reddit-Login bleibt sicher.',
+  clearCacheNow: 'Jetzt löschen',
+  clearingCache: 'Wird gelöscht…',
+  clearCacheConfirmTitle: 'Browserdaten löschen?',
+  clearCacheConfirmBody:
+    'Dadurch werden zwischengespeicherte Webdaten (Bilder, Skripte, Medien) aus dem Browserprofil gelöscht. <strong>Ihr Reddit-Login wird NICHT beeinflusst.</strong>',
+  clearCacheConfirmSubtext: '(Zwischengespeicherte Daten werden beim nächsten Besuch erneut abgerufen.)',
+  clearCacheCancel: 'Abbrechen',
+  clearCacheConfirm: 'Browserdaten löschen',
   noAudio: 'Reddit-Video hat kein Audio',
   noAudioHint:
     'ffmpeg wurde nicht gefunden. Führen Sie npm run tools:setup aus oder aktualisieren Sie es in den Einstellungen; die App verwendet Video-only fallback_url.',

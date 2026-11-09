@@ -144,6 +144,17 @@ export const zh: Translation = {
   ffmpeg: 'ffmpeg',
   ytDlp: 'yt-dlp',
   updateYtDlp: '更新 yt-dlp',
+  clearBrowserData: '清除浏览器数据',
+  clearBrowserDataHint:
+    '清除浏览器配置文件中的缓存网络数据（图片、脚本、媒体）。您的 Reddit 登录不受影响。',
+  clearCacheNow: '立即清除',
+  clearingCache: '清除中…',
+  clearCacheConfirmTitle: '清除浏览器数据？',
+  clearCacheConfirmBody:
+    '这将删除浏览器配置文件中的缓存网络数据（图片、脚本、媒体）。<strong>您的 Reddit 登录不会受到影响。</strong>',
+  clearCacheConfirmSubtext: '(下次访问时将重新获取缓存数据。)',
+  clearCacheCancel: '取消',
+  clearCacheConfirm: '清除浏览器数据',
   noAudio: 'Reddit 视频没有音频',
   noAudioHint:
     '未找到 ffmpeg。运行 npm run tools:setup 或在设置中更新；应用回退到仅视频的 fallback_url。',

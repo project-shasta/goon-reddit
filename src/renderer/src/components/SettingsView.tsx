@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { AppSettings, LanguageId, ToolsStatus } from '@shared/types'
 import { useI18n } from '../i18n'
-import { errorText } from '../lib/format'
+import { errorText, formatBytes } from '../lib/format'
 import {
   IconAlert,
   IconCheck,
@@ -50,6 +50,9 @@ export function SettingsView({
   const [showNsfwConfirm, setShowNsfwConfirm] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [resetting, setResetting] = useState(false)
+  const [showCacheClearConfirm, setShowCacheClearConfirm] = useState(false)
+  const [clearingCache, setClearingCache] = useState(false)
+  const [cacheClearedBytes, setCacheClearedBytes] = useState<number | null>(null)
 
   useEffect(() => {
     setDraft(settings)
@@ -125,6 +128,20 @@ export function SettingsView({
       setError(errorText(err))
     } finally {
       setResetting(false)
+    }
+  }
+
+  const handleClearCache = async (): Promise<void> => {
+    setClearingCache(true)
+    setError(null)
+    try {
+      const result = await window.api.clearCache()
+      setCacheClearedBytes(result.freedBytes)
+      setShowCacheClearConfirm(false)
+    } catch (err) {
+      setError(errorText(err))
+    } finally {
+      setClearingCache(false)
     }
   }
 
@@ -301,6 +318,26 @@ export function SettingsView({
         />
       </section>
 
+      <section className="card space-y-3 p-4">
+        <h2 className="text-sm font-semibold text-zinc-100">{t.clearBrowserData as string}</h2>
+        <p className="text-[11px] leading-relaxed text-zinc-500">
+          {t.clearBrowserDataHint as string}
+        </p>
+        <button
+          className="btn btn-danger flex items-center gap-2"
+          onClick={() => {
+            setCacheClearedBytes(null)
+            setShowCacheClearConfirm(true)
+          }}
+        >
+          {clearingCache ? <IconSpinner size={12} /> : <IconSettings size={12} />}
+          {clearingCache ? (t.clearingCache as string) : (t.clearCacheNow as string)}
+        </button>
+        {cacheClearedBytes !== null && (
+          <p className="text-xs text-emerald-400">{formatBytes(cacheClearedBytes)}</p>
+        )}
+      </section>
+
       {showNsfwConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
           <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5 text-center shadow-2xl">
@@ -356,6 +393,40 @@ export function SettingsView({
               >
                 {resetting ? <IconSpinner size={12} /> : <IconRefresh size={12} />}
                 {t.resetConfirm as string}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCacheClearConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5 text-center shadow-2xl">
+            <span className="text-2xl">🧹</span>
+            <h3 className="mt-3 text-sm font-semibold text-zinc-100">
+              {t.clearCacheConfirmTitle as string}
+            </h3>
+            <p
+              className="mt-2 text-xs leading-relaxed text-zinc-400"
+              dangerouslySetInnerHTML={{ __html: t.clearCacheConfirmBody as string }}
+            />
+            <p className="mt-2 text-xs text-zinc-500">
+              {t.clearCacheConfirmSubtext as string}
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                className="btn btn-secondary flex-1"
+                onClick={() => setShowCacheClearConfirm(false)}
+              >
+                {t.clearCacheCancel as string}
+              </button>
+              <button
+                className="btn btn-danger flex-1"
+                onClick={() => void handleClearCache()}
+                disabled={clearingCache}
+              >
+                {clearingCache ? <IconSpinner size={12} /> : null}
+                {t.clearCacheConfirm as string}
               </button>
             </div>
           </div>

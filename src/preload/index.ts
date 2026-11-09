@@ -40,6 +40,7 @@ const api: RendererApi = {
   openFolder: (directory: string) => ipcRenderer.invoke(IPC.shellOpenFolder, directory),
   historyTotal: () => ipcRenderer.invoke(IPC.historyTotal),
   historyClear: () => ipcRenderer.invoke(IPC.historyClear),
+  clearCache: () => ipcRenderer.invoke(IPC.cacheClear),
   shellBeep: () => ipcRenderer.invoke(IPC.shellBeep),
   showNotification: (title: string, body: string) =>
     ipcRenderer.invoke(IPC.notificationShow, { title, body }),

@@ -144,6 +144,17 @@ export const uk: Translation = {
   ffmpeg: 'ffmpeg',
   ytDlp: 'yt-dlp',
   updateYtDlp: 'Оновити yt-dlp',
+  clearBrowserData: 'Очистити дані браузера',
+  clearBrowserDataHint:
+    'Очищає кешовані веб-дані (зображення, скрипти, медіа) з профілю браузера. Ваш вхід на Reddit залишиться.',
+  clearCacheNow: 'Очистити зараз',
+  clearingCache: 'Очищення…',
+  clearCacheConfirmTitle: 'Очистити дані браузера?',
+  clearCacheConfirmBody:
+    'Це видалить кешовані веб-дані (зображення, скрипти, медіа) з профілю браузера. <strong>Ваш вхід на Reddit НЕ буде вражено.</strong>',
+  clearCacheConfirmSubtext: '(Кешовані дані будуть повторно отримані при наступному відвідуванні.)',
+  clearCacheCancel: 'Скасувати',
+  clearCacheConfirm: 'Очистити дані браузера',
   noAudio: 'Відео Reddit без аудіо',
   noAudioHint:
     'ffmpeg не знайдено. Запустіть npm run tools:setup або оновіть в Налаштуваннях; додаток використовує fallback_url лише з відео.',

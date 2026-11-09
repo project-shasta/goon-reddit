@@ -144,6 +144,17 @@ export const pirate: Translation = {
   ffmpeg: 'ffmpeg',
   ytDlp: 'yt-dlp',
   updateYtDlp: 'Update yt-dlp',
+  clearBrowserData: 'Clear browser data',
+  clearBrowserDataHint:
+    'Clears cached web data (images, scripts, media) from the browser profile. Yer Reddit login be safe.',
+  clearCacheNow: 'Clear now',
+  clearingCache: 'Clearin\'…',
+  clearCacheConfirmTitle: 'Clear browser data, matey?',
+  clearCacheConfirmBody:
+    'This here will delete cached web data (images, scripts, media) from the browser profile. <strong>Yer Reddit login won\'t be touched, I promise!</strong>',
+  clearCacheConfirmSubtext: '(Cached data will be fetched again on next visit.)',
+  clearCacheCancel: 'Avast, cancel',
+  clearCacheConfirm: 'Clear browser data',
   noAudio: 'Reddit video has no audio',
   noAudioHint:
     'ffmpeg was not found. Run npm run tools:setup or update it in Settings; the app falls back to video-only fallback_url.',
