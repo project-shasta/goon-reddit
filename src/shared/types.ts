@@ -205,6 +205,7 @@ export interface RendererApi {
   startJob(options: Partial<JobOptions>): Promise<boolean>
   cancelJob(): Promise<boolean>
   resumeJob(): Promise<boolean>
+  getJobState(): Promise<JobState>
   getSettings(): Promise<AppSettings>
   updateSettings(patch: Partial<AppSettings>): Promise<AppSettings>
   chooseDestination(): Promise<string | null>

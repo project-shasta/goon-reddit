@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { DownloadMode, JobState, LanguageId, SortOrder, SubredditInfo, UserInfo } from '@shared/types'
 import { useI18n } from '../i18n'
 import {
@@ -29,7 +29,6 @@ interface SubredditBarProps {
   onCancel: () => void
   onResume: () => void
   job: JobState
-  canStart: boolean
 }
 
 export function SubredditBar({
@@ -48,13 +47,27 @@ export function SubredditBar({
   onCancel,
   onResume,
   job,
-  canStart,
   lang = 'en'
 }: SubredditBarProps & { lang?: LanguageId }): React.JSX.Element {
   const t = useI18n(lang)
+  const inputRef = useRef<HTMLInputElement>(null)
+  // Shown when Check/Download new is pressed with an empty field. The buttons
+  // stay clickable on purpose: a disabled primary action on a fresh profile
+  // looks like the whole app is read-only.
+  const [needsName, setNeedsName] = useState(false)
   const running =
     job.phase === 'validating' || job.phase === 'scanning' || job.phase === 'downloading'
   const canResume = job.phase === 'cancelled' && job.canResume
+
+  const requireName = (): boolean => {
+    if (value.trim()) {
+      setNeedsName(false)
+      return false
+    }
+    setNeedsName(true)
+    inputRef.current?.focus()
+    return true
+  }
 
   return (
     <section className="card space-y-3 p-4">
@@ -70,15 +83,20 @@ export function SubredditBar({
               disabled={running}
             />
             <input
+              ref={inputRef}
               id="subreddit"
               className={`input ${running ? 'text-zinc-500' : ''}`}
               placeholder={t.placeholderSubreddit as string | undefined}
               value={value}
               spellCheck={false}
               autoComplete="off"
-              onChange={(event) => onChange(event.target.value)}
+              onChange={(event) => {
+                setNeedsName(false)
+                onChange(event.target.value)
+              }}
               onKeyDown={(event) => {
-                if (event.key === 'Enter' && !running && !validating) void onValidate()
+                if (event.key !== 'Enter' || running || validating) return
+                if (!requireName()) void onValidate()
               }}
               disabled={running}
             />
@@ -99,8 +117,10 @@ export function SubredditBar({
 
         <button
           className="btn btn-secondary"
-          onClick={() => void onValidate()}
-          disabled={running || validating || !value.trim()}
+          onClick={() => {
+            if (!requireName()) void onValidate()
+          }}
+          disabled={running || validating}
         >
           {validating ? <IconSpinner size={14} /> : <IconGrid size={14} />}
           {t.check as string}
@@ -121,8 +141,9 @@ export function SubredditBar({
             )}
             <button
               className={`btn ${canResume ? 'btn-secondary' : 'btn-primary'}`}
-              onClick={() => onStart(mode)}
-              disabled={!canStart}
+              onClick={() => {
+                if (!requireName()) onStart(mode)
+              }}
             >
               <IconDownload size={15} />
               {t.downloadNew as string}
@@ -130,6 +151,13 @@ export function SubredditBar({
           </>
         )}
       </div>
+
+      {needsName && !value.trim() && (
+        <p className="flex items-center gap-2 text-xs text-amber-300">
+          <IconAlert size={13} className="shrink-0" />
+          {t.enterSubredditName as string}
+        </p>
+      )}
 
       {validating && !validated && !user && (
         <p className="flex items-center gap-2 text-xs text-zinc-500">

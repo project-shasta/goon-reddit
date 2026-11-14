@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type {
   AppSettings,
   AuthStatus,
@@ -91,12 +91,19 @@ export default function App(): React.JSX.Element {
     let cancelled = false
 
     void (async () => {
-      const [settingsResult, authResult, historyResult] = await Promise.allSettled([
+      const [settingsResult, authResult, historyResult, jobResult] = await Promise.allSettled([
         window.api.getSettings(),
         window.api.getAuthStatus(),
-        window.api.historyTotal()
+        window.api.historyTotal(),
+        window.api.getJobState()
       ])
       if (cancelled) return
+
+      // Only trust the main process for job state: a renderer reload must not
+      // look "idle" while a job is actually running.
+      if (jobResult.status === 'fulfilled') {
+        setJob(jobResult.value)
+      }
 
       if (settingsResult.status === 'fulfilled') {
         const loadedSettings = settingsResult.value
@@ -240,9 +247,13 @@ export default function App(): React.JSX.Element {
   )
 
   const handleCancel = useCallback(() => {
-    void window.api.cancelJob().catch((err) => {
-      addLog({ level: 'error', message: errorText(err), time: Date.now() })
-    })
+    void window.api
+      .cancelJob()
+      .then(() => window.api.getJobState())
+      .then((state) => setJob(state))
+      .catch((err) => {
+        addLog({ level: 'error', message: errorText(err), time: Date.now() })
+      })
   }, [addLog])
 
   const handleResume = useCallback(() => {
@@ -306,10 +317,6 @@ export default function App(): React.JSX.Element {
     },
     [addLog]
   )
-
-  const canStart = useMemo(() => {
-    return Boolean(settings && settings.destination && (validated || subredditInput.trim()))
-  }, [settings, validated, subredditInput])
 
   if (!settings) {
     return (
@@ -522,7 +529,6 @@ export default function App(): React.JSX.Element {
             onAuthChanged={refreshAuth}
             onClearLogs={() => setLogs([])}
             onOpenSettings={() => setView('settings')}
-            canStart={canStart}
             lang={language}
           />
         )}

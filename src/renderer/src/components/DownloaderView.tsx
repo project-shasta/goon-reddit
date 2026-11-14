@@ -38,7 +38,6 @@ export interface DownloaderViewProps {
   onAuthChanged: () => void
   onClearLogs: () => void
   onOpenSettings: () => void
-  canStart: boolean
   lang?: LanguageId
 }
 
@@ -64,7 +63,6 @@ export function DownloaderView({
   onAuthChanged,
   onClearLogs,
   onOpenSettings,
-  canStart,
   lang = 'en'
 }: DownloaderViewProps): React.JSX.Element {
   const t = useI18n(lang)
@@ -90,7 +88,6 @@ export function DownloaderView({
         onCancel={onCancel}
         onResume={onResume}
         job={job}
-        canStart={canStart}
         lang={lang}
       />
 

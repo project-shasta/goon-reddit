@@ -30,6 +30,7 @@ const api: RendererApi = {
   startJob: (options: Partial<JobOptions>) => ipcRenderer.invoke(IPC.jobStart, options),
   cancelJob: () => ipcRenderer.invoke(IPC.jobCancel),
   resumeJob: () => ipcRenderer.invoke(IPC.jobResume),
+  getJobState: () => ipcRenderer.invoke(IPC.jobGetState),
   getSettings: () => ipcRenderer.invoke(IPC.settingsGet),
   updateSettings: (patch: Partial<AppSettings>) => ipcRenderer.invoke(IPC.settingsUpdate, patch),
   chooseDestination: () => ipcRenderer.invoke(IPC.settingsChooseDestination),

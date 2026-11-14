@@ -79,6 +79,29 @@ const THUMBNAIL_BYTES: Record<string, number> = {
   webp: 8_000
 }
 
+/**
+ * Resolve or reject with `promise`, but give up as soon as `signal` aborts.
+ * Used for calls that do not take an AbortSignal themselves (auth refresh) so
+ * Cancel still works while a job is still validating.
+ */
+function withAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  if (signal.aborted) return Promise.reject(new DOMException('Aborted', 'AbortError'))
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = (): void => reject(new DOMException('Aborted', 'AbortError'))
+    signal.addEventListener('abort', onAbort, { once: true })
+    promise.then(
+      (value) => {
+        signal.removeEventListener('abort', onAbort)
+        resolve(value)
+      },
+      (err) => {
+        signal.removeEventListener('abort', onAbort)
+        reject(err)
+      }
+    )
+  })
+}
+
 /** Check if a downloaded image file is likely a thumbnail (too small). */
 function isThumbnailFile(filePath: string, ext: string): boolean {
   const threshold = THUMBNAIL_BYTES[ext.toLowerCase()]
@@ -123,6 +146,26 @@ export class JobRunner {
 
   isRunning(): boolean {
     return this.running
+  }
+
+  /**
+   * Called when `start()` rejects before the job could emit a terminal state
+   * (for example when a job is already running). Re-emitting the authoritative
+   * state keeps the renderer from staying on its optimistic "validating" view,
+   * which would leave every control disabled with no way out.
+   */
+  reportStartFailure(message: string): void {
+    if (this.running) {
+      this.emit()
+      return
+    }
+    this.state.finishedAt = Date.now()
+    // Don't hide a resumable cancelled job behind a start error.
+    if (this.state.phase === 'cancelled') {
+      this.emit()
+      return
+    }
+    this.setPhase('error', message)
   }
 
   private emit(): void {
@@ -176,7 +219,6 @@ export class JobRunner {
       options.includeGalleries ||
       options.includeVideos ||
       options.includeExternalVideos
-    if (!includeAny) throw new Error('Enable at least one media type.')
 
     // Resume only when explicitly requested via resume(); a fresh start
     // discards any saved scan so the user can pick up new posts.
@@ -196,11 +238,19 @@ export class JobRunner {
       startedAt: Date.now()
     }
     this.ytDlpDelayMs_ = options.ytDlpDelayMs ?? 1500
-    this.setPhase('validating')
-    allowMediaRoot(destination)
 
     try {
-      const auth = await this.deps.auth.refresh(false)
+      // Everything from here on runs with `running` set, so any failure ends
+      // in a terminal phase instead of leaving the UI stuck on "validating".
+      this.setPhase('validating')
+      if (!includeAny) throw new Error('Enable at least one media type.')
+      allowMediaRoot(destination)
+
+      // `auth.refresh()` does not take a signal, so race it against the job's
+      // abort controller; otherwise Cancel would appear to do nothing until
+      // Reddit answers (rate limits can delay that by a minute or more).
+      const auth = await withAbort(this.deps.auth.refresh(false), controller.signal)
+      if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError')
       if (!auth.loggedIn) {
         throw new Error(
           auth.message ?? 'Log in on Reddit before starting. Reddit now requires a logged-in session.'
@@ -231,8 +281,9 @@ export class JobRunner {
       this.running = false
       this.controller = null
       this.currentOptions = null
-      // Keep the snapshot only while the job is resumable (i.e. cancelled).
-      if (this.state.phase !== 'cancelled') this.savedJob = null
+      // Keep the snapshot for cancelled jobs, and for failures that never got
+      // as far as downloading, so the user can retry without re-scanning.
+      if (this.state.phase === 'done') this.savedJob = null
       if (this.state.phase !== 'done' && this.state.phase !== 'error') this.emit()
     }
   }

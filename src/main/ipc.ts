@@ -156,15 +156,20 @@ export function registerIpcHandlers(ctx: IpcContext): void {
   })
 
   ipcMain.handle(IPC.jobStart, async (_event, raw: Partial<JobOptions>) => {
-    if (ctx.job.isRunning()) throw new Error('A job is already running.')
     const options = buildJobOptions(raw ?? {}, ctx.settings.get())
     allowMediaRoot(options.destination)
 
     ctx.job.start(options).catch((err) => {
-      ctx.log('error', errorMessage(err))
+      const message = errorMessage(err)
+      ctx.log('error', message)
+      // The renderer shows an optimistic "validating" state, so make sure a
+      // rejected start still emits an authoritative state to unlock the UI.
+      ctx.job.reportStartFailure(message)
     })
     return true
   })
+
+  ipcMain.handle(IPC.jobGetState, async () => ctx.job.getState())
 
   ipcMain.handle(IPC.jobCancel, async () => {
     ctx.job.cancel()
