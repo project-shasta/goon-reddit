@@ -13,22 +13,25 @@ import { cyberpunk } from './cyberpunk'
 import { eo } from './e0'
 import { enSimple } from './enSimple'
 import { matrix } from './matrix'
+import { notificationTranslations } from '@shared/i18n/notifications'
+
+const notifications = notificationTranslations as unknown as Record<LanguageId, Translation>
 
 export const translations: Record<LanguageId, Translation> = {
-  en,
-  de,
-  uk,
-  zh,
-  'zh-TW': zhTW,
-  ja,
-  fr,
-  it,
-  es,
-  pirate,
-  cyberpunk,
-  eo,
-  enSimple,
-  matrix
+  en: { ...en, ...notifications.en },
+  de: { ...de, ...notifications.de },
+  uk: { ...uk, ...notifications.uk },
+  zh: { ...zh, ...notifications.zh },
+  'zh-TW': { ...zhTW, ...notifications['zh-TW'] },
+  ja: { ...ja, ...notifications.ja },
+  fr: { ...fr, ...notifications.fr },
+  it: { ...it, ...notifications.it },
+  es: { ...es, ...notifications.es },
+  pirate: { ...pirate, ...notifications.pirate },
+  cyberpunk: { ...cyberpunk, ...notifications.cyberpunk },
+  eo: { ...eo, ...notifications.eo },
+  enSimple: { ...enSimple, ...notifications.enSimple },
+  matrix: { ...matrix, ...notifications.matrix }
 }
 
 /**

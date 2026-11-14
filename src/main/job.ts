@@ -6,6 +6,7 @@ import type {
   DownloadMode,
   JobOptions,
   JobState,
+  LanguageId,
   MediaItem,
   SubredditInfo,
   UserInfo
@@ -31,11 +32,12 @@ export interface JobDeps {
   settings: SettingsStore
   history: HistoryStore
   tools: ToolManager
+  language: LanguageId
   emitState: (state: JobState) => void
   emitMedia: (items: MediaItem[]) => void
   emitMediaUpdate: (item: MediaItem) => void
   log: (level: LogLevel, message: string) => void
-  notify: (title: string, body: string) => void
+  notify: (title: string, body: string, language: LanguageId) => void
 }
 
 function initialState(): JobState {
@@ -139,6 +141,10 @@ export class JobRunner {
   private currentOptions: JobOptions | null = null
 
   constructor(private readonly deps: JobDeps) {}
+
+  private get language(): LanguageId {
+    return this.deps.language
+  }
 
   getState(): JobState {
     return { ...this.state, active: [...this.state.active] }
@@ -272,7 +278,7 @@ export class JobRunner {
         const message = errorMessage(err)
         this.setPhase('error', message)
         this.deps.log('error', message)
-        this.deps.notify('Download failed', message)
+        this.deps.notify('Download failed', message, this.language)
         if (isRedditError(err) && err.code === 'AUTH_REQUIRED') {
           this.deps.log('warn', 'Open the Reddit login window to refresh your session.')
         }
@@ -311,7 +317,7 @@ export class JobRunner {
     if (prioritized.length === 0) {
       this.state.finishedAt = Date.now()
       this.setPhase('done', 'No downloadable media found in the scanned posts.')
-      this.deps.notify('Download complete', 'No downloadable media found.')
+      this.deps.notify('Download complete', 'No downloadable media found.', this.language)
       return
     }
 
@@ -328,7 +334,7 @@ export class JobRunner {
       this.setPhase('cancelled', `Cancelled. ${summary}`)
     } else {
       this.setPhase('done', summary)
-      this.deps.notify('Download complete', summary)
+      this.deps.notify('Download complete', summary, this.language)
     }
     this.deps.log(signal.aborted ? 'warn' : 'success', summary)
   }
@@ -363,7 +369,7 @@ export class JobRunner {
     if (prioritized.length === 0) {
       this.state.finishedAt = Date.now()
       this.setPhase('done', 'No downloadable media found in the scanned posts.')
-      this.deps.notify('Download complete', 'No downloadable media found.')
+      this.deps.notify('Download complete', 'No downloadable media found.', this.language)
       return
     }
 
@@ -380,7 +386,7 @@ export class JobRunner {
       this.setPhase('cancelled', `Cancelled. ${summary}`)
     } else {
       this.setPhase('done', summary)
-      this.deps.notify('Download complete', summary)
+      this.deps.notify('Download complete', summary, this.language)
     }
     this.deps.log(signal.aborted ? 'warn' : 'success', summary)
   }
@@ -436,7 +442,7 @@ export class JobRunner {
         this.state.completed === 1 ? '' : 's'
       }.`
       this.setPhase('done', summary)
-      this.deps.notify('Download complete', summary)
+      this.deps.notify('Download complete', summary, this.language)
       this.deps.log('success', summary)
       return
     }
@@ -460,7 +466,7 @@ export class JobRunner {
       this.setPhase('cancelled', `Cancelled. ${summary}`)
     } else {
       this.setPhase('done', summary)
-      this.deps.notify('Download complete', summary)
+      this.deps.notify('Download complete', summary, this.language)
     }
     this.deps.log(signal.aborted ? 'warn' : 'success', summary)
   }

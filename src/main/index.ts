@@ -2,7 +2,7 @@ import { app, BrowserWindow, dialog, Notification, session, shell } from 'electr
 import fs from 'node:fs'
 import path from 'node:path'
 import { IPC } from '@shared/ipc'
-import type { AuthStatus, JobState, LogEntry, MediaItem, ToolsStatus } from '@shared/types'
+import type { AuthStatus, JobState, LanguageId, LogEntry, MediaItem, ToolsStatus } from '@shared/types'
 import { AuthManager } from './auth'
 import { registerIpcHandlers } from './ipc'
 import { JobRunner } from './job'
@@ -12,6 +12,7 @@ import { configureUserData, getDataDir, SKIPPED_PROFILE_DIRS } from './paths'
 import { SettingsStore } from './settings'
 import { ToolManager } from './tooling'
 import { HistoryStore } from './history'
+import { translateNotification, notificationTranslations } from '@shared/i18n/notifications'
 
 registerMediaScheme()
 
@@ -46,14 +47,15 @@ function emitLog(level: LogEntry['level'], message: string): void {
   send(IPC.jobLog, { level, message, time: Date.now() } satisfies LogEntry)
 }
 
-function checkToolsAndNotify(tools: ToolManager): void {
+function checkToolsAndNotify(tools: ToolManager, language: LanguageId): void {
   tools.status().then((status: ToolsStatus) => {
     const missing: string[] = []
     if (!status.ffmpeg.ok) missing.push('ffmpeg')
     if (!status.ytdlp.ok) missing.push('yt-dlp')
     if (missing.length > 0) {
-      const body = `Missing ${missing.join(' and ')}. Check Settings → Tools.`
-      void new Notification({ title: 'GoOn ReDdIt', body }).show()
+      const t = notificationTranslations[language] ?? notificationTranslations.en
+      const body = t.missingToolsBody(missing)
+      void new Notification({ title: t.downloadFailedTitle, body }).show()
       send(IPC.toolsMissing, missing)
     }
   }).catch(() => {
@@ -144,12 +146,15 @@ if (startupError) {
       settings,
       history: historyStore,
       tools: toolManager,
+      language: settings.get().language,
       emitState: (state: JobState) => send(IPC.jobState, state),
       emitMedia: (items: MediaItem[]) => send(IPC.jobMedia, items),
       emitMediaUpdate: (item: MediaItem) => send(IPC.jobMediaUpdate, item),
       log: emitLog,
-      notify: (title: string, body: string) => {
-        void new Notification({ title, body }).show()
+      notify: (title: string, body: string, _language: LanguageId) => {
+        const language = settings.get().language
+        const { title: resolvedTitle, body: resolvedBody } = translateNotification(title, body, language)
+        void new Notification({ title: resolvedTitle, body: resolvedBody }).show()
       }
     })
 
@@ -164,7 +169,7 @@ if (startupError) {
     })
 
     void auth.refresh(true)
-    checkToolsAndNotify(toolManager)
+    checkToolsAndNotify(toolManager, settings.get().language)
 
     // Auto-cleanup: on startup, delete cache folders older than 30 days
     setTimeout(() => {

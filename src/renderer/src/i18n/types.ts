@@ -19,5 +19,7 @@ export type TranslationValue =
   | ((n: number) => string)
   | ((u: string) => string)
   | ((done: number, total: number) => string)
+  | ((done: number, skipped: number, failed: number) => string)
+  | ((tools: string[]) => string)
 
 export type Translation = Record<string, TranslationValue>
