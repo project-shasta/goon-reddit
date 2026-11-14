@@ -12,6 +12,7 @@ export const IPC = {
   // Job
   jobStart: 'job:start',
   jobCancel: 'job:cancel',
+  jobResume: 'job:resume',
   jobState: 'job:state',
   jobMedia: 'job:media',
   jobMediaUpdate: 'job:mediaUpdate',

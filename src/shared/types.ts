@@ -106,6 +106,8 @@ export interface JobState {
   message: string | null
   startedAt: number | null
   finishedAt: number | null
+  /** True when a cancelled job kept its scanned media and can be resumed. */
+  canResume: boolean
 }
 
 export interface AuthStatus {
@@ -202,6 +204,7 @@ export interface RendererApi {
   validateUser(name: string): Promise<UserInfo>
   startJob(options: Partial<JobOptions>): Promise<boolean>
   cancelJob(): Promise<boolean>
+  resumeJob(): Promise<boolean>
   getSettings(): Promise<AppSettings>
   updateSettings(patch: Partial<AppSettings>): Promise<AppSettings>
   chooseDestination(): Promise<string | null>

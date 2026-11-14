@@ -21,6 +21,7 @@ export const fr: Translation = {
   pressEnterOrClick: 'Appuyez sur Entrée ou cliquez pour valider',
   check: 'Vérifier',
   downloadNew: 'Télécharger les nouveaux',
+  resumeDownload: 'Reprendre le téléchargement',
   cancel: 'Annuler',
   checkSubreddit: 'Vérifier le subreddit',
   scanningPosts: 'Analyse des nouveaux messages',

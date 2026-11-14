@@ -34,6 +34,7 @@ export interface DownloaderViewProps {
   onValidate: () => void
   onStart: (mode: DownloadMode) => void
   onCancel: () => void
+  onResume: () => void
   onAuthChanged: () => void
   onClearLogs: () => void
   onOpenSettings: () => void
@@ -59,6 +60,7 @@ export function DownloaderView({
   onValidate,
   onStart,
   onCancel,
+  onResume,
   onAuthChanged,
   onClearLogs,
   onOpenSettings,
@@ -86,6 +88,7 @@ export function DownloaderView({
         onSortOrderChange={onSortOrderChange}
         onStart={onStart}
         onCancel={onCancel}
+        onResume={onResume}
         job={job}
         canStart={canStart}
         lang={lang}

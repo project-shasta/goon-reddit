@@ -21,6 +21,7 @@ export const eo: Translation = {
   pressEnterOrClick: 'Premu Enigon aŭ alklaku por validigi',
   check: 'Kontroli',
   downloadNew: 'Elŝuti novajn',
+  resumeDownload: 'Daŭrigi elŝuton',
   cancel: 'Nuligi',
   checkSubreddit: 'Kontroli subreddit',
   scanningPosts: 'Skani novajn afisxojn',

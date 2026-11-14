@@ -21,6 +21,7 @@ export const es: Translation = {
   pressEnterOrClick: 'Presiona Enter o haz clic para validar',
   check: 'Verificar',
   downloadNew: 'Descargar nuevos',
+  resumeDownload: 'Reanudar descarga',
   cancel: 'Cancelar',
   checkSubreddit: 'Verificar subreddit',
   scanningPosts: 'Escaneando nuevos posts',

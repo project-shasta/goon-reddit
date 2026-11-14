@@ -171,6 +171,14 @@ export function registerIpcHandlers(ctx: IpcContext): void {
     return true
   })
 
+  ipcMain.handle(IPC.jobResume, async () => {
+    if (ctx.job.isRunning()) throw new Error('A job is already running.')
+    ctx.job.resume().catch((err) => {
+      ctx.log('error', errorMessage(err))
+    })
+    return true
+  })
+
   ipcMain.handle(IPC.settingsGet, async () => ctx.settings.get())
 
   ipcMain.handle(IPC.settingsUpdate, async (_event, patch: Partial<AppSettings>) => {

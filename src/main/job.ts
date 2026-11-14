@@ -3,6 +3,7 @@ import fsp from 'node:fs/promises'
 import path from 'node:path'
 import type {
   ActiveDownload,
+  DownloadMode,
   JobOptions,
   JobState,
   MediaItem,
@@ -51,8 +52,23 @@ function initialState(): JobState {
     active: [],
     message: null,
     startedAt: null,
-    finishedAt: null
+    finishedAt: null,
+    canResume: false
   }
+}
+
+/**
+ * Everything needed to restart a cancelled job without re-scanning. The media
+ * array holds live item references, so items that already finished keep their
+ * `localPath` and are skipped on resume.
+ */
+interface SavedJob {
+  options: JobOptions
+  mode: DownloadMode
+  subreddit: SubredditInfo | null
+  user: UserInfo | null
+  media: MediaItem[]
+  scannedPosts: number
 }
 
 /** File-size thresholds below which an image is likely a thumbnail. */
@@ -90,6 +106,15 @@ export class JobRunner {
   private postItemTotals = new Map<string, number>()
   private postItemsDone = new Map<string, number>()
 
+  /** Full media list produced by the last scan, used to resume after cancel. */
+  private scannedMedia: MediaItem[] | null = null
+  /** Snapshot of a cancelled job that can be resumed. */
+  private savedJob: SavedJob | null = null
+  /** Set while `resume()` calls into `start()`. */
+  private pendingResume = false
+  /** Options of the job currently running (kept for resume snapshots). */
+  private currentOptions: JobOptions | null = null
+
   constructor(private readonly deps: JobDeps) {}
 
   getState(): JobState {
@@ -112,9 +137,35 @@ export class JobRunner {
 
   cancel(): void {
     if (!this.running) return
+    // Preserve what was already scanned so the next job can resume without
+    // re-fetching every page. Finished items keep their `localPath`, so only
+    // the remaining files are downloaded again.
+    if (this.scannedMedia && this.scannedMedia.length > 0 && this.currentOptions) {
+      this.savedJob = {
+        options: this.currentOptions,
+        mode: this.state.mode,
+        subreddit: this.state.subreddit,
+        user: this.state.user,
+        media: this.scannedMedia,
+        scannedPosts: this.state.scannedPosts
+      }
+      this.state.canResume = true
+    }
     this.state.message = 'Cancelling…'
     this.emit()
     this.controller?.abort()
+  }
+
+  /** Restart a cancelled job from its saved scan instead of scanning again. */
+  async resume(): Promise<void> {
+    const saved = this.savedJob
+    if (!saved) throw new Error('Nothing to resume.')
+    this.pendingResume = true
+    try {
+      await this.start(saved.options)
+    } finally {
+      this.pendingResume = false
+    }
   }
 
   async start(options: JobOptions): Promise<void> {
@@ -126,6 +177,14 @@ export class JobRunner {
       options.includeVideos ||
       options.includeExternalVideos
     if (!includeAny) throw new Error('Enable at least one media type.')
+
+    // Resume only when explicitly requested via resume(); a fresh start
+    // discards any saved scan so the user can pick up new posts.
+    const saved = this.pendingResume ? this.savedJob : null
+    this.pendingResume = false
+    this.currentOptions = options
+    this.scannedMedia = saved ? saved.media : null
+    if (!saved) this.savedJob = null
 
     const destination = path.resolve(options.destination)
     const controller = new AbortController()
@@ -148,7 +207,9 @@ export class JobRunner {
         )
       }
 
-      if (options.mode === 'archive') {
+      if (saved) {
+        await this.startFromSaved(saved, options, destination, controller.signal)
+      } else if (options.mode === 'archive') {
         await this.startArchive(options, destination, controller.signal)
       } else {
         await this.startDownload(options, destination, controller.signal)
@@ -169,6 +230,9 @@ export class JobRunner {
     } finally {
       this.running = false
       this.controller = null
+      this.currentOptions = null
+      // Keep the snapshot only while the job is resumable (i.e. cancelled).
+      if (this.state.phase !== 'cancelled') this.savedJob = null
       if (this.state.phase !== 'done' && this.state.phase !== 'error') this.emit()
     }
   }
@@ -270,6 +334,86 @@ export class JobRunner {
     this.deps.log(signal.aborted ? 'warn' : 'success', summary)
   }
 
+  /**
+   * Resume a cancelled job from its saved scan. Skips validation and page
+   * scanning entirely and only downloads items that are not on disk yet.
+   */
+  private async startFromSaved(
+    saved: SavedJob,
+    options: JobOptions,
+    destination: string,
+    signal: AbortSignal
+  ): Promise<void> {
+    const media = saved.media
+    this.state.subreddit = saved.subreddit
+    this.state.user = saved.user
+    this.state.scannedPosts = saved.scannedPosts
+    this.state.discovered = media.length
+
+    const target = saved.subreddit ?? saved.user
+    if (!target) {
+      // No target info (should not happen) — fall back to a full run.
+      if (options.mode === 'archive') {
+        await this.startArchive(options, destination, signal)
+      } else {
+        await this.startDownload(options, destination, signal)
+      }
+      return
+    }
+
+    const folder = path.join(destination, safeFilename(target.name))
+    await fsp.mkdir(folder, { recursive: true })
+
+    // Items already on disk keep their localPath; only the rest needs work.
+    // Verify the file still exists in case it was moved or deleted meanwhile.
+    const remaining = media.filter(
+      (item) => !item.localPath || !fs.existsSync(item.localPath)
+    )
+    this.state.completed = media.length - remaining.length
+
+    this.deps.log(
+      'info',
+      `Resuming ${target.name}: ${remaining.length} of ${media.length} item${
+        media.length === 1 ? '' : 's'
+      } left to download (scan skipped).`
+    )
+    this.emit()
+
+    if (remaining.length === 0) {
+      this.state.finishedAt = Date.now()
+      const summary = `Downloaded ${this.state.completed} file${
+        this.state.completed === 1 ? '' : 's'
+      }.`
+      this.setPhase('done', summary)
+      this.deps.notify('Download complete', summary)
+      this.deps.log('success', summary)
+      return
+    }
+
+    await this.downloadAll(
+      this.prioritizeLargeImages(remaining),
+      target,
+      options,
+      destination,
+      signal
+    )
+
+    this.state.finishedAt = Date.now()
+    const summary = `Downloaded ${this.state.completed} file${
+      this.state.completed === 1 ? '' : 's'
+    }${this.state.skipped ? `, skipped ${this.state.skipped}` : ''}${
+      this.state.failed ? `, ${this.state.failed} failed` : ''
+    }.`
+
+    if (signal.aborted) {
+      this.setPhase('cancelled', `Cancelled. ${summary}`)
+    } else {
+      this.setPhase('done', summary)
+      this.deps.notify('Download complete', summary)
+    }
+    this.deps.log(signal.aborted ? 'warn' : 'success', summary)
+  }
+
   private extractOptions(options: JobOptions) {
     return {
       includeImages: options.includeImages,
@@ -343,6 +487,7 @@ export class JobRunner {
 
     this.state.scannedPosts = scanned
     this.state.discovered = media.length
+    this.scannedMedia = media
     this.emit()
     return media
   }
@@ -414,6 +559,7 @@ export class JobRunner {
 
     this.state.scannedPosts = scanned
     this.state.discovered = media.length
+    this.scannedMedia = media
     this.emit()
     return media
   }

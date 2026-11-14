@@ -42,7 +42,8 @@ const INITIAL_JOB: JobState = {
   active: [],
   message: null,
   startedAt: null,
-  finishedAt: null
+  finishedAt: null,
+  canResume: false
 }
 
 const MAX_LOGS = 500
@@ -240,6 +241,12 @@ export default function App(): React.JSX.Element {
 
   const handleCancel = useCallback(() => {
     void window.api.cancelJob().catch((err) => {
+      addLog({ level: 'error', message: errorText(err), time: Date.now() })
+    })
+  }, [addLog])
+
+  const handleResume = useCallback(() => {
+    void window.api.resumeJob().catch((err) => {
       addLog({ level: 'error', message: errorText(err), time: Date.now() })
     })
   }, [addLog])
@@ -511,6 +518,7 @@ export default function App(): React.JSX.Element {
             onValidate={() => void handleValidate()}
             onStart={(nextMode) => void handleStart(nextMode)}
             onCancel={handleCancel}
+            onResume={handleResume}
             onAuthChanged={refreshAuth}
             onClearLogs={() => setLogs([])}
             onOpenSettings={() => setView('settings')}

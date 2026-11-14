@@ -27,6 +27,7 @@ interface SubredditBarProps {
   onValidate: () => void
   onStart: (mode: DownloadMode) => void
   onCancel: () => void
+  onResume: () => void
   job: JobState
   canStart: boolean
 }
@@ -45,6 +46,7 @@ export function SubredditBar({
   onValidate,
   onStart,
   onCancel,
+  onResume,
   job,
   canStart,
   lang = 'en'
@@ -52,6 +54,7 @@ export function SubredditBar({
   const t = useI18n(lang)
   const running =
     job.phase === 'validating' || job.phase === 'scanning' || job.phase === 'downloading'
+  const canResume = job.phase === 'cancelled' && job.canResume
 
   return (
     <section className="card space-y-3 p-4">
@@ -109,14 +112,22 @@ export function SubredditBar({
             {t.cancel as string}
           </button>
         ) : (
-          <button
-            className="btn btn-primary"
-            onClick={() => onStart(mode)}
-            disabled={!canStart}
-          >
-            <IconDownload size={15} />
-            {t.downloadNew as string}
-          </button>
+          <>
+            {canResume && (
+              <button className="btn btn-primary" onClick={onResume}>
+                <IconDownload size={15} />
+                {t.resumeDownload as string}
+              </button>
+            )}
+            <button
+              className={`btn ${canResume ? 'btn-secondary' : 'btn-primary'}`}
+              onClick={() => onStart(mode)}
+              disabled={!canStart}
+            >
+              <IconDownload size={15} />
+              {t.downloadNew as string}
+            </button>
+          </>
         )}
       </div>
 

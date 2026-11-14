@@ -21,6 +21,7 @@ export const uk: Translation = {
   pressEnterOrClick: 'Натисніть Enter або клацніть для підтвердження',
   check: 'Перевірити',
   downloadNew: 'Завантажити нові',
+  resumeDownload: 'Продовжити завантаження',
   cancel: 'Скасувати',
   checkSubreddit: 'Перевірити субредит',
   scanningPosts: 'Сканування нових дописів',

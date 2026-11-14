@@ -21,6 +21,7 @@ export const ja: Translation = {
   pressEnterOrClick: 'Enterキーを押すかクリックして確認',
   check: '確認',
   downloadNew: '新規ダウンロード',
+  resumeDownload: 'ダウンロードを再開',
   cancel: 'キャンセル',
   checkSubreddit: 'サブレdditを確認',
   scanningPosts: '新しい投稿をスキャン',

@@ -21,6 +21,7 @@ export const matrix: Translation = {
   pressEnterOrClick: 'Follow the white rabbit',
   check: 'Scan',
   downloadNew: 'Follow_New',
+  resumeDownload: 'Resume_stream',
   cancel: 'Abort',
   checkSubreddit: 'Scan node',
   scanningPosts: 'Tracing new data packets',

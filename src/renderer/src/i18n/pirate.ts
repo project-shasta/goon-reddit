@@ -21,6 +21,7 @@ export const pirate: Translation = {
   pressEnterOrClick: 'Strike Enter or click to validate',
   check: 'Scout',
   downloadNew: 'Plunder new',
+  resumeDownload: "Resume plunderin'",
   cancel: 'Abandon',
   checkSubreddit: 'Scout the map',
   scanningPosts: 'Searchin\' for new posts',

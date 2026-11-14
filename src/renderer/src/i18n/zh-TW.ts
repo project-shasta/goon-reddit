@@ -21,6 +21,7 @@ export const zhTW: Translation = {
   pressEnterOrClick: '按 Enter 鍵或點擊以驗證',
   check: '檢查',
   downloadNew: '下載新內容',
+  resumeDownload: '繼續下載',
   cancel: '取消',
   checkSubreddit: '檢查 subreddit',
   scanningPosts: '掃描新帖子',

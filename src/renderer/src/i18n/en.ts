@@ -19,6 +19,7 @@ export const en: Translation = {
   pressEnterOrClick: 'Press Enter or click to validate',
   check: 'Check',
   downloadNew: 'Download new',
+  resumeDownload: 'Resume download',
   cancel: 'Cancel',
   checkSubreddit: 'Check subreddit',
   checkingSubreddit: 'Checking subreddit',

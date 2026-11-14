@@ -21,6 +21,7 @@ export const zh: Translation = {
   pressEnterOrClick: '按回车键或点击以验证',
   check: '检查',
   downloadNew: '下载新内容',
+  resumeDownload: '继续下载',
   cancel: '取消',
   checkSubreddit: '检查 subreddit',
   scanningPosts: '扫描新帖子',

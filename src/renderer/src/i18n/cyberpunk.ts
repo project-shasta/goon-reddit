@@ -21,6 +21,7 @@ export const cyberpunk: Translation = {
   pressEnterOrClick: 'Execute Enter or click to validate',
   check: 'Scan',
   downloadNew: 'Harvest_new',
+  resumeDownload: 'Resume_stream',
   cancel: 'Abort',
   checkSubreddit: 'Scan node',
   scanningPosts: 'Scanning new data packets',

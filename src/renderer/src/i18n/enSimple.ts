@@ -21,6 +21,7 @@ export const enSimple: Translation = {
   pressEnterOrClick: 'Press Enter or click to check',
   check: 'Check',
   downloadNew: 'Download new',
+  resumeDownload: 'Keep downloading',
   cancel: 'Cancel',
   checkSubreddit: 'Check group',
   scanningPosts: 'Looking at new posts',
