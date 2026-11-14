@@ -230,7 +230,7 @@ pick?" at 3 AM.
 
 ## Personal notes
 
-This app is mostly a test of what I could do with opencode and a local Qwen 3.6 35B A3B model hosted on LM Studio on my new company MacBook M5 Pro. I am a senior frontend developer by day but this experiment has showed me what these local models are good at and where they still lack.
+This app is mostly a test of what I could do with OpenCode and a local Qwen 3.6 35B A3B model on my new company MacBook M5 Pro. I am a senior frontend developer by day but this experiment has showed me what these local models are good at and where they still lack. Heavier tasks the local model struggled with were handled by OpenCode's own Big Pickle frontier model and the differences in speed and quality are still staggering.
 
 The idea of a Reddit gallery downloader came to me because sites like peekstr.com or redditp.com had to basically shut down because Reddit blocked anonymous JSON API calls as of late 2026 which renders these services useless. As I have not seen any other project that attempts to solve this (there are some dubious browser addons that let you view the galleries?) I said *Fuck it, let's do it* and here we are.
 
