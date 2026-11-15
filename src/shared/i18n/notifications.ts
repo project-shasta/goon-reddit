@@ -1,4 +1,4 @@
-import type { LanguageId } from '../types'
+import type { LanguageId, NotificationKey } from '../types'
 
 export interface NotificationTranslations {
   downloadFailedTitle: string
@@ -179,29 +179,30 @@ export const notificationTranslations: Record<LanguageId, NotificationTranslatio
   }
 }
 
+/**
+ * Translate a notification by key. Accepts a typed `NotificationKey` so the
+ * caller never has to construct English text that is later matched by regex.
+ */
 export function translateNotification(
-  title: string,
-  body: string,
+  notification: NotificationKey,
   language: LanguageId
 ): { title: string; body: string } {
   const t = notificationTranslations[language] ?? notificationTranslations.en
 
-  if (title === 'Download failed') {
-    return { title: t.downloadFailedTitle, body }
-  }
+  switch (notification.key) {
+    case 'downloadFailed':
+      return { title: t.downloadFailedTitle, body: notification.message }
 
-  if (title === 'Download complete') {
-    if (body === 'No downloadable media found.') {
+    case 'downloadComplete':
+      return {
+        title: t.downloadCompleteTitle,
+        body: t.downloadCompleteSummary(notification.done, notification.skipped, notification.failed)
+      }
+
+    case 'downloadCompleteNoMedia':
       return { title: t.downloadCompleteTitle, body: t.downloadCompleteNoMedia }
-    }
-    const match = body.match(/^Downloaded (\d+) file(?:s)?(?:, skipped (\d+))?(?:, (\d+) failed)?\.$/)
-    if (match) {
-      const done = parseInt(match[1])
-      const skipped = match[2] ? parseInt(match[2]) : 0
-      const failed = match[3] ? parseInt(match[3]) : 0
-      return { title: t.downloadCompleteTitle, body: t.downloadCompleteSummary(done, skipped, failed) }
-    }
-  }
 
-  return { title, body }
+    case 'missingTools':
+      return { title: t.downloadFailedTitle, body: t.missingToolsBody(notification.tools) }
+  }
 }

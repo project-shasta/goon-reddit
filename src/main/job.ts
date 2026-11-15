@@ -8,6 +8,7 @@ import type {
   JobState,
   LanguageId,
   MediaItem,
+  NotificationKey,
   SubredditInfo,
   UserInfo
 } from '@shared/types'
@@ -37,7 +38,7 @@ export interface JobDeps {
   emitMedia: (items: MediaItem[]) => void
   emitMediaUpdate: (item: MediaItem) => void
   log: (level: LogLevel, message: string) => void
-  notify: (title: string, body: string, language: LanguageId) => void
+  notify: (notification: NotificationKey, language: LanguageId) => void
 }
 
 function initialState(): JobState {
@@ -278,7 +279,7 @@ export class JobRunner {
         const message = errorMessage(err)
         this.setPhase('error', message)
         this.deps.log('error', message)
-        this.deps.notify('Download failed', message, this.language)
+        this.deps.notify({ key: 'downloadFailed', message }, this.language)
         if (isRedditError(err) && err.code === 'AUTH_REQUIRED') {
           this.deps.log('warn', 'Open the Reddit login window to refresh your session.')
         }
@@ -317,25 +318,23 @@ export class JobRunner {
     if (prioritized.length === 0) {
       this.state.finishedAt = Date.now()
       this.setPhase('done', 'No downloadable media found in the scanned posts.')
-      this.deps.notify('Download complete', 'No downloadable media found.', this.language)
+      this.deps.notify({ key: 'downloadCompleteNoMedia' }, this.language)
       return
     }
 
     await this.downloadAll(prioritized, user, options, destination, signal)
 
     this.state.finishedAt = Date.now()
-    const summary = `Downloaded ${this.state.completed} file${
-      this.state.completed === 1 ? '' : 's'
-    }${this.state.skipped ? `, skipped ${this.state.skipped}` : ''}${
-      this.state.failed ? `, ${this.state.failed} failed` : ''
-    }.`
-
+    const summary = this.buildSummary()
     if (signal.aborted) {
       this.setPhase('cancelled', `Cancelled. ${summary}`)
     } else {
       this.setPhase('done', summary)
-      this.deps.notify('Download complete', summary, this.language)
     }
+    this.deps.notify(
+      { key: 'downloadComplete', done: this.state.completed, skipped: this.state.skipped, failed: this.state.failed },
+      this.language
+    )
     this.deps.log(signal.aborted ? 'warn' : 'success', summary)
   }
 
@@ -369,25 +368,23 @@ export class JobRunner {
     if (prioritized.length === 0) {
       this.state.finishedAt = Date.now()
       this.setPhase('done', 'No downloadable media found in the scanned posts.')
-      this.deps.notify('Download complete', 'No downloadable media found.', this.language)
+      this.deps.notify({ key: 'downloadCompleteNoMedia' }, this.language)
       return
     }
 
     await this.downloadAll(prioritized, subreddit, options, destination, signal)
 
     this.state.finishedAt = Date.now()
-    const summary = `Downloaded ${this.state.completed} file${
-      this.state.completed === 1 ? '' : 's'
-    }${this.state.skipped ? `, skipped ${this.state.skipped}` : ''}${
-      this.state.failed ? `, ${this.state.failed} failed` : ''
-    }.`
-
+    const summary = this.buildSummary()
     if (signal.aborted) {
       this.setPhase('cancelled', `Cancelled. ${summary}`)
     } else {
       this.setPhase('done', summary)
-      this.deps.notify('Download complete', summary, this.language)
     }
+    this.deps.notify(
+      { key: 'downloadComplete', done: this.state.completed, skipped: this.state.skipped, failed: this.state.failed },
+      this.language
+    )
     this.deps.log(signal.aborted ? 'warn' : 'success', summary)
   }
 
@@ -438,11 +435,12 @@ export class JobRunner {
 
     if (remaining.length === 0) {
       this.state.finishedAt = Date.now()
-      const summary = `Downloaded ${this.state.completed} file${
-        this.state.completed === 1 ? '' : 's'
-      }.`
+      const summary = this.buildSummary()
       this.setPhase('done', summary)
-      this.deps.notify('Download complete', summary, this.language)
+      this.deps.notify(
+        { key: 'downloadComplete', done: this.state.completed, skipped: this.state.skipped, failed: this.state.failed },
+        this.language
+      )
       this.deps.log('success', summary)
       return
     }
@@ -456,19 +454,27 @@ export class JobRunner {
     )
 
     this.state.finishedAt = Date.now()
+    const summary = this.buildSummary()
+    if (signal.aborted) {
+      this.setPhase('cancelled', `Cancelled. ${summary}`)
+    } else {
+      this.setPhase('done', summary)
+    }
+    this.deps.notify(
+      { key: 'downloadComplete', done: this.state.completed, skipped: this.state.skipped, failed: this.state.failed },
+      this.language
+    )
+    this.deps.log(signal.aborted ? 'warn' : 'success', summary)
+  }
+
+  /** Build a human-readable summary like "Downloaded 5 files, skipped 2, 1 failed." */
+  private buildSummary(): string {
     const summary = `Downloaded ${this.state.completed} file${
       this.state.completed === 1 ? '' : 's'
     }${this.state.skipped ? `, skipped ${this.state.skipped}` : ''}${
       this.state.failed ? `, ${this.state.failed} failed` : ''
     }.`
-
-    if (signal.aborted) {
-      this.setPhase('cancelled', `Cancelled. ${summary}`)
-    } else {
-      this.setPhase('done', summary)
-      this.deps.notify('Download complete', summary, this.language)
-    }
-    this.deps.log(signal.aborted ? 'warn' : 'success', summary)
+    return summary
   }
 
   private extractOptions(options: JobOptions) {

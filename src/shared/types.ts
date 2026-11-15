@@ -196,6 +196,13 @@ export interface CacheClearResult {
   freedBytes: number
 }
 
+/** Notification keys used by the job runner for translatable system notifications. */
+export type NotificationKey =
+  | { key: 'downloadFailed'; message: string }
+  | { key: 'downloadComplete'; done: number; skipped: number; failed: number }
+  | { key: 'downloadCompleteNoMedia' }
+  | { key: 'missingTools'; tools: string[] }
+
 export interface RendererApi {
   getAuthStatus(): Promise<AuthStatus>
   openLogin(): Promise<boolean>

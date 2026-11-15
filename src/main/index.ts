@@ -12,7 +12,7 @@ import { configureUserData, getDataDir, SKIPPED_PROFILE_DIRS } from './paths'
 import { SettingsStore } from './settings'
 import { ToolManager } from './tooling'
 import { HistoryStore } from './history'
-import { translateNotification, notificationTranslations } from '@shared/i18n/notifications'
+import { translateNotification } from '@shared/i18n/notifications'
 
 registerMediaScheme()
 
@@ -53,9 +53,8 @@ function checkToolsAndNotify(tools: ToolManager, language: LanguageId): void {
     if (!status.ffmpeg.ok) missing.push('ffmpeg')
     if (!status.ytdlp.ok) missing.push('yt-dlp')
     if (missing.length > 0) {
-      const t = notificationTranslations[language] ?? notificationTranslations.en
-      const body = t.missingToolsBody(missing)
-      void new Notification({ title: t.downloadFailedTitle, body }).show()
+      const { title, body } = translateNotification({ key: 'missingTools', tools: missing }, language)
+      void new Notification({ title, body }).show()
       send(IPC.toolsMissing, missing)
     }
   }).catch(() => {
@@ -151,10 +150,10 @@ if (startupError) {
       emitMedia: (items: MediaItem[]) => send(IPC.jobMedia, items),
       emitMediaUpdate: (item: MediaItem) => send(IPC.jobMediaUpdate, item),
       log: emitLog,
-      notify: (title: string, body: string, _language: LanguageId) => {
+      notify: (notification, _language: LanguageId) => {
         const language = settings.get().language
-        const { title: resolvedTitle, body: resolvedBody } = translateNotification(title, body, language)
-        void new Notification({ title: resolvedTitle, body: resolvedBody }).show()
+        const { title, body } = translateNotification(notification, language)
+        void new Notification({ title, body }).show()
       }
     })
 
