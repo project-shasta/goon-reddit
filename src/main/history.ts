@@ -41,11 +41,17 @@ export class HistoryStore {
         lines.push(`${subreddit} ${[...postIds].join(' ')}`)
       }
     }
-    const tmp = `${KNOWN_FILE()}.tmp`
-    fs.writeFileSync(tmp, lines.join('\n') + (lines.length > 0 ? '\n' : ''), 'utf8')
-    try { fs.renameSync(tmp, KNOWN_FILE()) } catch {
-      // If rename fails (e.g., file in use), just overwrite.
-      fs.writeFileSync(KNOWN_FILE(), lines.join('\n') + (lines.length > 0 ? '\n' : ''), 'utf8')
+    const content = lines.join('\n') + (lines.length > 0 ? '\n' : '')
+    const target = KNOWN_FILE()
+    const tmp = `${target}.tmp`
+
+    fs.writeFileSync(tmp, content, 'utf8')
+    try {
+      fs.renameSync(tmp, target)
+    } catch {
+      // Rename failed (e.g., file in use on some platforms). Fall back to
+      // direct overwrite and clean up the tmp file.
+      try { fs.writeFileSync(target, content, 'utf8') } catch {}
       try { fs.unlinkSync(tmp) } catch {}
     }
   }
