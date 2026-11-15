@@ -19,7 +19,7 @@ import type { ToolManager } from './tooling'
 import { allowMediaRoot } from './mediaProtocol'
 import { extractMedia } from './reddit/extract'
 import { errorMessage, isRedditError } from './reddit/errors'
-import { sleep } from './reddit/client'
+import { RedditPost, sleep } from './reddit/client'
 import { validateSubreddit, validateUser } from './reddit/validate'
 import { downloadToFile, runPool, uniqueDestination } from './download/queue'
 import { downloadWithFfmpeg } from './download/ffmpeg'
@@ -487,8 +487,14 @@ export class JobRunner {
     }
   }
 
-  private async scan(
-    subreddit: SubredditInfo,
+  /**
+   * Shared scan logic for both subreddit and user archive scans.
+   * `pageGenerator` returns an async iterator over listing pages.
+   * `targetName` is the subreddit or username used for history checks and folder naming.
+   */
+  private async scanListing(
+    pageGenerator: () => AsyncGenerator<{ posts: RedditPost[]; after: string | null }>,
+    targetName: string,
     options: JobOptions,
     destination: string,
     signal: AbortSignal
@@ -498,13 +504,10 @@ export class JobRunner {
     const seen = new Set<string>()
     const seenFiles = new Set<string>()
     const maxPosts = options.maxPosts > 0 ? options.maxPosts : Number.POSITIVE_INFINITY
-    const folder = path.join(destination, safeFilename(subreddit.name))
+    const folder = path.join(destination, safeFilename(targetName))
     let scanned = 0
 
-    for await (const page of this.deps.auth.client.pages(subreddit.name, {
-      signal,
-      sortOrder: options.sortOrder
-    })) {
+    for await (const page of pageGenerator()) {
       if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
       const batch: MediaItem[] = []
 
@@ -517,12 +520,12 @@ export class JobRunner {
         for (const item of extracted) {
           // Crossposts keep the original post's ID in `item.postId`; check that
           // too so a crosspost is recorded against the ID later sent to history.
-          if (this.deps.history.has(subreddit.name, item.postId)) continue
+          if (this.deps.history.has(targetName, item.postId)) continue
           if (seen.has(item.id)) continue
           seen.add(item.id)
 
           // Skip posts that have already been downloaded (per history).
-          if (this.deps.history.has(subreddit.name, post.id)) {
+          if (this.deps.history.has(targetName, post.id)) {
             continue
           }
 
@@ -555,6 +558,22 @@ export class JobRunner {
     return media
   }
 
+  /** Scan a subreddit for downloadable media. */
+  private async scan(
+    subreddit: SubredditInfo,
+    options: JobOptions,
+    destination: string,
+    signal: AbortSignal
+  ): Promise<MediaItem[]> {
+    return this.scanListing(
+      () => this.deps.auth.client.pages(subreddit.name, { signal, sortOrder: options.sortOrder }),
+      subreddit.name,
+      options,
+      destination,
+      signal
+    )
+  }
+
   /**
    * Scan a user's archive (submitted posts).
    * Uses `client.userPages()` instead of `client.pages()`.
@@ -565,66 +584,13 @@ export class JobRunner {
     destination: string,
     signal: AbortSignal
   ): Promise<MediaItem[]> {
-    this.setPhase('scanning')
-    const media: MediaItem[] = []
-    const seen = new Set<string>()
-    const seenFiles = new Set<string>()
-    const maxPosts = options.maxPosts > 0 ? options.maxPosts : Number.POSITIVE_INFINITY
-    const folder = path.join(destination, safeFilename(user.name))
-    let scanned = 0
-
-    for await (const page of this.deps.auth.client.userPages(user.name, {
-      signal,
-      sortOrder: options.sortOrder
-    })) {
-      if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
-      const batch: MediaItem[] = []
-
-      for (const post of page.posts) {
-        if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
-        if (scanned >= maxPosts) break
-        scanned++
-
-        const extracted = extractMedia(post, this.extractOptions(options))
-        for (const item of extracted) {
-          // Crossposts keep the original post's ID in `item.postId`; check that
-          // too so a crosspost is recorded against the ID later sent to history.
-          if (this.deps.history.has(user.name, item.postId)) continue
-          if (seen.has(item.id)) continue
-          seen.add(item.id)
-
-          // Skip posts that have already been downloaded (per history).
-          if (this.deps.history.has(user.name, post.id)) {
-            continue
-          }
-
-          item.filename = safeFilename(item.filename)
-          const initialPath = path.join(folder, item.filename)
-
-          if (seenFiles.has(initialPath) && options.skipExisting) continue
-          seenFiles.add(initialPath)
-
-          if (options.skipExisting && fs.existsSync(initialPath)) {
-            item.localPath = initialPath
-          }
-
-          media.push(item)
-          batch.push(item)
-        }
-      }
-
-      this.state.scannedPosts = scanned
-      this.state.discovered = media.length
-      this.emit()
-      if (batch.length > 0) this.deps.emitMedia(batch)
-      if (scanned >= maxPosts) break
-    }
-
-    this.state.scannedPosts = scanned
-    this.state.discovered = media.length
-    this.scannedMedia = media
-    this.emit()
-    return media
+    return this.scanListing(
+      () => this.deps.auth.client.userPages(user.name, { signal, sortOrder: options.sortOrder }),
+      user.name,
+      options,
+      destination,
+      signal
+    )
   }
 
   /** Sort images so large ones download first; small/thumbnail images go to the end. */
