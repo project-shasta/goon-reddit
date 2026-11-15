@@ -123,6 +123,8 @@ export class JobRunner {
   private running = false
   /** Configurable delay between yt-dlp invocations (ms); overridden per job. */
   private ytDlpDelayMs_ = 1500
+  /** Timestamp of the last yt-dlp invocation, for throttling external video downloads. */
+  private lastYtDlpStart_ = 0
 
   /**
    * Media items per post and how many of them finished. A post is only added
@@ -288,6 +290,12 @@ export class JobRunner {
       this.running = false
       this.controller = null
       this.currentOptions = null
+      // Reset yt-dlp throttle state so the next job starts fresh.
+      this.ytDlpDelayMs_ = 1500
+      this.lastYtDlpStart_ = 0
+      // Clear post-level tracking maps to avoid stale data from a previous job.
+      this.postItemTotals.clear()
+      this.postItemsDone.clear()
       // Keep the snapshot for cancelled jobs, and for failures that never got
       // as far as downloading, so the user can retry without re-scanning.
       if (this.state.phase === 'done') this.savedJob = null
@@ -931,6 +939,4 @@ export class JobRunner {
       onProgress
     })
   }
-
-  private lastYtDlpStart_ = 0
 }
