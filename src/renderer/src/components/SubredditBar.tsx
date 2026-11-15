@@ -240,12 +240,12 @@ export function SubredditBar({
               {user.isGold && <span className="badge bg-amber-500/15 text-amber-300">Gold</span>}
               {user.isMod && <span className="badge bg-emerald-500/15 text-emerald-300">Mod</span>}
               <span className="text-xs text-zinc-500">
-                {user.linkKarma !== null ? `${user.linkKarma.toLocaleString()} link karma` : ''}
-                {user.commentKarma !== null ? `, ${user.commentKarma.toLocaleString()} comment karma` : ''}
+                {user.linkKarma !== null ? (t.linkKarma as (n: string) => string)(user.linkKarma.toLocaleString()) : ''}
+                {user.commentKarma !== null ? ' ' + (t.commentKarma as (n: string) => string)(user.commentKarma.toLocaleString()) : ''}
               </span>
             </div>
             <p className="truncate text-xs text-zinc-500">
-              {user.createdUtc ? `Created ${new Date(user.createdUtc * 1000).toLocaleDateString()}` : ''}
+              {user.createdUtc ? (t.createdDate as (d: string) => string)(new Date(user.createdUtc * 1000).toLocaleDateString()) : ''}
             </p>
           </div>
           <a

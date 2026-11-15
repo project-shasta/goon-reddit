@@ -225,5 +225,14 @@ export const en: Translation = {
   unknownError: 'Unknown error.',
   unknownErrorHint: 'Something went wrong.',
   retryCount: 'Retry count',
-  retriedCount: (n: number) => `Retried ${n} time${n > 1 ? 's' : ''} — tried source URL 3 times, then preview URL 3 times`
+  retriedCount: (n: number) => `Retried ${n} time${n > 1 ? 's' : ''} — tried source URL 3 times, then preview URL 3 times`,
+  // DownloaderView
+  newestPostsCount: (n: string) => `newest ${n} posts`,
+  allPosts: 'all',
+  // SubredditBar (user info)
+  linkKarma: (n: string) => `${n} link karma`,
+  commentKarma: (n: string) => `${n} comment karma`,
+  createdDate: (d: string) => `Created ${d}`,
+  // App missing tools banner
+  missingToolsBanner: (tools: string) => `Missing ${tools}. Check Settings → Tools.`
 }

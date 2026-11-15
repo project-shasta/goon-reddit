@@ -105,7 +105,9 @@ export function DownloaderView({
             <span>{types.length ? types.join(' · ') : (t.noMediaTypesEnabled as string)}</span>
             <span className="text-zinc-700">|</span>
             <span>
-              newest {settings.maxPosts > 0 ? settings.maxPosts.toLocaleString() : 'all'} posts
+              {(t.newestPostsCount as (n: string) => string)(
+                settings.maxPosts > 0 ? settings.maxPosts.toLocaleString() : (t.allPosts as string)
+              )}
             </span>
             <span className="text-zinc-700">|</span>
             <span>{settings.concurrency} {t.parallelDownloads as string}</span>

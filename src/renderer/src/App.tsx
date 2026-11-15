@@ -493,7 +493,7 @@ export default function App(): React.JSX.Element {
       {missingTools.length > 0 && (
         <div className="border-b border-amber-500/20 bg-amber-500/5 px-4 py-2.5">
           <span className="text-xs text-amber-300">
-            Missing {missingTools.join(' and ')}. Check Settings → Tools.
+            {(t.missingToolsBanner as (tools: string) => string)(missingTools.join(' and '))}
           </span>
         </div>
       )}
