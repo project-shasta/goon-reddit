@@ -10,16 +10,19 @@ All of the following are licensed under the **MIT License** unless otherwise not
 
 | Package | License |
 |---------|---------|
-| react | MIT |
-| react-dom | MIT |
-| electron | MIT |
-| tailwindcss | MIT |
-| vitest | MIT |
-| electron-builder | MIT |
-| electron-vite | MIT |
+| @tailwindcss/vite | MIT |
 | @types/node | MIT |
 | @types/react | MIT |
 | @types/react-dom | MIT |
+| @vitejs/plugin-react | MIT |
+| electron | MIT |
+| electron-builder | MIT |
+| electron-vite | MIT |
+| react | MIT |
+| react-dom | MIT |
+| tailwindcss | MIT |
+| vite | MIT |
+| vitest | MIT |
 
 ### TypeScript 7.0.2
 
@@ -161,25 +164,56 @@ Apache License, Version 2.0
    END OF TERMS AND CONDITIONS
 ```
 
+### ffmpeg-static 5.3.0
+
+Licensed under the **GNU General Public License, version 3.0** (or at your option, any later version).
+
+The `ffmpeg-static` npm package bundles FFmpeg binaries for use at runtime. The underlying FFmpeg library itself is licensed under LGPL-2.1, but the npm package distribution carries the GPL-3.0-or-later license.
+
+- Repository: https://github.com/eugeneware/ffmpeg-static
+- License: https://github.com/eugeneware/ffmpeg-static/blob/master/LICENSE
+
 ---
 
 ## Bundled Tools
 
-### FFmpeg
+### FFmpeg (tools/ffmpeg.exe)
 
-Licensed under the **GNU Lesser General Public License, version 2.1** (or at your option, any later version).
+The FFmpeg library is licensed under the **GNU Lesser General Public License, version 2.1** (or at your option, any later version).
 
 FFmpeg is dynamically linked at runtime. The LGPL requires that you provide the ability to relink against a modified version of FFmpeg. This is satisfied by shipping the full FFmpeg binaries in the `tools/` directory alongside the app.
 
 - Website: https://ffmpeg.org
 - License: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 
-### yt-dlp
+### yt-dlp (tools/yt-dlp.exe)
 
 Licensed under the **Unlicense** — this means the software is in the public domain. No license restrictions apply.
 
 - Repository: https://github.com/yt-dlp/yt-dlp
 - License: https://github.com/yt-dlp/yt-dlp/blob/master/LICENSE
+
+---
+
+## Notable Transitive Dependencies
+
+The following non-MIT licenses appear among transitive dependencies pulled in by the direct dependencies listed above:
+
+| License | Notable Packages |
+|---------|-----------------|
+| Apache-2.0 | @malept/cross-spawn-promise, @typescript/\* (TypeScript platform binaries), baseline-browser-mapping, caseless, detect-libc, ejs, expect-type, exponential-backoff, filelist, jake, sumchecker |
+| MPL-2.0 | lightningcss (CSS compiler, pulled in by @tailwindcss/vite) and its platform-specific binaries |
+| BSD-2-Clause | @electron/osx-sign, @electron/windows-sign, dotenv, dotenv-expand, http-cache-semantics |
+| BSD-3-Clause | asn1js, bytestreamjs, duplexer2, fast-uri, global-agent, pkijs, roarr, source-map, source-map-js, sprintf-js |
+| ISC | abbrev, cliui, electron-to-chromium, fs.realpath, glob, graceful-fs, hosted-git-info, inflight, inherits, isexe, json-stringify-safe, lru-cache, minimatch, nopt, once, picocolors, proc-log, rimraf, semver, signal-exit, which, wrappy, y18n, yallist, yargs-parser |
+| BlueOak-1.0.0 | chownr, minipass, sax, tar |
+| 0BSD | tslib |
+| Python-2.0 | argparse |
+| CC-BY-4.0 | caniuse-lite |
+| WTFPL | truncate-utf8-bytes |
+| WTFPL OR ISC | sanitize-filename |
+| (MIT OR CC0-1.0) | type-fest |
+| (WTFPL OR MIT) | utf8-byte-length |
 
 ---
 
@@ -196,9 +230,38 @@ Electron bundles Chromium and Node.js, both of which carry their own licenses (B
 
 ## Summary
 
+### Direct npm Dependencies
+
+| License | Count | Packages |
+|---------|-------|----------|
+| MIT | 13 | @tailwindcss/vite, @types/node, @types/react, @types/react-dom, @vitejs/plugin-react, electron, electron-builder, electron-vite, react, react-dom, tailwindcss, vite, vitest |
+| Apache-2.0 | 1 | typescript |
+| GPL-3.0-or-later | 1 | ffmpeg-static |
+
+### Bundled Tools
+
+| License | Tool |
+|---------|------|
+| LGPL-2.1 | FFmpeg (tools/ffmpeg.exe) |
+| Unlicense | yt-dlp (tools/yt-dlp.exe) |
+
+### All Dependencies (386 unique packages)
+
 | License | Count |
 |---------|-------|
-| MIT | 10 packages |
-| Apache-2.0 | 1 package (TypeScript) |
-| LGPL-2.1 | 1 tool (FFmpeg) |
-| Unlicense | 1 tool (yt-dlp) |
+| MIT | 287 |
+| Apache-2.0 | 31 |
+| ISC | 28 |
+| MPL-2.0 | 12 |
+| BSD-3-Clause | 10 |
+| BSD-2-Clause | 5 |
+| BlueOak-1.0.0 | 4 |
+| GPL-3.0-or-later | 1 |
+| 0BSD | 1 |
+| Python-2.0 | 1 |
+| CC-BY-4.0 | 1 |
+| WTFPL | 1 |
+| WTFPL OR ISC | 1 |
+| (MIT OR CC0-1.0) | 1 |
+| (WTFPL OR MIT) | 1 |
+| unknown | 1 |
