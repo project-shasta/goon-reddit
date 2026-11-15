@@ -4,6 +4,7 @@ import {
   extensionFromMime,
   extensionFromUrl
 } from '@shared/filename'
+import type { RedditPost } from './client'
 
 export interface ExtractOptions {
   includeImages: boolean
@@ -12,8 +13,6 @@ export interface ExtractOptions {
   includeExternalVideos: boolean
   skipNsfw: boolean
 }
-
-type RedditPost = Record<string, any>
 
 const VIDEO_HOSTS = new Set([
   'youtube.com',

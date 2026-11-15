@@ -1,4 +1,4 @@
-export type SortOrder = 'new' | 'hot' | 'top' | 'rising'
+import type { SortOrder } from '@shared/types'
 
 export interface ListingRequest {
   label: string

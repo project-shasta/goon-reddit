@@ -1,18 +1,7 @@
-export type LanguageId =
-  | 'en'
-  | 'de'
-  | 'uk'
-  | 'zh-TW'
-  | 'zh'
-  | 'ja'
-  | 'fr'
-  | 'it'
-  | 'es'
-  | 'pirate'
-  | 'cyberpunk'
-  | 'eo'
-  | 'enSimple'
-  | 'matrix'
+import type { LanguageId as SharedLanguageId } from '@shared/types'
+
+/** Re-export LanguageId from shared types for use in renderer i18n. */
+export type LanguageId = SharedLanguageId
 
 export type TranslationValue =
   | string

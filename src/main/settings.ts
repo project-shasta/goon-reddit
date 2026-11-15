@@ -2,7 +2,7 @@ import { app } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
 import type { AppSettings, LanguageId, Theme } from '@shared/types'
-import { clampInt, asBool } from '@shared/util'
+import { asBool, clampInt, VALID_LANGUAGES, VALID_SORT_ORDERS, VALID_THEMES } from '@shared/util'
 import { getDataDir } from './paths'
 
 const SETTINGS_FILE = () => path.join(getDataDir(), 'settings.json')
@@ -58,17 +58,15 @@ export class SettingsStore {
       includeExternalVideos: asBool(next.includeExternalVideos, base.includeExternalVideos),
       skipNsfw: asBool(next.skipNsfw, base.skipNsfw),
       skipExisting: asBool(next.skipExisting, base.skipExisting),
-      sortOrder: (['new', 'hot', 'top', 'rising'] as const).includes(next.sortOrder)
+      sortOrder: VALID_SORT_ORDERS.includes(next.sortOrder)
         ? next.sortOrder
         : base.sortOrder,
-      theme: (['dark', 'midnight', 'circuit', 'corporate', 'vaporwave', 'matrix'] as const).includes(
+      theme: VALID_THEMES.includes(
         next.theme
       )
         ? (next.theme as Theme)
         : base.theme,
-      language: (
-        ['en', 'de', 'uk', 'zh-TW', 'zh', 'ja', 'fr', 'it', 'es', 'pirate', 'cyberpunk', 'eo', 'enSimple', 'matrix'] as const
-      ).includes(next.language)
+      language: VALID_LANGUAGES.includes(next.language)
         ? (next.language as LanguageId)
         : base.language,
       toolsDir:
