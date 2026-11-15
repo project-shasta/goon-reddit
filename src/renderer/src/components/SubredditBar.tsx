@@ -13,6 +13,14 @@ import {
 
 const SORT_ORDER: SortOrder[] = ['new', 'hot', 'top', 'rising']
 
+/** Map sort order values to their translation keys. All four values are valid keys. */
+const SORT_LABEL_KEY: Record<SortOrder, 'new' | 'hot' | 'top' | 'rising'> = {
+  new: 'new',
+  hot: 'hot',
+  top: 'top',
+  rising: 'rising'
+}
+
 interface SubredditBarProps {
   value: string
   onChange: (value: string) => void
@@ -295,7 +303,7 @@ function SortDropdown({
         onClick={() => !disabled && setOpen((v) => !v)}
         disabled={disabled}
       >
-        <span>{t[value as keyof typeof t] as string}</span>
+        <span>{t[SORT_LABEL_KEY[value]] as string}</span>
         <IconCaretDown size={14} className={`shrink-0 ${disabled ? 'text-zinc-600' : 'text-zinc-500'}`} />
       </button>
 
@@ -314,7 +322,7 @@ function SortDropdown({
                 setOpen(false)
               }}
             >
-              {t[option as keyof typeof t] as string}
+              {t[SORT_LABEL_KEY[option]] as string}
             </button>
           ))}
         </div>
