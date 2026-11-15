@@ -2,6 +2,7 @@ import { BrowserWindow, dialog, ipcMain, Notification, session, shell } from 'el
 import fs from 'node:fs'
 import path from 'node:path'
 import { IPC } from '@shared/ipc'
+import { clampInt, asBool } from '@shared/util'
 import type { AppSettings, CacheClearResult, DownloadMode, JobOptions, LogEntry } from '@shared/types'
 import type { AuthManager } from './auth'
 import type { JobRunner } from './job'
@@ -22,16 +23,6 @@ export interface IpcContext {
   tools: ToolManager
   getMainWindow: () => BrowserWindow | null
   log: (level: LogEntry['level'], message: string) => void
-}
-
-function clampInt(value: unknown, min: number, max: number, fallback: number): number {
-  const n = typeof value === 'number' ? value : Number(value)
-  if (!Number.isFinite(n)) return fallback
-  return Math.min(max, Math.max(min, Math.round(n)))
-}
-
-function asBool(value: unknown, fallback: boolean): boolean {
-  return typeof value === 'boolean' ? value : fallback
 }
 
 function buildJobOptions(raw: Partial<JobOptions>, settings: AppSettings): JobOptions {

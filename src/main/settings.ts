@@ -2,6 +2,7 @@ import { app } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
 import type { AppSettings, LanguageId, Theme } from '@shared/types'
+import { clampInt, asBool } from '@shared/util'
 import { getDataDir } from './paths'
 
 const SETTINGS_FILE = () => path.join(getDataDir(), 'settings.json')
@@ -23,16 +24,6 @@ export function defaults(): AppSettings {
     language: 'en' as const,
     toolsDir: null
   }
-}
-
-function clampInt(value: unknown, min: number, max: number, fallback: number): number {
-  const n = typeof value === 'number' ? value : Number(value)
-  if (!Number.isFinite(n)) return fallback
-  return Math.min(max, Math.max(min, Math.round(n)))
-}
-
-function asBool(value: unknown, fallback: boolean): boolean {
-  return typeof value === 'boolean' ? value : fallback
 }
 
 export class SettingsStore {
