@@ -56,6 +56,8 @@ const api: RendererApi = {
     subscribe<MediaItem>(IPC.jobMediaUpdate, callback),
   onJobLog: (callback: (entry: LogEntry) => void) =>
     subscribe<LogEntry>(IPC.jobLog, callback),
+  onToolsMissing: (callback: (tools: string[]) => void) =>
+    subscribe<string[]>(IPC.toolsMissing, callback),
   setTheme: (theme: string) => {
     document.documentElement.removeAttribute('data-theme')
     if (theme !== 'dark') document.documentElement.setAttribute('data-theme', theme)

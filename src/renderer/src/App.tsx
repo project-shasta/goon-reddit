@@ -162,17 +162,10 @@ export default function App(): React.JSX.Element {
     if (trimmed) localStorage.setItem(SUBREDDIT_STORAGE_KEY, trimmed)
   }, [subredditInput])
 
-  // Check tools on startup and show banner if missing
+  // Subscribe to tools:missing event from main process
   useEffect(() => {
-    void window.api
-      .getToolsStatus()
-      .then((status) => {
-        const missing: string[] = []
-        if (!status.ffmpeg.ok) missing.push('ffmpeg')
-        if (!status.ytdlp.ok) missing.push('yt-dlp')
-        setMissingTools(missing)
-      })
-      .catch(() => setMissingTools([]))
+    const off = window.api.onToolsMissing((missing) => setMissingTools(missing))
+    return off
   }, [])
 
   const busy =
