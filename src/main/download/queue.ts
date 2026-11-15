@@ -112,8 +112,12 @@ export async function uniqueDestination(
     reserved.add(candidate)
     try {
       await fs.access(candidate)
-    } catch {
-      return candidate
+    } catch (err: any) {
+      // Only ENOENT means the name is free. Other errors (permissions, etc.)
+      // should not reserve a name that might be usable later.
+      if (err?.code === 'ENOENT') return candidate
+      reserved.delete(candidate)
+      throw err
     }
     // The file exists; this candidate is taken.
     reserved.delete(candidate)
