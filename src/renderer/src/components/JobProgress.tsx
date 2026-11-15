@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import type { ActiveDownload, JobState, LanguageId } from '@shared/types'
 import { useI18n } from '../i18n'
 import {
@@ -133,15 +134,15 @@ export function JobProgress({
   const overall =
     job.discovered > 0 ? Math.min(100, (finished / job.discovered) * 100) : null
 
-  const phaseLabel: Record<JobState['phase'], string> = {
-    idle: (t.checkingSubreddit as string),
-    validating: (t.checkingSubreddit as string),
-    scanning: (t.scanningPosts as string),
-    downloading: (t.download as string),
-    done: (t.finished as string),
-    cancelled: (t.cancelled as string),
-    error: (t.error as string)
-  }
+  const phaseLabel = useMemo((): Record<JobState['phase'], string> => ({
+    idle: t.checkingSubreddit as string,
+    validating: t.checkingSubreddit as string,
+    scanning: t.scanningPosts as string,
+    downloading: t.download as string,
+    done: t.finished as string,
+    cancelled: t.cancelled as string,
+    error: t.error as string
+  }), [t])
 
   if (job.phase === 'idle') {
     return (

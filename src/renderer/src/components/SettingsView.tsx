@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { AppSettings, LanguageId, ToolsStatus } from '@shared/types'
 import { useI18n } from '../i18n'
 import { errorText, formatBytes } from '../lib/format'
@@ -42,6 +42,14 @@ export function SettingsView({
   lang = 'en'
 }: SettingsViewProps & { lang?: LanguageId }): React.JSX.Element {
   const t = useI18n(lang)
+  const toggleLabels = useMemo((): Record<BooleanKey, { label: string; hint: string }> => ({
+    includeImages: { label: t.images as string, hint: t.imagesHint as string },
+    includeGalleries: { label: t.galleries as string, hint: t.galleriesHint as string },
+    includeVideos: { label: t.redditVideos as string, hint: t.redditVideosHint as string },
+    includeExternalVideos: { label: t.externalVideos as string, hint: t.externalVideosHint as string },
+    skipNsfw: { label: t.skipNsfw as string, hint: t.skipNsfwHint as string },
+    skipExisting: { label: t.skipExisting as string, hint: t.skipExistingHint as string }
+  }), [t])
   const [draft, setDraft] = useState<AppSettings>(settings)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -234,15 +242,7 @@ export function SettingsView({
         <h2 className="text-sm font-semibold text-zinc-100">{t.mediaTypes as string}</h2>
         <div className="grid gap-2 sm:grid-cols-2">
           {MEDIA_TOGGLES.map((toggle) => {
-            const labels: Record<BooleanKey, { label: string; hint: string }> = {
-              includeImages: { label: (t.images as string), hint: (t.imagesHint as string) },
-              includeGalleries: { label: (t.galleries as string), hint: (t.galleriesHint as string) },
-              includeVideos: { label: (t.redditVideos as string), hint: (t.redditVideosHint as string) },
-              includeExternalVideos: { label: (t.externalVideos as string), hint: (t.externalVideosHint as string) },
-              skipNsfw: { label: (t.skipNsfw as string), hint: (t.skipNsfwHint as string) },
-              skipExisting: { label: (t.skipExisting as string), hint: (t.skipExistingHint as string) }
-            }
-            const { label, hint } = labels[toggle.key]
+            const { label, hint } = toggleLabels[toggle.key]
             return (
               <label key={toggle.key} className="checkbox-row items-start">
                 <input
@@ -265,15 +265,7 @@ export function SettingsView({
         <h2 className="text-sm font-semibold text-zinc-100">{t.behavior as string}</h2>
         <div className="grid gap-2 sm:grid-cols-2">
           {BEHAVIOR_TOGGLES.map((toggle) => {
-            const labels: Record<BooleanKey, { label: string; hint: string }> = {
-              includeImages: { label: (t.images as string), hint: (t.imagesHint as string) },
-              includeGalleries: { label: (t.galleries as string), hint: (t.galleriesHint as string) },
-              includeVideos: { label: (t.redditVideos as string), hint: (t.redditVideosHint as string) },
-              includeExternalVideos: { label: (t.externalVideos as string), hint: (t.externalVideosHint as string) },
-              skipNsfw: { label: (t.skipNsfw as string), hint: (t.skipNsfwHint as string) },
-              skipExisting: { label: (t.skipExisting as string), hint: (t.skipExistingHint as string) }
-            }
-            const { label, hint } = labels[toggle.key]
+            const { label, hint } = toggleLabels[toggle.key]
             return (
               <label key={toggle.key} className="checkbox-row items-start">
                 <input
