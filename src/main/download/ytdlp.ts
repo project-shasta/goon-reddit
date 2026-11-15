@@ -143,7 +143,13 @@ export async function downloadWithYtDlp(
               continue
             }
 
-            if (/^[A-Za-z]:\\|^\//.test(value) || value.includes(`${path.sep}`)) {
+            // Detect the output file path from yt-dlp's `after_move:filepath` print.
+            // Check for absolute paths with a file extension to avoid false positives
+            // from error messages that happen to contain path separators.
+            const isWindowsPath = /^[A-Za-z]:\\/.test(value)
+            const isUnixPath = /^\//.test(value)
+            const hasExtension = /\.[a-z0-9]+$/i.test(value)
+            if ((isWindowsPath || isUnixPath) && hasExtension) {
               printedPath = value
             }
           }
