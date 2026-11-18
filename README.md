@@ -42,6 +42,17 @@ This is a small, portable Electron app that logs into Reddit with **your own ses
 
 Reddit blocks anonymous `.json` access, so the app opens a real browser login window and reuses that session for every request. Your cookies never leave the machine.
 
+### Screenshots
+
+<div align="center">
+  <img src="resources/download.png" alt="Download screen showing active transfer list" width="540" />
+  <br/><br/>
+  <table><tr>
+    <td width="280"><img src="resources/login.png" alt="Login screen" width="260"/></td>
+    <td width="280"><img src="resources/settings.png" alt="Settings tab" width="260"/></td>
+  </tr></table>
+</div>
+
 ## Contents
 
 - [Using the app](#using-the-app)
@@ -82,11 +93,12 @@ The app has two tabs in the header: **Downloader** and **Settings**.
 **Downloader tab** (top to bottom):
 
 1. **Auth panel** — Login/logout/recheck buttons. Shows your Reddit username when connected.
+   See the [login screen screenshot](resources/login.png) for the authentication flow.
 2. **Subreddit bar** — Mode dropdown (Download `/r` or Archive `/u`), subreddit/user name input, sort dropdown, **Check** button, and **Download new** button. Shows validated subreddit or user info cards with icon, title, member count, NSFW/quarantined badges, and user karma.
 3. **Progress** — Shows posts scanned, media found, downloaded/skipped counts, and a transfer list.
 4. **Activity log** — Toggleable, closed by default. Shows timestamped entries (info, warn, error, success).
 
-**Settings tab**:
+**Settings tab** (see full [settings screenshot](resources/settings.png)):
 
 - Destination folder, number of newest posts to scan (default 100), parallel downloads (1–8), yt-dlp delay (500–10,000 ms)
 - Media types: images, galleries, Reddit videos, external videos (toggle each)
@@ -103,6 +115,7 @@ The app has two tabs in the header: **Downloader** and **Settings**.
 2. Type a subreddit or username (for example `pics` or `r/pics`) and press **Check**.
 3. Press **Download new** — scans newest posts, then downloads matching media.
 4. Watch progress in the transfer list. Use **Cancel** to stop mid-run; cancelled jobs can be resumed.
+   See the [full download screen](resources/download.png) for an example of the app in action.
 
 Files are saved flat per subreddit:
 
