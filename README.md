@@ -36,13 +36,42 @@
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠻⠿⠿⠟⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ```
 
-*GoOnReDdIt? Go on Reddit? Go on, Reddit? Go on, Redd it? Goon Reddit? You decide ;-)*
+*GoOnReDdIt? Go on Reddit? Go on, Redd it? Go on, Redd it? Goon Reddit? You decide ;-)*
 
-This is a small Electron app that logs into Reddit with **your own session**, scans a subreddit's newest
-posts, and fetches images, galleries, Reddit-hosted videos, and external videos in parallel.
+This is a small, portable Electron app that logs into Reddit with **your own session**, scans subreddits (or user archives) for media, and downloads images, galleries, Reddit-hosted videos, and external videos in parallel.
 
-Reddit blocks anonymous `.json` access, so the app opens a real Reddit login window and reuses that
-session for every request. Cookies never leave the main process.
+Reddit blocks anonymous `.json` access, so the app opens a real browser login window and reuses that session for every request. Your cookies never leave the machine.
+
+## Contents
+
+- [Using the app](#using-the-app)
+  - [Layout](#layout)
+  - [Workflow](#workflow)
+  - [User archive mode](#user-archive-mode)
+  - [File naming](#file-naming)
+- [Features](#features)
+  - [Authentication](#authentication)
+  - [Media types](#media-types)
+  - [Supported external video hosts](#supported-external-video-hosts)
+  - [Sort orders](#sort-orders)
+  - [Download settings](#download-settings)
+  - [Retry & quality handling](#retry--quality-handling)
+  - [Known posts & resume](#known-posts--resume)
+  - [Activity log](#activity-log)
+  - [Error handling](#error-handling)
+- [Appearance](#appearance)
+  - [Themes](#themes)
+  - [Languages](#languages)
+- [Developer notes](#developer-notes)
+  - [Requirements](#requirements)
+  - [Setup](#setup)
+  - [Build & run](#build--run)
+  - [How it works](#how-it-works)
+  - [Tests](#tests)
+  - [Manual smoke test](#manual-smoke-test)
+- [Acknowledgements](#acknowledgements)
+
+---
 
 ## Using the app
 
@@ -52,26 +81,28 @@ The app has two tabs in the header: **Downloader** and **Settings**.
 
 **Downloader tab** (top to bottom):
 
-1. **Auth panel** — login/logout/recheck buttons. Shows your Reddit username when connected.
-2. **Subreddit bar** — enter a subreddit name (e.g. `pics`), press **Check**, then **Download new**.
-3. **Progress** — shows posts scanned, media found, downloaded/skipped counts, and a transfer list.
-4. **Activity log** — toggleable, closed by default. Shows timestamped entries (info, warn, error, success).
+1. **Auth panel** — Login/logout/recheck buttons. Shows your Reddit username when connected.
+2. **Subreddit bar** — Mode dropdown (Download `/r` or Archive `/u`), subreddit/user name input, sort dropdown, **Check** button, and **Download new** button. Shows validated subreddit or user info cards with icon, title, member count, NSFW/quarantined badges, and user karma.
+3. **Progress** — Shows posts scanned, media found, downloaded/skipped counts, and a transfer list.
+4. **Activity log** — Toggleable, closed by default. Shows timestamped entries (info, warn, error, success).
 
 **Settings tab**:
 
-- Destination folder, number of newest posts to scan (default 100), parallel downloads (1–8)
+- Destination folder, number of newest posts to scan (default 100), parallel downloads (1–8), yt-dlp delay (500–10,000 ms)
 - Media types: images, galleries, Reddit videos, external videos (toggle each)
-- Behavior: skip NSFW, skip already-downloaded files
+- Behavior: skip NSFW (with confirmation dialog), skip already-downloaded files
 - Sort order: New, Hot, Top, Rising
-- Tools: ffmpeg and yt-dlp status
+- Tools: ffmpeg and yt-dlp status; update yt-dlp button
+- Clear browser data: button to clear cached web data (login preserved)
+- Reset to defaults button
 
 ### Workflow
 
 1. Press **Log in on Reddit** and finish the normal Reddit login (including 2FA if enabled). The
-   window closes itself once the session is verified.
-2. Type a subreddit name (for example `pics` or `r/pics`) and press **Check**.
+   login window closes itself once the session is verified.
+2. Type a subreddit or username (for example `pics` or `r/pics`) and press **Check**.
 3. Press **Download new** — scans newest posts, then downloads matching media.
-4. Watch progress in the transfer list. Use **Cancel** to stop mid-run.
+4. Watch progress in the transfer list. Use **Cancel** to stop mid-run; cancelled jobs can be resumed.
 
 Files are saved flat per subreddit:
 
@@ -82,7 +113,11 @@ Files are saved flat per subreddit:
 Galleries get `_01`, `_02`, … suffixes. Existing files are skipped by default, and name collisions
 get ` (1)`, ` (2)`, … suffixes.
 
-### Retry and thumbnail handling
+### User archive mode
+
+Click the mode dropdown next to the subreddit input to switch between **Download** (`/r`) and **Archive** (`/u`) mode. Archive mode scans a specific user's submissions across all subreddits, validating the user profile and showing karma, Gold, and Mod badges.
+
+### Retry & thumbnail handling
 
 Downloads retry up to 3 times per URL (source URL + preview URL fallback). A small orange badge
 shows the retry count (e.g. `×3`). Failed entries show an alert icon with a hover tooltip containing
@@ -98,21 +133,108 @@ The app keeps a local record of posts you've already scanned. A small badge in t
 the total count, and a **Clear known** link wipes the entire list. Re-scanning a subreddit will
 skip anything already in the known list, so you only pick up new posts.
 
+### Job resume
+
+When you cancel a job mid-download, the app saves the full scan results (media items, options, subreddit info). You can then click **Resume download** to pick up where you left off — no re-scanning needed. Partial `.part*` files are cleaned up on cancel.
+
 ### Troubleshooting
 
-- **"Reddit blocked the request"** — open the login window, confirm Reddit loads and you are signed
+- **"Reddit blocked the request"** — Open the login window, confirm Reddit loads and you are signed
   in, then retry. VPN/datacenter IPs are more likely to be blocked.
-- **Verification / 2FA** — solve it in the login window; the app waits for the session cookie.
+- **Verification / 2FA** — Solve it in the login window; the app waits for the session cookie.
 - **Reddit video has no audio** — ffmpeg was not found. Run `npm run tools:setup`.
-- **External video fails** — run `npm run tools:setup` to refresh yt-dlp; some hosts change frequently.
-- **Quarantined/private subreddit** — opt in on Reddit first; the app uses your account's access.
+- **External video fails** — Run `npm run tools:setup` to refresh yt-dlp; some hosts change frequently.
+- **Quarantined/private subreddit** — Opt in on Reddit first; the app uses your account's access.
+- **Missing tools banner** — An amber banner appears at the top of the app when ffmpeg or yt-dlp is not installed, with a link to the Tools section in Settings.
+
+---
+
+## Features
+
+### Authentication
+
+- Uses a **persistent Chromium session partition** (`persist:reddit`) so cookies survive app restarts.
+- Login happens in a separate browser window. The app polls for the session cookie every 2 seconds.
+- Once verified, the login window closes automatically and the UI shows your `u/username`.
+- **Logout** clears all partition storage (cookies, cache, storage data).
+- Session cookies never leave the machine — they are stored alongside the app's data directory.
+
+### Media types
+
+| Type | Description | Download method |
+|------|-------------|-----------------|
+| **Images** | Single i.redd.it and direct image posts (jpg, png, gif, webp, avif) | Direct HTTP download |
+| **Galleries** | Multi-image Reddit galleries | Per-image HTTP download (`_01`, `_02`, …) |
+| **Reddit videos** | DASH/HLS videos with audio (v.redd.it) | ffmpeg DASH merge → HLS → fallback (no audio) |
+| **External videos** | YouTube, RedGifs, Streamable, Twitch, TikTok, Twitter/X, Instagram, Imgur, Gfycat | yt-dlp subprocess |
+| **External images** | Direct image links outside Reddit | Direct HTTP download |
+
+### Supported external video hosts
+
+YouTube, Vimeo, RedGifs, Streamable, Twitch, Twitch Clips, TikTok, Twitter/X, Instagram, Imgur, Gfycat.
+
+### Sort orders
+
+Posts can be fetched in four sort orders: **New**, **Hot**, **Top**, **Rising**.
+
+### Download settings
+
+| Setting | Default | Range |
+|---------|---------|-------|
+| Destination folder | `~/Downloads/Reddit Downloads` | Any writable path |
+| New posts to scan | 100 | 0 = unlimited, 1–100,000 |
+| Parallel downloads | 4 | 1–8 |
+| yt-dlp delay | 1500 ms | 500–10,000 ms (step 100) |
+| Skip NSFW | false | Boolean (confirmation dialog) |
+| Skip existing | true | Boolean |
+
+### Error handling
+
+The app defines typed error codes for common failure modes: `AUTH_REQUIRED`, `BLOCKED`, `NOT_FOUND`, `FORBIDDEN`, `UNAVAILABLE`, `RATE_LIMITED`, `NETWORK`, and `UNKNOWN`. Each produces a translated, user-facing message with a hint about what to do next.
+
+---
+
+## Appearance
+
+### Themes
+
+Six built-in themes with full color definition (background, accents, buttons, inputs, cards, badges, scrollbars):
+
+| Theme | Background | Accent | Scheme |
+|-------|------------|--------|--------|
+| **Dark** (default) | `#09090b` | Orange `#f97316` | Dark |
+| **Midnight** | `#0f0a2e` | Cyan `#22d3ee` | Dark |
+| **Circuit Breaker** | `#000000` | Yellow `#facc15` | Dark |
+| **Corporate** | `#f1f5f9` | Blue `#2563eb` | **Light** |
+| **Vaporwave** | Gradient `#861982 → #25225b` | Pink `#f472b6` | Dark |
+| **Matrix** | `#0a0a0a` | Green `#00ff41` | Dark |
+
+### Languages
+
+Fourteen language/localization options:
+
+| ID | Language | Type |
+|----|----------|------|
+| `en` | English | Full translation |
+| `de` | Deutsch | Full translation |
+| `uk` | Українська | Full translation |
+| `zh` | 简体中文 | Full translation |
+| `zh-TW` | 繁體中文 | Full translation |
+| `ja` | 日本語 | Full translation |
+| `fr` | Français | Full translation |
+| `it` | Italiano | Full translation |
+| `es` | Español | Full translation |
+| `pirate` | Pirate | Themed English |
+| `cyberpunk` | Cyberpunk | Themed English |
+| `eo` | Esperanto | Full translation |
+| `enSimple` | Easy English | Simplified vocabulary |
+| `matrix` | Matrix | Themed English |
+
+System notifications (download complete, failed, missing tools) are also fully translated in all 14 languages. All themed languages fall back to English for missing keys.
 
 ---
 
 ## Developer notes
-
-If you're reading this and thinking of forking or digging into the source — welcome. Things get
-weird down here.
 
 ### Requirements
 
@@ -178,14 +300,15 @@ npm start        # preview the production build
   look like a real browser.
 - Scans paginate `/r/<name>.json?sort=new` with rate limiting and retries. If Reddit's edge blocks
   that path it falls back to `api.reddit.com/r/<name>/new`, then the legacy `/r/<name>/new.json`.
+- **Crosspost handling**: Crossposts resolve to the original post's media (recursive up to depth 2, deduplicated by original post ID).
 - Video strategy per post: try DASH with ffmpeg → HLS with ffmpeg → direct `fallback_url`. External
-  hosts go through yt-dlp.
+  hosts go through yt-dlp (with exponential backoff retry: 3 retries, 5s base delay + jitter).
 - The renderer only sees a typed IPC bridge; Node and cookies stay in the main process.
 
 ### Tests
 
 ```powershell
-npm test          # extraction + filename + listing unit tests
+npm test          # extraction + filename + listing + i18n unit tests (50+ cases)
 npm run typecheck # main, preload, and renderer
 ```
 
@@ -199,22 +322,35 @@ npm run typecheck # main, preload, and renderer
    - a gallery produces `_01`, `_02`, … files
    - a Reddit video produces a playable MP4 with audio (ffmpeg present)
    - a YouTube/RedGifs post produces an MP4 (yt-dlp present)
-5. Cancel halfway: partial `.part*` files are removed, phase shows **Cancelled**.
+5. Cancel halfway: partial `.part*` files are removed, phase shows **Cancelled**. Resume downloads the remaining items without re-scanning.
 6. Re-run with **Skip files already downloaded**: counts show skipped, no duplicates.
 7. **Log out** clears the session; scanning then asks you to log in again.
+8. Switch themes and languages to verify full color/language coverage.
 
-## ⚠️ Vibecoded Notice
+---
 
-This project is **100% vibecoded** — no spec, no architecture doc, no "best practices". Just one
-person at 2 AM, a growing pile of `edit` calls, and the unshakable conviction that a Reddit
-downloader should spell its name like a mocking SpongeBob caption.
+## Portable installation
+
+The app stores all data (settings, cookies, caches, known posts, crash dumps) in a `data/` directory alongside the executable. This means:
+
+- You can move the entire folder to another machine and retain your session.
+- A zip archive contains everything needed to run — no installer required.
+- Settings persist between runs via a local JSON file; known posts via a local `.known` file.
+
+---
+
+## Acknowledgements
+
+This app is built on Electron 45 + React 19 + Tailwind CSS 4 + TypeScript 7. ffmpeg is bundled via `ffmpeg-static` and yt-dlp is downloaded from GitHub releases (SHA-256 verified).
+
+This project was built entirely as an experiment using OpenCode and a local Qwen 3.6 35B A3B model — no spec, no architecture doc, no "best practices". Just one person and a growing pile of `edit` calls, and the unshakable conviction that a Reddit downloader should spell its name like a mocking SpongeBob caption.
 
 **Credentials:**
 
-- **Architecture:** "it works on my machine" (still works, 42 tests passing)
+- **Architecture:** "it works on my machine" (still works, 50 tests passing)
 - **Error handling:** "try / catch until it doesn't crash"
 - **Code review:** the commit diff, bro
-- **Testing:** `npm test` → 42/42 ✅ (when it feels like it)
+- **Testing:** `npm test` → 50/50 ✅ (when it feels like it)
 - **Design system:** Tailwind classes that "look about right"
 - **Reddit transport:** `session.fetch` → HTML block page → hidden window → pray → fallback chain
 - **Maintainer:** the AI who wrote every line and the human who kept saying "yeah, but what if…"
