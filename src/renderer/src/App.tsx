@@ -372,27 +372,29 @@ export default function App(): React.JSX.Element {
 
       {showAbout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5 text-center shadow-2xl">
+          <div className="card relative w-full max-w-sm rounded-2xl p-5 text-center shadow-2xl">
             <button
-              className="absolute right-3 top-3 text-zinc-500 transition-colors hover:text-zinc-300"
+              className="absolute right-3 top-3 tab"
               onClick={() => setShowAbout(false)}
+              style={{ padding: '0.25rem' }}
             >
               <IconX size={16} />
             </button>
-            <h3 className="text-lg font-semibold text-zinc-100">
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>
               {t.appName as string}
             </h3>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
               {t.aboutVersion as string}
             </p>
-            <p className="mt-3 text-xs leading-relaxed text-zinc-400">
+            <p className="mt-3 text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
               {t.aboutDescription as string}
             </p>
-            <p className="mt-2 text-[11px] text-zinc-600">
+            <p className="mt-2 text-[11px]" style={{ color: 'var(--text-muted)', opacity: 0.6 }}>
               {t.aboutLicense as string}
             </p>
             <button
-              className="mt-4 flex items-center gap-1.5 text-xs text-orange-400 underline-offset-4 transition-colors hover:text-orange-300 hover:underline"
+              className="mt-4 flex items-center gap-1.5 text-xs underline-offset-4 transition-colors hover:underline"
+              style={{ color: 'var(--accent)' }}
               onClick={() => {
                 void window.api.openExternal('https://github.com/project-shasta/goon-reddit')
                 setShowAbout(false)
