@@ -372,7 +372,7 @@ export default function App(): React.JSX.Element {
 
       {showAbout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="card relative w-full max-w-sm rounded-2xl p-5 text-center shadow-2xl">
+          <div className="relative w-full max-w-sm rounded-2xl p-5 text-center shadow-2xl" style={{ border: '1px solid var(--border)', background: 'var(--bg)' }}>
             <button
               className="absolute right-3 top-3 tab"
               onClick={() => setShowAbout(false)}
