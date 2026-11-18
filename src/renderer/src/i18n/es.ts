@@ -225,5 +225,11 @@ export const es: Translation = {
   unknownError: 'Error desconocido.',
   unknownErrorHint: 'Algo salió mal.',
   retryCount: 'Número de reintentos',
-  retriedCount: (n: number) => `Reintentado ${n} veces — URL de origen intentada 3 veces, luego URL de vista previa 3 veces`
+  retriedCount: (n: number) => `Reintentado ${n} veces — URL de origen intentada 3 veces, luego URL de vista previa 3 veces`,
+  // About popup
+  aboutTitle: 'Acerca de',
+  aboutVersion: 'Versión 0.1.0',
+  aboutDescription: 'Descarga imágenes, galerías y videos de Reddit',
+  aboutLicense: 'Licencia MIT',
+  aboutSource: 'Ver código fuente en GitHub'
 }

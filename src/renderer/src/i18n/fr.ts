@@ -225,5 +225,11 @@ export const fr: Translation = {
   unknownError: 'Erreur inconnue.',
   unknownErrorHint: 'Quelque chose s\'est mal passé.',
   retryCount: 'Nombre de tentatives',
-  retriedCount: (n: number) => `Réessayé ${n} fois — URL source tentée 3 fois, puis URL de prévisualisation 3 fois`
+  retriedCount: (n: number) => `Réessayé ${n} fois — URL source tentée 3 fois, puis URL de prévisualisation 3 fois`,
+  // About popup
+  aboutTitle: 'À propos',
+  aboutVersion: 'Version 0.1.0',
+  aboutDescription: 'Récupère des images, galeries et vidéos depuis Reddit',
+  aboutLicense: 'Licence MIT',
+  aboutSource: 'Voir le code source sur GitHub'
 }

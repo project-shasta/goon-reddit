@@ -225,5 +225,11 @@ export const de: Translation = {
   unknownError: 'Unbekannter Fehler.',
   unknownErrorHint: 'Etwas ist schief gelaufen.',
   retryCount: 'Wiederholungsanzahl',
-  retriedCount: (n: number) => `${n} Mal wiederholt — Quell-URL 3 Mal versucht, dann Vorschau-URL 3 Mal`
+  retriedCount: (n: number) => `${n} Mal wiederholt — Quell-URL 3 Mal versucht, dann Vorschau-URL 3 Mal`,
+  // About popup
+  aboutTitle: 'Über',
+  aboutVersion: 'Version 0.1.0',
+  aboutDescription: 'Lade Bilder, Galerien und Videos von Reddit herunter',
+  aboutLicense: 'MIT-Lizenz',
+  aboutSource: 'Quellcode auf GitHub ansehen'
 }

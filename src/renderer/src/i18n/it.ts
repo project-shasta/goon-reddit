@@ -225,5 +225,11 @@ export const it: Translation = {
   unknownError: 'Errore sconosciuto.',
   unknownErrorHint: 'Qualcosa è andato storto.',
   retryCount: 'Numero di tentativi',
-  retriedCount: (n: number) => `Riprovi ${n} volte — URL sorgente tentata 3 volte, poi URL di anteprima 3 volte`
+  retriedCount: (n: number) => `Riprovi ${n} volte — URL sorgente tentata 3 volte, poi URL di anteprima 3 volte`,
+  // About popup
+  aboutTitle: 'Informazioni',
+  aboutVersion: 'Versione 0.1.0',
+  aboutDescription: 'Scarica immagini, gallerie e video da Reddit',
+  aboutLicense: 'Licenza MIT',
+  aboutSource: 'Visualizza il codice sorgente su GitHub'
 }

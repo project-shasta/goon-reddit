@@ -225,5 +225,11 @@ export const pirate: Translation = {
   unknownError: 'Unknown error.',
   unknownErrorHint: 'Something went wrong, arrr.',
   retryCount: 'Retry count',
-  retriedCount: (n: number) => `Plundered ${n} time${n > 1 ? 's' : ''} — tried source URL 3 times, then preview URL 3 times, arrr!`
+  retriedCount: (n: number) => `Plundered ${n} time${n > 1 ? 's' : ''} — tried source URL 3 times, then preview URL 3 times, arrr!`,
+  // About popup
+  aboutTitle: 'About',
+  aboutVersion: 'Version 0.1.0',
+  aboutDescription: 'Plunder images, galleries and videos from Reddit',
+  aboutLicense: 'MIT License',
+  aboutSource: 'View the source on GitHub'
 }

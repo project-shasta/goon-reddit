@@ -225,5 +225,11 @@ export const uk: Translation = {
   unknownError: 'Невідома помилка.',
   unknownErrorHint: 'Щось пішло не так.',
   retryCount: 'Кількість повторів',
-  retriedCount: (n: number) => `Повторено ${n} раз${n > 1 ? 'и' : 'ів'} — спробовано URL джерела 3 рази, потім URL попереднього перегляду 3 рази`
+  retriedCount: (n: number) => `Повторено ${n} раз${n > 1 ? 'и' : 'ів'} — спробовано URL джерела 3 рази, потім URL попереднього перегляду 3 рази`,
+  // About popup
+  aboutTitle: 'Про додаток',
+  aboutVersion: 'Версія 0.1.0',
+  aboutDescription: 'Завантаження зображень, галерей та відео з Reddit',
+  aboutLicense: 'Ліцензія MIT',
+  aboutSource: 'Переглянути код на GitHub'
 }

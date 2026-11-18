@@ -225,5 +225,11 @@ export const zhTW: Translation = {
   unknownError: '未知錯誤。',
   unknownErrorHint: '出了些問題。',
   retryCount: '重試次數',
-  retriedCount: (n: number) => `重試 ${n} 次 — 嘗試源 URL 3 次，然後嘗試預覽 URL 3 次`
+  retriedCount: (n: number) => `重試 ${n} 次 — 嘗試源 URL 3 次，然後嘗試預覽 URL 3 次`,
+  // About popup
+  aboutTitle: '關於',
+  aboutVersion: '版本 0.1.0',
+  aboutDescription: '從 Reddit 下載圖片、畫廊和影片',
+  aboutLicense: 'MIT 授權條款',
+  aboutSource: '在 GitHub 上查看原始碼'
 }

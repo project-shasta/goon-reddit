@@ -225,5 +225,11 @@ export const eo: Translation = {
   unknownError: 'Nekonata eraro.',
   unknownErrorHint: 'Io malĝuste okazis.',
   retryCount: 'Reprova nombro',
-  retriedCount: (n: number) => `Reprovita ${n} foj${n > 1 ? 'oj' : 'o'} — fonta URL provita 3 fojojn, antaŭvida URL 3 fojojn`
+  retriedCount: (n: number) => `Reprovita ${n} foj${n > 1 ? 'oj' : 'o'} — fonta URL provita 3 fojojn, antaŭvida URL 3 fojojn`,
+  // About popup
+  aboutTitle: 'Pri',
+  aboutVersion: 'Versio 0.1.0',
+  aboutDescription: 'Elŝutu bildojn, galeriojn kaj videojn de Reddit',
+  aboutLicense: 'MIT-permesilo',
+  aboutSource: 'Vidi fontkodon sur GitHub'
 }

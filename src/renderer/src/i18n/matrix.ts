@@ -225,5 +225,11 @@ export const matrix: Translation = {
   unknownError: 'Unknown error.',
   unknownErrorHint: 'Something went wrong.',
   retryCount: 'Retry count',
-  retriedCount: (n: number) => `Retried ${n} times — source URL 3 attempts, preview URL 3 attempts`
+  retriedCount: (n: number) => `Retried ${n} times — source URL 3 attempts, preview URL 3 attempts`,
+  // About popup
+  aboutTitle: 'About',
+  aboutVersion: 'Version 0.1.0',
+  aboutDescription: 'Extract media streams from the system',
+  aboutLicense: 'MIT License',
+  aboutSource: 'Access source on GitHub'
 }

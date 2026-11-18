@@ -225,5 +225,11 @@ export const enSimple: Translation = {
   unknownError: 'Unknown error.',
   unknownErrorHint: 'Something went wrong.',
   retryCount: 'Retry count',
-  retriedCount: (n: number) => `Tried again ${n} time${n > 1 ? 's' : ''} — tried the main link 3 times, then the small preview link 3 times`
+  retriedCount: (n: number) => `Tried again ${n} time${n > 1 ? 's' : ''} — tried the main link 3 times, then the small preview link 3 times`,
+  // About popup
+  aboutTitle: 'About',
+  aboutVersion: 'Version 0.1.0',
+  aboutDescription: 'Download images, galleries and videos from Reddit',
+  aboutLicense: 'MIT License',
+  aboutSource: 'View source on GitHub'
 }

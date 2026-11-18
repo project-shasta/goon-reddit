@@ -225,5 +225,11 @@ export const zh: Translation = {
   unknownError: '未知错误。',
   unknownErrorHint: '出了些问题。',
   retryCount: '重试次数',
-  retriedCount: (n: number) => `重试 ${n} 次 — 尝试源 URL 3 次，然后尝试预览 URL 3 次`
+  retriedCount: (n: number) => `重试 ${n} 次 — 尝试源 URL 3 次，然后尝试预览 URL 3 次`,
+  // About popup
+  aboutTitle: '关于',
+  aboutVersion: '版本 0.1.0',
+  aboutDescription: '从 Reddit 下载图片、画廊和视频',
+  aboutLicense: 'MIT 许可证',
+  aboutSource: '在 GitHub 上查看源码'
 }

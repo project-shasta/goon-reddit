@@ -225,5 +225,11 @@ export const ja: Translation = {
   unknownError: '不明なエラー。',
   unknownErrorHint: '何かが間違いました。',
   retryCount: '再試行回数',
-  retriedCount: (n: number) => `${n}回再試行 — ソースURLを3回、プレビューURLを3回試行`
+  retriedCount: (n: number) => `${n}回再試行 — ソースURLを3回、プレビューURLを3回試行`,
+  // About popup
+  aboutTitle: '概要',
+  aboutVersion: 'バージョン 0.1.0',
+  aboutDescription: 'Reddit から画像、ギャラリー、ビデオを取得',
+  aboutLicense: 'MITライセンス',
+  aboutSource: 'GitHub でソースを表示'
 }

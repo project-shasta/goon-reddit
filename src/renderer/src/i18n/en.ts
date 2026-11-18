@@ -234,5 +234,11 @@ export const en: Translation = {
   commentKarma: (n: string) => `${n} comment karma`,
   createdDate: (d: string) => `Created ${d}`,
   // App missing tools banner
-  missingToolsBanner: (tools: string) => `Missing ${tools}. Check Settings → Tools.`
+  missingToolsBanner: (tools: string) => `Missing ${tools}. Check Settings → Tools.`,
+  // About popup
+  aboutTitle: 'About',
+  aboutVersion: 'Version 0.1.0',
+  aboutDescription: 'Fetch images, galleries and videos from Reddit',
+  aboutLicense: 'MIT License',
+  aboutSource: 'View source on GitHub'
 }

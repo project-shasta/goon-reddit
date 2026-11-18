@@ -16,8 +16,11 @@ import { SettingsView } from './components/SettingsView'
 import { errorText } from './lib/format'
 import {
   IconDownload,
+  IconExternal,
+  IconInfo,
   IconSettings,
-  IconSpinner
+  IconSpinner,
+  IconX
 } from './components/icons'
 
 type View = 'download' | 'settings'
@@ -64,6 +67,7 @@ export default function App(): React.JSX.Element {
   const [validationError, setValidationError] = useState<string | null>(null)
     const [startupError, setStartupError] = useState<string | null>(null)
   const [historyCount, setHistoryCount] = useState(0)
+  const [showAbout, setShowAbout] = useState(false)
   const [showClearKnownConfirm, setShowClearKnownConfirm] = useState(false)
   const [showThemePicker, setShowThemePicker] = useState(false)
   const [showLangPicker, setShowLangPicker] = useState(false)
@@ -366,6 +370,41 @@ export default function App(): React.JSX.Element {
         </div>
       )}
 
+      {showAbout && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5 text-center shadow-2xl">
+            <button
+              className="absolute right-3 top-3 text-zinc-500 transition-colors hover:text-zinc-300"
+              onClick={() => setShowAbout(false)}
+            >
+              <IconX size={16} />
+            </button>
+            <h3 className="text-lg font-semibold text-zinc-100">
+              {t.appName as string}
+            </h3>
+            <p className="mt-1 text-xs text-zinc-500">
+              {t.aboutVersion as string}
+            </p>
+            <p className="mt-3 text-xs leading-relaxed text-zinc-400">
+              {t.aboutDescription as string}
+            </p>
+            <p className="mt-2 text-[11px] text-zinc-600">
+              {t.aboutLicense as string}
+            </p>
+            <button
+              className="mt-4 flex items-center gap-1.5 text-xs text-orange-400 underline-offset-4 transition-colors hover:text-orange-300 hover:underline"
+              onClick={() => {
+                void window.api.openExternal('https://github.com/project-shasta/goon-reddit')
+                setShowAbout(false)
+              }}
+            >
+              <IconExternal size={13} />
+              {t.aboutSource as string}
+            </button>
+          </div>
+        </div>
+      )}
+
       <header className="flex flex-wrap items-center gap-3 border-b border-white/5 px-4 py-2.5">
         <nav className="flex items-center gap-1 rounded-xl bg-black/30 p-1">
           <button
@@ -445,6 +484,14 @@ export default function App(): React.JSX.Element {
               </div>
             )}
           </div>
+
+          <button
+            className="tab"
+            onClick={() => setShowAbout(true)}
+            title={t.aboutTitle as string}
+          >
+            <IconInfo size={14} />
+          </button>
         </div>
 
         <div className="ml-auto flex items-center gap-2">
